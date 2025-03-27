@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+  EXECUTOR
+}
+
+model User {
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  password       String
+  role           Role             @default(CUSTOMER)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  
+  // Связь 1 к 1 с профилем исполнителя (если роль = EXECUTOR)
+  executorProfile ExecutorProfile?
+  
+  // Связь 1 к 1 с профилем заказчика (если роль = CUSTOMER)
+  customerProfile CustomerProfile?
+}
+
+model ExecutorProfile {
+  id        Int    @id @default(autoincrement())
+  userId    Int    @unique
+  city      String
+  // любые дополнительные поля: рейтинг, портфолио, и т.п.
+
+  user      User   @relation(fields: [userId], references: [id])
+}
+
+model CustomerProfile {
+  id        Int    @id @default(autoincrement())
+  userId    Int    @unique
+  // любые поля, например, "address", "preferences" и т.п.
+  address   String?
+
+  user      User   @relation(fields: [userId], references: [id])
+}
