@@ -7,41 +7,109 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Роли пользователей
 enum Role {
   ADMIN
   CUSTOMER
   EXECUTOR
 }
 
+// Статусы заказов
+enum OrderStatus {
+  PENDING // Ожидает исполнителя
+  IN_PROGRESS // Принят исполнителем
+  COMPLETED // Завершён с отчётом
+  CANCELLED // Отклонён
+}
+
+// 👤 Пользователи
 model User {
-  id             Int              @id @default(autoincrement())
-  email          String           @unique
-  password       String
-  role           Role             @default(CUSTOMER)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  
-  // Связь 1 к 1 с профилем исполнителя (если роль = EXECUTOR)
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   executorProfile ExecutorProfile?
-  
-  // Связь 1 к 1 с профилем заказчика (если роль = CUSTOMER)
   customerProfile CustomerProfile?
+
+  ordersAsCustomer Order[]    @relation("CustomerOrders")
+  ordersAsExecutor Order[]    @relation("ExecutorOrders")
+  favorites        Favorite[] @relation("FavoriteCustomer")
+  favoritedBy      Favorite[] @relation("FavoriteExecutor")
 }
 
+// Профиль исполнителя
 model ExecutorProfile {
-  id        Int    @id @default(autoincrement())
-  userId    Int    @unique
-  city      String
-  // любые дополнительные поля: рейтинг, портфолио, и т.п.
+  id     Int    @id @default(autoincrement())
+  userId Int    @unique
+  city   String
 
-  user      User   @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
+// Профиль заказчика
 model CustomerProfile {
-  id        Int    @id @default(autoincrement())
-  userId    Int    @unique
-  // любые поля, например, "address", "preferences" и т.п.
-  address   String?
+  id      Int     @id @default(autoincrement())
+  userId  Int     @unique
+  address String?
 
-  user      User   @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+// Услуги
+model Service {
+  id       Int    @id @default(autoincrement())
+  name     String
+  priority Int    @default(100)
+
+  orders Order[]
+}
+
+// Заказы
+model Order {
+  id         Int  @id @default(autoincrement())
+  customerId Int
+  executorId Int? // null — пока не назначен
+  serviceId  Int
+
+  city        String
+  description String
+  report      String? // для отчёта исполнителя
+
+  status    OrderStatus @default(PENDING)
+  priority  Int         @default(100)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  customer User    @relation("CustomerOrders", fields: [customerId], references: [id])
+  executor User?   @relation("ExecutorOrders", fields: [executorId], references: [id])
+  service  Service @relation(fields: [serviceId], references: [id])
+  review   Review?
+
+  @@index([status])
+  @@index([priority])
+}
+
+// Отзывы к заказам
+model Review {
+  id        Int      @id @default(autoincrement())
+  orderId   Int      @unique // 1 заказ = 1 отзыв
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+model Favorite {
+  id         Int @id @default(autoincrement())
+  customerId Int
+  executorId Int
+
+  customer User @relation("FavoriteCustomer", fields: [customerId], references: [id])
+  executor User @relation("FavoriteExecutor", fields: [executorId], references: [id])
+
+  @@unique([customerId, executorId]) // нельзя добавить одного и того же дважды
 }

@@ -1,14 +1,13 @@
-// src/modules/user/createUser.dto.ts
 import {
     IsEmail,
     IsEnum,
+    IsNotEmpty,
     IsOptional,
     IsString,
-    IsNotEmpty,
 } from 'class-validator';
 import {Role} from '@prisma/client';
 
-export class CreateUserDTO {
+export class RegisterDTO {
     @IsEmail()
     email!: string;
 
