@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Чат по заказу</title>
+        <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+        <style>
+            body {
+                font-family: sans-serif;
+                margin: 20px;
+            }
+            #messages {
+                border: 1px solid #ccc;
+                height: 300px;
+                overflow-y: scroll;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            .message {
+                margin-bottom: 8px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Чат по заказу</h1>
+
+        <div>
+            <label>JWT Token:</label>
+            <input type="text" id="token" style="width: 500px" />
+        </div>
+        <div>
+            <label>Order ID:</label>
+            <input type="number" id="orderId" />
+            <button onclick="joinChat()">Войти в чат</button>
+        </div>
+
+        <div id="messages"></div>
+
+        <input type="text" id="text" placeholder="Введите сообщение..." />
+        <button onclick="sendMessage()">Отправить</button>
+
+        <script>
+            let socket;
+            let orderId = null;
+
+            function joinChat() {
+                orderId = Number(document.getElementById('orderId').value);
+                const token = document.getElementById('token').value;
+
+                socket = io('http://localhost:4001', {
+                    auth: {token},
+                });
+
+                socket.on('connect', () => {
+                    console.log('Подключено:', socket.id);
+                    socket.emit('chat:join', orderId);
+                });
+
+                // История сообщений
+                socket.on('chat:history', (messages) => {
+                    document.getElementById('messages').innerHTML = '';
+                    messages.forEach((msg) => renderMessage(msg));
+                });
+
+                // Новые сообщения
+                socket.on('message:received', (msg) => {
+                    renderMessage(msg);
+                });
+
+                socket.on('message:status', (status) => {
+                    console.log('📬 Статус:', status);
+                });
+
+                socket.on('disconnect', () => {
+                    console.log('Отключено');
+                });
+
+                socket.on('error', (err) => {
+                    console.error('Ошибка:', err);
+                });
+            }
+
+            function sendMessage() {
+                const text = document.getElementById('text').value;
+                if (socket && orderId && text.trim()) {
+                    socket.emit('message:send', {
+                        orderId,
+                        content: text,
+                    });
+                    document.getElementById('text').value = '';
+                }
+            }
+
+            function renderMessage(msg) {
+                const div = document.createElement('div');
+                div.className = 'message';
+                div.textContent = `[${msg.senderId}] ${msg.content}`;
+                document.getElementById('messages').appendChild(div);
+            }
+        </script>
+    </body>
+</html>
