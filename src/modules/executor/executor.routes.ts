@@ -3,6 +3,9 @@ import * as ExecutorController from './executor.controller';
 import {validateDto} from '../../middleware/validate';
 import {RegisterExecutorDTO} from './dto/registerExecutor.dto';
 import {LoginDTO} from '../auth/dto/login.dto';
+import {authMiddleware} from '../../middleware/authMiddleware';
+import {roleMiddleware} from '../../middleware/roleMiddleware';
+import {UpdateExecutorDTO} from './dto/updateExecutor.dto';
 
 export const routerExecutor = Router();
 
@@ -85,5 +88,44 @@ routerExecutor.post(
  *                   type: string
  */
 routerExecutor.post('/login', validateDto(LoginDTO), ExecutorController.login);
+
+/**
+ * @swagger
+ * /executor/me:
+ *   patch:
+ *     summary: Обновить профиль исполнителя
+ *     tags: [Executor]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateExecutorDTO'
+ *     responses:
+ *       200:
+ *         description: Профиль обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 userId:
+ *                   type: integer
+ *                 city:
+ *                   type: string
+ *       400:
+ *         description: Ошибка валидации или прав доступа
+ */
+routerExecutor.patch(
+    '/me',
+    authMiddleware,
+    roleMiddleware(['EXECUTOR']),
+    validateDto(UpdateExecutorDTO),
+    ExecutorController.updateProfile
+);
 
 export default routerExecutor;

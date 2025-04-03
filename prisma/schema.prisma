@@ -19,7 +19,6 @@ enum OrderStatus {
   PENDING // Ожидает исполнителя
   IN_PROGRESS // Принят исполнителем
   COMPLETED // Завершён с отчётом
-  CANCELLED // Отклонён
 }
 
 // 👤 Пользователи
@@ -38,6 +37,8 @@ model User {
   ordersAsExecutor Order[]    @relation("ExecutorOrders")
   favorites        Favorite[] @relation("FavoriteCustomer")
   favoritedBy      Favorite[] @relation("FavoriteExecutor")
+
+  declinedOrders OrderDeclined[]
 }
 
 // Профиль исполнителя
@@ -83,6 +84,8 @@ model Order {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
+  declinedBy OrderDeclined[]
+
   customer User    @relation("CustomerOrders", fields: [customerId], references: [id])
   executor User?   @relation("ExecutorOrders", fields: [executorId], references: [id])
   service  Service @relation(fields: [serviceId], references: [id])
@@ -112,4 +115,15 @@ model Favorite {
   executor User @relation("FavoriteExecutor", fields: [executorId], references: [id])
 
   @@unique([customerId, executorId]) // нельзя добавить одного и того же дважды
+}
+
+model OrderDeclined {
+  id         Int @id @default(autoincrement())
+  orderId    Int
+  executorId Int
+
+  order    Order @relation(fields: [orderId], references: [id])
+  executor User  @relation(fields: [executorId], references: [id])
+
+  @@unique([orderId, executorId]) // один исполнитель может отклонить один заказ один раз
 }
