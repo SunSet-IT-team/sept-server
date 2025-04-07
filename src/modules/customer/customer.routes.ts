@@ -6,6 +6,7 @@ import {LoginDTO} from '../auth/dto/login.dto';
 import {authMiddleware} from '../../middleware/authMiddleware';
 import {roleMiddleware} from '../../middleware/roleMiddleware';
 import {UpdateCustomerDTO} from './dto/updateCustomer.dto';
+import {verification} from '../auth/controllers/verifyCode.controller';
 
 export const customerRouter = Router();
 
@@ -123,3 +124,5 @@ customerRouter.patch(
     validateDto(UpdateCustomerDTO),
     CustomerController.updateProfile
 );
+
+customerRouter.post('/verify', verification);

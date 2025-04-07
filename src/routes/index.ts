@@ -7,12 +7,15 @@ import routerExecutor from '../modules/executor/executor.routes'; // Испол�
 import {serviceRouter} from '../modules/service/service.routes'; // Услуги
 import {orderRouter} from '../modules/order/order.routes'; // Заказы
 import {favoriteRouter} from '../modules/favorite/favorite.routes'; // Избранное
-import {reviewRouter} from '../modules/review/review.routes';
+import {reviewRouter} from '../modules/review/review.routes'; // Отзывы
+import {adminRouter} from '../modules/admin/admin.routes';
+import {verifyCode} from '../modules/auth/services/verifyCode.service';
 
 const apiRouter = Router();
 
 apiRouter.use('/customer', customerRouter);
 apiRouter.use('/executor', routerExecutor);
+apiRouter.use('/admin', adminRouter);
 
 apiRouter.use('/services', serviceRouter);
 apiRouter.use('/orders', orderRouter);

@@ -1,20 +1,21 @@
 import {Request, Response} from 'express';
-import {login as loginUser} from '../auth/login.service';
-import {registerUser} from '../auth/register.service';
+import {login as loginUser} from '../auth/services/login.service';
+import {registerUser} from '../auth/services/register.service';
 import * as CustomerService from './customer.service';
 import {AuthRequest} from '../../middleware/authMiddleware';
+import {verifyCode} from '../auth/services/verifyCode.service';
 
 export async function register(req: Request, res: Response) {
-    const token = await registerUser({
+    const result = await registerUser({
         ...req.body,
         role: 'CUSTOMER',
     });
-    res.json({token});
+    res.json(result);
 }
 
 export async function login(req: Request, res: Response) {
-    const token = await loginUser(req.body);
-    res.json({token});
+    const result = await loginUser(req.body);
+    res.json(result);
 }
 
 export async function updateProfile(req: AuthRequest, res: Response) {
@@ -31,3 +32,5 @@ export async function updateProfile(req: AuthRequest, res: Response) {
         res.status(400).json({message: error.message});
     }
 }
+
+export async function verification(req: AuthRequest, res: Response) {}
