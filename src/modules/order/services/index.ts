@@ -6,3 +6,4 @@ export * from './updateStatus';
 export * from './completeOrder';
 export * from './rejectOrder';
 export * from './getAvailable';
+export * from './acceptOrder';

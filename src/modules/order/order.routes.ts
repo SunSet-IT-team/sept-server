@@ -222,6 +222,30 @@ orderRouter.patch(
 
 /**
  * @swagger
+ * /orders/{id}/accept:
+ *   patch:
+ *     summary: Взять заказ в работу (исполнитель)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Заказ принят в работу
+ */
+orderRouter.patch(
+    '/:id/accept',
+    roleMiddleware(['EXECUTOR']),
+    OrderController.acceptOrder
+);
+
+/**
+ * @swagger
  * /orders/available:
  *   get:
  *     summary: Получить доступные заказы (неотклонённые и непринятые)
