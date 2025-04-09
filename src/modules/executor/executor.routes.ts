@@ -134,4 +134,56 @@ routerExecutor.patch(
     ExecutorController.updateProfile
 );
 
+/**
+ * @swagger
+ * /executor/rating/{executorId}:
+ *   get:
+ *     summary: Получить рейтинг исполнителя
+ *     description: Возвращает средний рейтинг и количество отзывов для указанного исполнителя
+ *     tags: [Executor]
+ *     parameters:
+ *       - in: path
+ *         name: executorId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID исполнителя
+ *         example: 42
+ *     responses:
+ *       200:
+ *         description: Успешный запрос рейтинга
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 rating:
+ *                   type: number
+ *                   format: float
+ *                   description: Средний рейтинг (0-5)
+ *                   example: 4.7
+ *                 count:
+ *                   type: integer
+ *                   description: Количество отзывов
+ *                   example: 15
+ *       400:
+ *         description: Неверный ID исполнителя
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "ID исполнителя обязателен"
+ *       404:
+ *         description: Исполнитель не найден
+ *       500:
+ *         description: Внутренняя ошибка сервера
+ */
+routerExecutor.get('/rating/:executorId', ExecutorController.getRating);
+
 export default routerExecutor;

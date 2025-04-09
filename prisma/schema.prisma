@@ -88,32 +88,45 @@ model Service {
   orders Order[]
 }
 
-// Заказы
 model Order {
-  id         Int  @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   customerId Int
-  executorId Int? // null — пока не назначен
+  executorId Int?      // null — пока не назначен
   serviceId  Int
 
-  city        String
-  description String
-  report      String? // для отчёта исполнителя
+  // Основные данные
+  objectType  String   // Тип объекта ()
+  comment     String?  // Дополнительный комментарий
 
-  status    OrderStatus @default(PENDING)
-  priority  Int         @default(100)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  // Характеристики септика
+  distanceToSeptic       Float    // Расстояние до септика от подъезда
+  septicDepth            Float    // Глубина септика до дна
+  septicVolume           Float    // Объём септика
+  septicConstructionType String   // Вид сооружения
 
+  // Рабочие поля
+  report      String?     // Отчёт исполнителя
+  paymentMethod String    // Форма оплаты (наличные, карта, перевод)
+  workDate    DateTime    // Дата выполнения работ
+  status      OrderStatus @default(PENDING)
+  priority    Int         @default(100)
+
+  // Таймстампы
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Связи
   declinedBy OrderDeclined[]
+  customer   User    @relation("CustomerOrders", fields: [customerId], references: [id])
+  executor   User?   @relation("ExecutorOrders", fields: [executorId], references: [id])
+  service    Service @relation(fields: [serviceId], references: [id])
+  review     Review?
+  chat       Chat?
 
-  customer User    @relation("CustomerOrders", fields: [customerId], references: [id])
-  executor User?   @relation("ExecutorOrders", fields: [executorId], references: [id])
-  service  Service @relation(fields: [serviceId], references: [id])
-  review   Review?
-  chat Chat?
-
+  // Индексы
   @@index([status])
   @@index([priority])
+  @@index([workDate])
 }
 
 // Отзывы к заказам

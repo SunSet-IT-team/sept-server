@@ -12,8 +12,8 @@ export async function getAllOrdersForAdminService(params: {
     serviceId?: number;
 }) {
     const {
-        page,
-        limit,
+        page = 1,
+        limit = 10,
         sortBy = 'createdAt',
         order = 'desc',
         customerId,
@@ -22,36 +22,70 @@ export async function getAllOrdersForAdminService(params: {
         serviceId,
     } = params;
 
-    const filters: any = {
-        status: status && OrderStatus[status as keyof typeof OrderStatus], // приведение
-        executorId: executorId ? Number(executorId) : undefined,
-        customerId: customerId ? Number(customerId) : undefined,
-        serviceId: serviceId ? Number(serviceId) : undefined,
-    };
+    // Строим фильтры
+    const where: any = {};
 
-    // Убираем undefined значения (опционально)
-    Object.keys(filters).forEach(
-        (key) => filters[key] === undefined && delete filters[key]
-    );
+    if (status) where.status = status;
+    if (customerId) where.customerId = Number(customerId);
+    if (executorId) where.executorId = Number(executorId);
+    if (serviceId) where.serviceId = Number(serviceId);
 
+    // Основной запрос с правильной структурой include
     const orders = await prisma.order.findMany({
-        where: filters,
+        where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: {[sortBy]: order},
         include: {
-            customer: true,
-            executor: true,
-            service: true,
+            customer: {
+                select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    status: true,
+                    customerProfile: true,
+                },
+            },
+            executor: {
+                select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    status: true,
+                    executorProfile: true,
+                },
+            },
+            service: {
+                select: {
+                    id: true,
+                    name: true,
+                    priority: true,
+                },
+            },
         },
     });
 
-    const total = await prisma.order.count({where: filters});
+    const total = await prisma.order.count({where});
+
+    // Форматируем ответ
+    const formattedOrders = orders.map((order) => ({
+        ...order,
+        customer: {
+            ...order.customer,
+            profile: order.customer.customerProfile,
+        },
+        executor: order.executor
+            ? {
+                  ...order.executor,
+                  profile: order.executor.executorProfile,
+              }
+            : null,
+    }));
 
     return {
         total,
-        page,
-        limit,
-        orders,
+        page: Number(page),
+        limit: Number(limit),
+        orders: formattedOrders,
     };
 }

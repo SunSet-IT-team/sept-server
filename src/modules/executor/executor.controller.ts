@@ -3,6 +3,7 @@ import {registerUser} from '../auth/services/register.service';
 import {login as loginUser} from '../auth/services/login.service';
 import {AuthRequest} from '../../middleware/authMiddleware';
 import * as ExecutorService from './executor.service';
+import {getUserIdFromRequest} from '../../helpers/getUserByToken';
 
 export async function register(req: Request, res: Response) {
     const result = await registerUser({
@@ -29,5 +30,25 @@ export async function updateProfile(req: AuthRequest, res: Response) {
         res.json(updated);
     } catch (error: any) {
         res.status(400).json({message: error.message});
+    }
+}
+
+export async function getRating(req: AuthRequest, res: Response) {
+    try {
+        // Если нужно брать executorId из URL (а не из авторизации)
+        const executorId = Number(req.params.executorId);
+
+        if (!executorId) throw new Error('ID исполнителя обязателен');
+
+        const rating = await ExecutorService.calculateExecutorRating(
+            executorId
+        );
+
+        res.json(rating);
+    } catch (error: any) {
+        res.status(400).json({
+            error: true,
+            message: error.message,
+        });
     }
 }

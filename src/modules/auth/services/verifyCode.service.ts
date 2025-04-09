@@ -1,4 +1,5 @@
 // src/modules/auth/verifyCode.service.ts
+import {AccountStatus} from '@prisma/client';
 import {prisma} from '../../../db/prisma';
 
 export interface VerifyCodeResult {
@@ -29,7 +30,9 @@ export async function verifyCode(
 
     await prisma.user.update({
         where: {email},
-        data: {isVerified: true},
+        data: {
+            status: AccountStatus['VERIFIED'],
+        },
     });
 
     return {success: true};

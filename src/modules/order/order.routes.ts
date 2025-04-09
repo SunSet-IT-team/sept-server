@@ -22,7 +22,7 @@ orderRouter.use(authMiddleware);
  * @swagger
  * /orders:
  *   post:
- *     summary: Создать заказ
+ *     summary: Создать новый заказ
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
@@ -34,21 +34,94 @@ orderRouter.use(authMiddleware);
  *             type: object
  *             required:
  *               - serviceId
- *               - city
- *               - description
+ *               - objectType
+ *               - distanceToSeptic
+ *               - septicDepth
+ *               - septicVolume
+ *               - septicConstructionType
+ *               - paymentMethod
+ *               - workDate
  *             properties:
  *               serviceId:
  *                 type: integer
- *                 example: 1
- *               city:
+ *                 description: ID услуги
+ *                 example: 5
+ *               objectType:
  *                 type: string
- *                 example: Москва
- *               description:
+ *                 description: Тип объекта
+ *                 example: "Частный дом"
+ *               distanceToSeptic:
+ *                 type: number
+ *                 minimum: 0.1
+ *                 description: Расстояние до септика (должно быть положительным)
+ *                 example: 10.5
+ *               septicDepth:
+ *                 type: number
+ *                 minimum: 0.1
+ *                 description: Глубина септика (должна быть положительной)
+ *                 example: 2.5
+ *               septicVolume:
+ *                 type: number
+ *                 minimum: 0.1
+ *                 description: Объём септика (должен быть положительным)
+ *                 example: 5.0
+ *               septicConstructionType:
  *                 type: string
- *                 example: Нужно откачать септик
+ *                 description: Тип конструкции септика
+ *                 example: "Бетонные кольца"
+ *               paymentMethod:
+ *                 type: string
+ *                 description: Способ оплаты
+ *                 example: "Наличные"
+ *               workDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Дата выполнения работ
+ *                 example: "2023-12-15T10:00:00Z"
+ *               comment:
+ *                 type: string
+ *                 description: Дополнительный комментарий
+ *                 example: "Вход со стороны двора"
  *     responses:
  *       201:
- *         description: Заказ создан
+ *         description: Заказ успешно создан
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   description: ID созданного заказа
+ *                 customer:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     email:
+ *                       type: string
+ *                     customerProfile:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                 service:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     name:
+ *                       type: string
+ *                 status:
+ *                   type: string
+ *                   enum: [PENDING, IN_PROGRESS, COMPLETED, CANCELLED]
+ *                   description: Статус заказа
+ *       400:
+ *         description: Неверные параметры запроса (валидация не пройдена)
+ *       401:
+ *         description: Пользователь не авторизован
+ *       403:
+ *         description: Недостаточно прав (требуется роль CUSTOMER)
  */
 orderRouter.post(
     '/',
@@ -78,7 +151,7 @@ orderRouter.post(
  *       200:
  *         description: Список заказов
  */
-orderRouter.get('/', OrderController.getOrders);
+// orderRouter.get('/', OrderController.getOrders);
 
 /**
  * @swagger
@@ -320,7 +393,7 @@ orderRouter.get(
  *         description: Список заказов
  */
 orderRouter.get(
-    '/admin',
+    '/',
     roleMiddleware(['ADMIN']),
     OrderController.getAllOrdersForAdmin
 );
