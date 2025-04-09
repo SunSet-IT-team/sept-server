@@ -2,6 +2,7 @@ import {prisma} from '../../../db/prisma';
 import bcrypt from 'bcrypt';
 import {generateVerificationCode} from '../../../helpers/codeGenerator';
 import {sendVerificationEmail} from './email.service';
+import {AccountStatus} from '@prisma/client';
 
 const SALT_ROUNDS = 10;
 const CODE_EXPIRATION_MINUTES = 15;
@@ -40,7 +41,11 @@ export async function registerUser(
         });
 
         // Если пользователь существует и уже подтвержден
-        if (existingUser && existingUser.isVerified) {
+        if (
+            existingUser &&
+            (existingUser.status === AccountStatus['VERIFIED'] ||
+                existingUser.status === AccountStatus['DELETED'])
+        ) {
             return {
                 success: false,
                 error: 'Пользователь с таким email уже существует',
@@ -48,7 +53,10 @@ export async function registerUser(
         }
 
         // Если пользователь существует, но не подтвержден
-        if (existingUser && !existingUser.isVerified) {
+        if (
+            existingUser &&
+            existingUser.status === AccountStatus['UNVERIFIED']
+        ) {
             // Генерация нового кода
             const newVerificationCode = generateVerificationCode();
             const newExpiresAt = new Date();
@@ -85,7 +93,7 @@ export async function registerUser(
             email,
             password: hashedPassword,
             role,
-            isVerified: false,
+            status: AccountStatus['UNVERIFIED'],
             verificationCode: {
                 create: {
                     code: verificationCode,
@@ -119,7 +127,7 @@ export async function registerUser(
             message: 'Код подтверждения отправлен на вашу почту',
         };
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('Ошибка при регистрации:', error);
         return {
             success: false,
             error: 'Произошла ошибка при регистрации',

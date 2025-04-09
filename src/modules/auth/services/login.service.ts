@@ -1,3 +1,4 @@
+import {AccountStatus} from '@prisma/client';
 import {prisma} from '../../../db/prisma';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -32,6 +33,20 @@ export async function login({
             return {
                 success: false,
                 error: 'Неверный email или пароль',
+            };
+        }
+
+        if (user.status === AccountStatus['DELETED']) {
+            return {
+                success: false,
+                error: 'Пользователь удален',
+            };
+        }
+
+        if (user.status === AccountStatus['UNVERIFIED']) {
+            return {
+                success: false,
+                error: 'Email не подтвержден',
             };
         }
 

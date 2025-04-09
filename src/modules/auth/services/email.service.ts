@@ -37,3 +37,27 @@ export async function sendVerificationEmail(to: string, code: string) {
         throw new Error('Не удалось отправить письмо с подтверждением');
     }
 }
+
+export async function sendRecoveryCode(to: string, code: string) {
+    const mailOptions = {
+        from: `"СЕПТИК" <${process.env.EMAIL_USER}>`,
+        to,
+        subject: 'Ваш код для восстановления доступа',
+        text: `Ваш код подтверждения: ${code}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333;">Вы изменили пароль!</h2>
+                <h3 style="color: #000;">Для следующего изменения пароля используйте этот код!</h3>
+                <p>Ваш код подтверждения:</p>
+                <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">${code}</p>
+                <p>Если вы потеряете код, то не сможете восстановить доступ к своему аккаунту никогда!</p>
+            </div>
+        `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Failed to send email:', error);
+    }
+}

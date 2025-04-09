@@ -7,3 +7,5 @@ export * from './completeOrder';
 export * from './rejectOrder';
 export * from './getAvailableOrders';
 export * from './acceptOrder';
+export * from './getAllOrdersForAdmin';
+export * from './deleteOrder';

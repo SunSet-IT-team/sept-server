@@ -21,15 +21,21 @@ enum OrderStatus {
   COMPLETED // Завершён с отчётом
 }
 
-// 👤 Пользователи
+enum AccountStatus {
+  UNVERIFIED    // Не подтверждён (только зарегистрировался)
+  VERIFIED      // Подтверждённый аккаунт
+  DELETED       // Удалённый аккаунт (soft delete)
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
   role      Role     @default(CUSTOMER)
   code      String?
-  isVerified       Boolean           @default(false)
   verificationCode VerificationCode?
+  status    AccountStatus @default(UNVERIFIED)
+  statusUpdatedAt DateTime @default(now())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -67,6 +73,7 @@ model ExecutorProfile {
 model CustomerProfile {
   id      Int     @id @default(autoincrement())
   userId  Int     @unique
+  name    String?
   address String?
 
   user User @relation(fields: [userId], references: [id])
