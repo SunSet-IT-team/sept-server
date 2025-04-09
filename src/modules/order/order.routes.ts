@@ -270,3 +270,83 @@ orderRouter.get(
     roleMiddleware(['EXECUTOR']),
     OrderController.getAvailableOrders
 );
+
+/**
+ * @swagger
+ * /orders/admin:
+ *   get:
+ *     summary: Получить все заказы (только для админов)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: sortBy
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [createdAt, customer, executor, service, status]
+ *       - name: order
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *       - name: customerId
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: executorId
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: serviceId
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: status
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [PENDING, IN_PROGRESS, COMPLETED, CANCELLED]
+ *     responses:
+ *       200:
+ *         description: Список заказов
+ */
+orderRouter.get(
+    '/admin',
+    roleMiddleware(['ADMIN']),
+    OrderController.getAllOrdersForAdmin
+);
+
+/**
+ * @swagger
+ * /orders/{id}:
+ *   delete:
+ *     summary: Удалить заказ по ID (только админ)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Заказ удалён
+ *       404:
+ *         description: Заказ не найден
+ */
+orderRouter.delete(
+    '/:id',
+    roleMiddleware(['ADMIN']),
+    OrderController.deleteOrder
+);

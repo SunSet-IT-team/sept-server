@@ -60,7 +60,7 @@ serviceRouter.get('/', authMiddleware, ServiceController.getServices);
  *         description: Услуга создана
  */
 serviceRouter.post(
-    '/',
+    '/create',
     authMiddleware,
     roleMiddleware(['ADMIN']),
     validateDto(CreateServiceDTO),

@@ -102,7 +102,13 @@ routerExecutor.post('/login', validateDto(LoginDTO), ExecutorController.login);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateExecutorDTO'
+ *             type: object
+ *             required:
+ *               - city
+ *             properties:
+ *               city:
+ *                 type: string
+ *                 example: Санкт-Петербург
  *     responses:
  *       200:
  *         description: Профиль обновлён
