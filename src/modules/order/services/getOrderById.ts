@@ -29,6 +29,7 @@ export async function getOrderById(orderId: number) {
                     priority: true,
                 },
             },
+            review: true,
         },
     });
 }

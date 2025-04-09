@@ -32,6 +32,7 @@ export async function getOrders(page = 1, limit = 10) {
                     priority: true,
                 },
             },
+            review: true,
         },
     });
 }
