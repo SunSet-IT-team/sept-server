@@ -19,8 +19,5 @@ COPY . .
 # Сборка приложения
 RUN npm run build
 
-# Можно добавить выполнение миграций при старте
-# RUN npx prisma migrate deploy
-
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
