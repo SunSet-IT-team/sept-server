@@ -8,6 +8,7 @@ import {swaggerSpec} from './docs/swagger';
 import {apiRouter} from './routes';
 import {createAdmin} from './core/initial/createAdmin';
 import {Role} from '@prisma/client';
+import {sendVerificationEmail} from './modules/auth/services/email.service';
 
 const email = process.env.ADMIN_EMAIL || 'admin@admin.com';
 const password = process.env.ADMIN_PASSWORD || '123456';
@@ -23,5 +24,9 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 createAdmin({email, password, code}).then((result) => {
     console.log(result);
 });
+
+console.log('process.env.EMAIL_USER');
+console.log(process.env.EMAIL_USER);
+console.log(sendVerificationEmail('artess.ponomarev@mail.ru', '1000'));
 
 export default app;
