@@ -7,33 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Роли пользователей
 enum Role {
   ADMIN
   CUSTOMER
   EXECUTOR
 }
 
+// Статусы заказов
 enum OrderStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
+  PENDING // Ожидает исполнителя
+  IN_PROGRESS // Принят исполнителем
+  COMPLETED // Завершён с отчётом
 }
 
 enum AccountStatus {
-  UNVERIFIED
-  VERIFIED
-  DELETED
+  UNVERIFIED    // Не подтверждён (только зарегистрировался)
+  VERIFIED      // Подтверждённый аккаунт
+  DELETED       // Удалённый аккаунт (soft delete)
 }
 
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
-  
   role      Role     @default(CUSTOMER)
-  
+  code      String?
   verificationCode VerificationCode?
-  
   status    AccountStatus @default(UNVERIFIED)
   statusUpdatedAt DateTime @default(now())
   createdAt DateTime @default(now())
@@ -41,7 +41,6 @@ model User {
 
   executorProfile ExecutorProfile?
   customerProfile CustomerProfile?
-  adminProfile AdminProfile?
 
   ordersAsCustomer Order[]    @relation("CustomerOrders")
   ordersAsExecutor Order[]    @relation("ExecutorOrders")
@@ -53,6 +52,13 @@ model User {
   readMessages    MessageRead[]
 }
 
+model VerificationCode {
+    id        Int      @id @default(autoincrement())
+    code      String
+    expiresAt DateTime
+    userId    Int      @unique
+    user      User     @relation(fields: [userId], references: [id])
+}
 
 // Профиль исполнителя
 model ExecutorProfile {
@@ -73,22 +79,10 @@ model CustomerProfile {
   user User @relation(fields: [userId], references: [id])
 }
 
-// Профиль админа
-model AdminProfile {
-    id    Int     @id @default(autoincrement())
-    userId Int @unique
-    recoveryCode String
+model Addresses {
+  id Int @id @default(autoincrement())
+  value String
 
-    user User @relation(fields: [userId], references: [id])
-}
-
-// Код для подтверждения почты
-model VerificationCode {
-    id        Int      @id @default(autoincrement())
-    code      String
-    expiresAt DateTime
-    userId    Int      @unique
-    user      User     @relation(fields: [userId], references: [id])
 }
 
 // Услуги

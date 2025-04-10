@@ -7,197 +7,197 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Роли пользователей
 enum Role {
   ADMIN
   CUSTOMER
   EXECUTOR
 }
 
-// Статусы заказов
 enum OrderStatus {
-  PENDING // Ожидает исполнителя
-  IN_PROGRESS // Принят исполнителем
-  COMPLETED // Завершён с отчётом
+  PENDING
+  IN_PROGRESS
+  REJECTED
+  COMPLETED
+  CANCELLED
 }
 
 enum AccountStatus {
-  UNVERIFIED    // Не подтверждён (только зарегистрировался)
-  VERIFIED      // Подтверждённый аккаунт
-  DELETED       // Удалённый аккаунт (soft delete)
+  UNVERIFIED
+  VERIFIED
+  DELETED
+  BANNED
+}
+
+enum FileType {
+  DOCUMENT
+  PICTURE
+  OTHER
+  REPORT_FILE
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      Role     @default(CUSTOMER)
-  code      String?
-  verificationCode VerificationCode?
-  status    AccountStatus @default(UNVERIFIED)
-  statusUpdatedAt DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String       @id @default(uuid())
+  email          String       @unique
+  password       String
+  phone          String?
+  firstName      String?
+  lastName       String?
+  role           Role
+
+  status         AccountStatus @default(UNVERIFIED)
+  statusUpdatedAt DateTime     @default(now())
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   executorProfile ExecutorProfile?
   customerProfile CustomerProfile?
+  adminProfile    AdminProfile?
 
-  ordersAsCustomer Order[]    @relation("CustomerOrders")
-  ordersAsExecutor Order[]    @relation("ExecutorOrders")
-  favorites        Favorite[] @relation("FavoriteCustomer")
-  favoritedBy      Favorite[] @relation("FavoriteExecutor")
-
-  declinedOrders OrderDeclined[]
-  sentMessages    Message[] @relation("SentMessages")
-  readMessages    MessageRead[]
+  reviewsGiven    Review[]    @relation("ReviewAuthor")
+  reviewsReceived Review[]    @relation("ReviewTarget")
+  emailVerification EmailVerification?
 }
 
-model VerificationCode {
-    id        Int      @id @default(autoincrement())
-    code      String
-    expiresAt DateTime
-    userId    Int      @unique
-    user      User     @relation(fields: [userId], references: [id])
+model AdminProfile {
+  id           String @id @default(uuid())
+  userId       String @unique
+  recoveryCode String?
+
+  user         User   @relation(fields: [userId], references: [id])
 }
 
-// Профиль исполнителя
-model ExecutorProfile {
-  id     Int    @id @default(autoincrement())
-  userId Int    @unique
-  city   String
-
-  user User @relation(fields: [userId], references: [id])
-}
-
-// Профиль заказчика
 model CustomerProfile {
-  id      Int     @id @default(autoincrement())
-  userId  Int     @unique
-  name    String?
-  address String?
+  id         String    @id @default(uuid())
+  userId     String    @unique
+  user       User      @relation(fields: [userId], references: [id])
 
-  user User @relation(fields: [userId], references: [id])
+  orders     Order[]
+  addresses  Address[]
 }
 
-model Addresses {
-  id Int @id @default(autoincrement())
-  value String
+model ExecutorProfile {
+  id          String @id @default(uuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id])
 
+  companyName String?
+  description String?
+  rating      Float?  @default(0.0)
+  completedOrders Int @default(0)
+
+  orders      Order[]
+  files       File[]
 }
 
-// Услуги
-model Service {
-  id       Int    @id @default(autoincrement())
-  name     String
-  priority Int    @default(100)
+model File {
+  id          String   @id @default(uuid())
+  userId      String
+  user        ExecutorProfile @relation(fields: [userId], references: [id])
+  reportId    String?
+  report      Report?  @relation(name: "ReportFiles", fields: [reportId], references: [id])
 
-  orders Order[]
+  url         String
+  filename    String
+  mimetype    String
+  type        FileType
+  size        Int?     // размер файла в байтах
+  uploadedAt  DateTime @default(now())
 }
 
 model Order {
-  id         Int       @id @default(autoincrement())
-  customerId Int
-  executorId Int?      // null — пока не назначен
-  serviceId  Int
+  id           String      @id @default(uuid())
 
-  // Основные данные
-  objectType  String   // Тип объекта ()
-  comment     String?  // Дополнительный комментарий
+  title       String      @default("")
+  objectType  String
+  comment     String?
 
-  // Характеристики септика
-  distanceToSeptic       Float    // Расстояние до септика от подъезда
-  septicDepth            Float    // Глубина септика до дна
-  septicVolume           Float    // Объём септика
-  septicConstructionType String   // Вид сооружения
+  distanceToSeptic       Float
+  septicDepth            Float
+  septicVolume           Float
+  septicConstructionType String
 
-  // Рабочие поля
-  report      String?     // Отчёт исполнителя
-  paymentMethod String    // Форма оплаты (наличные, карта, перевод)
-  workDate    DateTime    // Дата выполнения работ
+  report      String?
+  paymentMethod String
+  workDate    DateTime
   status      OrderStatus @default(PENDING)
   priority    Int         @default(100)
+  price       Float?
 
-  // Таймстампы
+  addressId   String?
+  address     Address?    @relation(fields: [addressId], references: [id])
+
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  // Связи
-  declinedBy OrderDeclined[]
-  customer   User    @relation("CustomerOrders", fields: [customerId], references: [id])
-  executor   User?   @relation("ExecutorOrders", fields: [executorId], references: [id])
-  service    Service @relation(fields: [serviceId], references: [id])
-  review     Review?
-  chat       Chat?
+  customerId  String
+  executorId  String?
 
-  // Индексы
-  @@index([status])
-  @@index([priority])
-  @@index([workDate])
+  customer    CustomerProfile @relation(fields: [customerId], references: [id])
+  executor    ExecutorProfile? @relation(fields: [executorId], references: [id])
+
+  service     Service?
+  reports     Report[]
+  reviews     Review[]
 }
 
-// Отзывы к заказам
+model Service {
+  id       String   @id @default(uuid())
+  name     String
+  priority Int      @default(100)
+
+  orderId  String   @unique
+  order    Order    @relation(fields: [orderId], references: [id])
+}
+
 model Review {
-  id        Int      @id @default(autoincrement())
-  orderId   Int      @unique // 1 заказ = 1 отзыв
-  rating    Int
-  comment   String
+  id         String   @id @default(uuid())
+  text       String
+  rating     Int
+  createdAt  DateTime @default(now())
+
+  authorId   String
+  targetId   String
+  orderId    String?
+
+  author     User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  target     User     @relation("ReviewTarget", fields: [targetId], references: [id])
+  order      Order?   @relation(fields: [orderId], references: [id])
+}
+
+model Address {
+  id           String   @id @default(uuid())
+  userId       String
+  user         CustomerProfile @relation(fields: [userId], references: [id])
+
+  value        String
+  city         String?
+  postalCode   String?
+  coordinates  String?
+
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  orders       Order[]
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
   createdAt DateTime @default(now())
-
-  order Order @relation(fields: [orderId], references: [id])
+  updatedAt DateTime @updatedAt
 }
 
-model Favorite {
-  id         Int @id @default(autoincrement())
-  customerId Int
-  executorId Int
-
-  customer User @relation("FavoriteCustomer", fields: [customerId], references: [id])
-  executor User @relation("FavoriteExecutor", fields: [executorId], references: [id])
-
-  @@unique([customerId, executorId]) // нельзя добавить одного и того же дважды
-}
-
-model OrderDeclined {
-  id         Int @id @default(autoincrement())
-  orderId    Int
-  executorId Int
-
-  order    Order @relation(fields: [orderId], references: [id])
-  executor User  @relation(fields: [executorId], references: [id])
-
-  @@unique([orderId, executorId]) // один исполнитель может отклонить один заказ один раз
-}
-
-
-model Chat {
-  id        Int      @id @default(autoincrement())
-  orderId   Int      @unique
+model Report {
+  id        String   @id @default(uuid())
+  text      String?
+  files     File[]   @relation("ReportFiles")
+  orderId   String
   order     Order    @relation(fields: [orderId], references: [id])
-  messages  Message[]
   createdAt DateTime @default(now())
-}
-
-
-model Message {
-  id        Int        @id @default(autoincrement())
-  chatId    Int
-  senderId  Int
-  content   String?
-  fileUrl   String?
-  createdAt DateTime   @default(now())
-
-  chat   Chat   @relation(fields: [chatId], references: [id])
-  sender User   @relation("SentMessages", fields: [senderId], references: [id])
-  reads  MessageRead[]
-}
-
-model MessageRead {
-  id        Int @id @default(autoincrement())
-  messageId Int
-  userId    Int
-
-  message Message @relation(fields: [messageId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
-
-  @@unique([messageId, userId])
 }
