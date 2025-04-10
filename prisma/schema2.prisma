@@ -7,33 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Роли пользователей
 enum Role {
   ADMIN
   CUSTOMER
   EXECUTOR
 }
 
-// Статусы заказов
 enum OrderStatus {
-  PENDING // Ожидает исполнителя
-  IN_PROGRESS // Принят исполнителем
-  COMPLETED // Завершён с отчётом
+  PENDING
+  IN_PROGRESS
+  COMPLETED
 }
 
 enum AccountStatus {
-  UNVERIFIED    // Не подтверждён (только зарегистрировался)
-  VERIFIED      // Подтверждённый аккаунт
-  DELETED       // Удалённый аккаунт (soft delete)
+  UNVERIFIED
+  VERIFIED
+  DELETED
 }
 
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
+  
   role      Role     @default(CUSTOMER)
-  code      String?
+  
   verificationCode VerificationCode?
+  
   status    AccountStatus @default(UNVERIFIED)
   statusUpdatedAt DateTime @default(now())
   createdAt DateTime @default(now())
@@ -41,6 +41,7 @@ model User {
 
   executorProfile ExecutorProfile?
   customerProfile CustomerProfile?
+  adminProfile AdminProfile?
 
   ordersAsCustomer Order[]    @relation("CustomerOrders")
   ordersAsExecutor Order[]    @relation("ExecutorOrders")
@@ -52,13 +53,6 @@ model User {
   readMessages    MessageRead[]
 }
 
-model VerificationCode {
-    id        Int      @id @default(autoincrement())
-    code      String
-    expiresAt DateTime
-    userId    Int      @unique
-    user      User     @relation(fields: [userId], references: [id])
-}
 
 // Профиль исполнителя
 model ExecutorProfile {
@@ -74,15 +68,27 @@ model CustomerProfile {
   id      Int     @id @default(autoincrement())
   userId  Int     @unique
   name    String?
-  addressId Int?
+  address String?
 
   user User @relation(fields: [userId], references: [id])
 }
 
-model Addresses {
-  id Int @id @default(autoincrement())
-  value String
+// Профиль админа
+model AdminProfile {
+    id    Int     @id @default(autoincrement())
+    userId Int @unique
+    recoveryCode String
 
+    user User @relation(fields: [userId], references: [id])
+}
+
+// Код для подтверждения почты
+model VerificationCode {
+    id        Int      @id @default(autoincrement())
+    code      String
+    expiresAt DateTime
+    userId    Int      @unique
+    user      User     @relation(fields: [userId], references: [id])
 }
 
 // Услуги
