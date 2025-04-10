@@ -52,3 +52,25 @@ export async function getRating(req: AuthRequest, res: Response) {
         });
     }
 }
+
+export async function getMe(req: Request, res: Response) {
+    try {
+        const id = getUserIdFromRequest(req);
+
+        if (!id) {
+            res.status(400).json({
+                error: 'Не удалось идентифицировать пользователя',
+            });
+            return;
+        }
+
+        const result = await ExecutorService.getMeService({id});
+
+        res.json(result);
+    } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            error: error?.message || 'Произошла ошибка при авторизации',
+        });
+    }
+}
