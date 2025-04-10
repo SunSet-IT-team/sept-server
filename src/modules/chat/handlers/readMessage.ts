@@ -1,5 +1,5 @@
 import {Socket} from 'socket.io';
-import {prisma} from '../../db/prisma';
+import {prisma} from '../../../db/prisma';
 import {io} from '../index';
 
 export async function handleReadMessage(

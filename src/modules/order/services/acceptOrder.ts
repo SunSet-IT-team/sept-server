@@ -15,7 +15,7 @@ export async function acceptOrder(orderId: number, executorId: number) {
         where: {id: orderId},
         data: {
             executorId,
-            status: 'IN_PROGRESS',
+            status: OrderStatus['IN_PROGRESS'],
         },
     });
 }

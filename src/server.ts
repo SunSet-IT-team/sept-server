@@ -1,7 +1,7 @@
 // src/server.ts
 import http from 'http';
 import app from './app';
-import {initSocket} from './chat';
+import {initSocket} from './modules/chat';
 
 const PORT = process.env.PORT || 4000;
 

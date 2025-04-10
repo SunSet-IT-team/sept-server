@@ -7,9 +7,32 @@ export async function getOrders(page = 1, limit = 10) {
         take: limit,
         orderBy: {priority: 'asc'},
         include: {
-            customer: true,
-            executor: true,
-            service: true,
+            customer: {
+                select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    status: true,
+                    customerProfile: true,
+                },
+            },
+            executor: {
+                select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    status: true,
+                    executorProfile: true,
+                },
+            },
+            service: {
+                select: {
+                    id: true,
+                    name: true,
+                    priority: true,
+                },
+            },
+            review: true,
         },
     });
 }

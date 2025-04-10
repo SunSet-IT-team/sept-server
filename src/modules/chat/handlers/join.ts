@@ -1,5 +1,5 @@
 import {Socket} from 'socket.io';
-import {prisma} from '../../db/prisma';
+import {prisma} from '../../../db/prisma';
 
 export async function handleJoin(
     socket: Socket,
