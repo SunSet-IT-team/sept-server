@@ -74,7 +74,7 @@ model CustomerProfile {
   id      Int     @id @default(autoincrement())
   userId  Int     @unique
   name    String?
-  addressId Int?
+  address String?
 
   user User @relation(fields: [userId], references: [id])
 }
