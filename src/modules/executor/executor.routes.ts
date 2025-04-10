@@ -186,4 +186,11 @@ routerExecutor.patch(
  */
 routerExecutor.get('/rating/:executorId', ExecutorController.getRating);
 
+routerExecutor.get(
+    '/me',
+    authMiddleware,
+    roleMiddleware(['EXECUTOR']),
+    ExecutorController.getMe
+);
+
 export default routerExecutor;

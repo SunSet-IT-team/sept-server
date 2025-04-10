@@ -3,6 +3,7 @@ import {validateDto} from '../../middleware/validate';
 import * as AdminController from './admin.controller';
 import {LoginAdminDTO} from './dto/loginAdmin.dto';
 import {RecoveryAdminDTO} from './dto/recoveryAdmin.dto';
+import {roleMiddleware} from '../../middleware/roleMiddleware';
 
 export const adminRouter = Router();
 
@@ -89,3 +90,5 @@ adminRouter.post(
     validateDto(RecoveryAdminDTO),
     AdminController.recovery
 );
+
+adminRouter.get('/me', AdminController.getMe);

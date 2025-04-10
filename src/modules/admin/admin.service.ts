@@ -77,3 +77,18 @@ export async function recovery({
         message: 'Пароль успешно изменен. Новый код отправлен на вашу почту.',
     };
 }
+
+export const getMeService = async ({id}: {id: number}) => {
+    const user = await prisma.user.findUnique({
+        where: {id},
+        select: {
+            id: true,
+            email: true,
+            role: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+    return user;
+};

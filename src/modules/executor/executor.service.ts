@@ -43,3 +43,23 @@ export async function calculateExecutorRating(executorId: number): Promise<{
         totalReviews: reviews.length,
     };
 }
+
+export const getMeService = async ({id}: {id: number}) => {
+    const user = await prisma.user.findUnique({
+        where: {id},
+        select: {
+            id: true,
+            email: true,
+            role: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+            executorProfile: {
+                select: {
+                    city: true,
+                },
+            },
+        },
+    });
+    return user;
+};
