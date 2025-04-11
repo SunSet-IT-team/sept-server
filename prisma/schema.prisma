@@ -33,6 +33,15 @@ enum FileType {
   PICTURE
   OTHER
   REPORT_FILE
+  PROFILE_PHOTO
+  REGISTRATION_CERTIFICATE
+  LICENSE
+}
+
+enum WorkFormat {
+  INDIVIDUAL     // частное лицо
+  LEGAL_ENTITY   // юридическое лицо
+  SOLE_PROPRIETOR // ИП
 }
 
 model User {
@@ -77,18 +86,23 @@ model CustomerProfile {
 }
 
 model ExecutorProfile {
-  id          String @id @default(uuid())
-  userId      String @unique
-  user        User   @relation(fields: [userId], references: [id])
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
 
-  companyName String?
-  description String?
-  rating      Float?  @default(0.0)
-  completedOrders Int @default(0)
+  workFormat       String
+  experience       Int?     
+  about            String?
 
-  orders      Order[]
-  files       File[]
+  companyName      String?
+  description      String?
+  rating           Float?   @default(0.0)
+  completedOrders  Int      @default(0)
+
+  orders           Order[]
+  files            File[]
 }
+
 
 model File {
   id          String   @id @default(uuid())
