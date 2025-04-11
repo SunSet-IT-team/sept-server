@@ -150,7 +150,9 @@ model Order {
   customer    CustomerProfile @relation(fields: [customerId], references: [id])
   executor    ExecutorProfile? @relation(fields: [executorId], references: [id])
 
-  service     Service?
+  serviceId   String?    @unique
+  service     Service?   @relation(fields: [serviceId], references: [id])
+
   reports     Report[]
   reviews     Review[]
 }
@@ -160,9 +162,10 @@ model Service {
   name     String
   priority Int      @default(100)
 
-  orderId  String   @unique
-  order    Order    @relation(fields: [orderId], references: [id])
+  order    Order?   @relation
 }
+
+
 
 model Review {
   id         String   @id @default(uuid())

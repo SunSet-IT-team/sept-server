@@ -8,6 +8,9 @@ export const sendVerificationCode = async (
     const {email} = req.body;
 
     try {
+        if (!email) {
+            throw new Error('Email is required');
+        }
         const result = await sendVerificationCodeService(email);
         res.status(200).json(result);
         return;

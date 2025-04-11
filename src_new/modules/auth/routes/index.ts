@@ -10,12 +10,12 @@ import {adminRecovery} from '../controllers/adminRecovery.controller';
 
 export const authRouter = Router();
 
-authRouter.post('/auth/login/admin', login);
-authRouter.post('/auth/login/executor', login);
-authRouter.post('/auth/login/customer', login);
+authRouter.post('/login/admin', login);
+authRouter.post('/login/executor', login);
+authRouter.post('/login/customer', login);
 
 authRouter.post(
-    '/auth/register/executor',
+    '/register/executor',
     upload.fields([
         {name: 'profilePhoto', maxCount: 1},
         {name: 'registrationDoc', maxCount: 5},
@@ -25,8 +25,8 @@ authRouter.post(
     registerExecutor
 );
 
-authRouter.post('/auth/register/customer', registerCustomer);
+authRouter.post('/register/customer', registerCustomer);
 
-authRouter.get('/auth/verify/:code', verifyEmail);
-authRouter.post('/auth/verify', sendVerificationCode);
-authRouter.post('/auth/recovery/admin', adminRecovery);
+authRouter.get('/verify/:code', verifyEmail);
+authRouter.post('/verify', sendVerificationCode);
+authRouter.post('/recovery/admin', adminRecovery);
