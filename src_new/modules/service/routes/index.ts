@@ -9,12 +9,12 @@ import {Role} from '@prisma/client';
 
 export const serviceRouter = Router();
 
-serviceRouter.post('/service', checkRole(Role['ADMIN']), createService);
+serviceRouter.post('/', checkRole(Role['ADMIN']), createService);
 
-serviceRouter.get('/service/:id', getService);
+serviceRouter.get('/:id', getService);
 
-serviceRouter.get('/service', getAllServices);
+serviceRouter.get('/', getAllServices);
 
-serviceRouter.patch('/service/:id', checkRole(Role['ADMIN']), updateService);
+serviceRouter.patch('/:id', checkRole(Role['ADMIN']), updateService);
 
-serviceRouter.delete('/service/:id', checkRole(Role['ADMIN']), deleteService);
+serviceRouter.delete('/:id', checkRole(Role['ADMIN']), deleteService);

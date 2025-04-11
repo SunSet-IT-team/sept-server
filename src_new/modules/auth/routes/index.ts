@@ -4,7 +4,7 @@ import {registerExecutor} from '../controllers/registerExecutor.controller';
 import {upload} from '../../../core/middleware/upload';
 import {login} from '../controllers/login.controller';
 import {registerCustomer} from '../controllers/registerCustomer.controller';
-import {verifyEmail} from '../services/verifyEmail.service';
+import {verifyEmail} from '../controllers/verifyEmail.controller';
 import {sendVerificationCode} from '../controllers/sendVerificationCode.controller';
 import {adminRecovery} from '../controllers/adminRecovery.controller';
 

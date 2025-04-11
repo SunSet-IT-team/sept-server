@@ -1,5 +1,10 @@
 import {Request, Response} from 'express';
 import {deleteServiceService} from '../services/deleteService.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
 
 export const deleteService = async (
     req: Request,
@@ -7,15 +12,16 @@ export const deleteService = async (
 ): Promise<void> => {
     try {
         const {id} = req.params;
-        const deletedService = await deleteServiceService(id);
-        if (!deletedService) {
-            res.status(404).json({message: 'Сервис не найден'});
+        const result = await deleteServiceService(id);
+        if (!result) {
+            sendResponse(res, 404, errorResponse('Сервис не найден'));
             return;
         }
-        res.status(200).json({message: 'Сервис удален'});
+
+        sendResponse(res, 200, successResponse({...result, id: null}));
         return;
-    } catch (error) {
-        res.status(500).json({message: 'Ошибка при удалении сервиса'});
+    } catch (err: any) {
+        sendResponse(res, err.code || 400, errorResponse(err.message));
         return;
     }
 };

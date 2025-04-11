@@ -1,6 +1,11 @@
 import {Request, Response} from 'express';
 import {RegisterCustomerDTO} from '../dtos/registerCustomer.dto';
 import {registerCustomerService} from '../services/registerCustomer.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
 
 export const registerCustomer = async (
     req: Request,
@@ -10,24 +15,10 @@ export const registerCustomer = async (
         const dto: RegisterCustomerDTO | any = req.body;
         const user = await registerCustomerService(dto);
 
-        res.status(201).json({
-            success: true,
-            message: 'Регистрация успешна',
-            data: {
-                id: user.id,
-                email: user.email,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                phone: user.phone,
-            },
-        });
+        sendResponse(res, 200, successResponse(user));
         return;
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: 'Ошибка регистрации',
-            error: err,
-        });
+    } catch (err: any) {
+        sendResponse(res, err.code || 400, errorResponse(err.message));
         return;
     }
 };

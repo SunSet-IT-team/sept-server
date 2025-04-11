@@ -1,5 +1,10 @@
 import {Request, Response} from 'express';
 import {getServiceByIdService} from '../services/getServiceById.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
 
 export const getService = async (
     req: Request,
@@ -7,15 +12,15 @@ export const getService = async (
 ): Promise<void> => {
     try {
         const {id} = req.params;
-        const service = await getServiceByIdService(id);
-        if (!service) {
-            res.status(404).json({message: 'Сервис не найден'});
+        const result = await getServiceByIdService(id);
+        if (!result) {
+            sendResponse(res, 404, errorResponse('Сервис не найден'));
             return;
         }
-        res.status(200).json(service);
+        sendResponse(res, 200, successResponse(result));
         return;
-    } catch (error) {
-        res.status(500).json({message: 'Ошибка при получении сервиса'});
+    } catch (err: any) {
+        sendResponse(res, err.code || 400, errorResponse(err.message));
         return;
     }
 };

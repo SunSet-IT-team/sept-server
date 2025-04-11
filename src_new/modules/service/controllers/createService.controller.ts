@@ -1,19 +1,23 @@
 import {Request, Response} from 'express';
 import {CreateServiceDTO} from '../dtos/createService.dto';
 import {createServiceService} from '../services/createService.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
 
 export const createService = async (
     req: Request,
     res: Response
 ): Promise<void> => {
     try {
-        const {name, priority} = req.body;
-        const dto: CreateServiceDTO = {name, priority};
-        const service = await createServiceService(dto);
-        res.status(201).json(service);
+        const dto: CreateServiceDTO = req.body;
+        const result = await createServiceService(dto);
+        sendResponse(res, 200, successResponse(result));
         return;
-    } catch (error) {
-        res.status(500).json({message: 'Ошибка при создании сервиса'});
+    } catch (err: any) {
+        sendResponse(res, err.code || 400, errorResponse(err.message));
         return;
     }
 };

@@ -1,50 +1,26 @@
 import {Request, Response} from 'express';
 import {registerExecutorService} from '../services/registerExecutor.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
+import {RegisterExecutorDTO} from '../dtos/registerExecutor.dto';
 
 export const registerExecutor = async (
     req: Request,
     res: Response
 ): Promise<void> => {
     try {
-        const {
-            email,
-            password,
-            firstName,
-            lastName,
-            phone,
-            workFormat,
-            experience,
-            about,
-            companyName,
-        } = req.body;
-
+        const dto: RegisterExecutorDTO = req.body;
         const files = req.files as Record<string, Express.Multer.File[]>;
 
-        const data = await registerExecutorService({
-            email,
-            password,
-            firstName,
-            lastName,
-            phone,
-            workFormat,
-            experience,
-            about,
-            companyName,
-            files,
-        });
+        const result = await registerExecutorService({...dto, files});
 
-        res.status(201).json({
-            success: true,
-            message: 'Регистрация успешна',
-            data,
-        });
+        sendResponse(res, 200, successResponse(result));
         return;
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: 'Ошибка регистрации',
-            error: err,
-        });
+    } catch (err: any) {
+        sendResponse(res, err.code || 400, errorResponse(err.message));
         return;
     }
 };

@@ -1,5 +1,10 @@
 import {Request, Response} from 'express';
 import {sendVerificationCodeService} from '../services/sendVerificationCode.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
 
 export const sendVerificationCode = async (
     req: Request,
@@ -9,13 +14,15 @@ export const sendVerificationCode = async (
 
     try {
         if (!email) {
-            throw new Error('Email is required');
+            sendResponse(res, 400, errorResponse('Поле email обязательно'));
+            return;
         }
         const result = await sendVerificationCodeService(email);
-        res.status(200).json(result);
+
+        sendResponse(res, 200, successResponse(result));
         return;
-    } catch (error) {
-        res.status(400).json({message: error});
+    } catch (err: any) {
+        sendResponse(res, 400, errorResponse(err.message));
         return;
     }
 };

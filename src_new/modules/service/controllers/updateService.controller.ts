@@ -1,6 +1,11 @@
 import {Request, Response} from 'express';
 import {UpdateServiceDTO} from '../dtos/updateService.dto';
 import {updateServiceService} from '../services/updateService.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
 
 export const updateService = async (
     req: Request,
@@ -9,15 +14,16 @@ export const updateService = async (
     try {
         const {id} = req.params;
         const serviceData: UpdateServiceDTO = req.body;
-        const updatedService = await updateServiceService(id, serviceData);
-        if (!updatedService) {
-            res.status(404).json({message: 'Сервис не найден'});
+        const result = await updateServiceService(id, serviceData);
+
+        if (!result) {
+            sendResponse(res, 404, errorResponse('Сервис не найден'));
             return;
         }
-        res.status(200).json(updatedService);
+        sendResponse(res, 200, successResponse(result));
         return;
-    } catch (error) {
-        res.status(500).json({message: 'Ошибка при обновлении сервиса'});
+    } catch (err: any) {
+        sendResponse(res, err.code || 400, errorResponse(err.message));
         return;
     }
 };

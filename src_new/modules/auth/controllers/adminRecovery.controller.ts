@@ -1,5 +1,10 @@
 import {Request, Response} from 'express';
 import {adminRecoveryService} from '../services/adminRecovery.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
 
 export const adminRecovery = async (
     req: Request,
@@ -9,11 +14,10 @@ export const adminRecovery = async (
 
     try {
         const result = await adminRecoveryService(email, code, newPassword);
-        res.status(200).json(result);
+        sendResponse(res, 200, successResponse(result));
         return;
-    } catch (error) {
-        console.error(error);
-        res.status(400).json({message: error});
+    } catch (err: any) {
+        sendResponse(res, err.code || 400, errorResponse(err.message));
         return;
     }
 };

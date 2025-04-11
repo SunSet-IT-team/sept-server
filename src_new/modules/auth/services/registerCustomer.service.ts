@@ -28,7 +28,27 @@ export const registerCustomerService = async (dto: RegisterCustomerDTO) => {
             },
         },
         include: {
-            customerProfile: true,
+            customerProfile: {
+                include: {
+                    addresses: {
+                        select: {
+                            id: true,
+                            value: true,
+                        },
+                    },
+                    user: {
+                        select: {
+                            id: true,
+                            email: true,
+                            firstName: true,
+                            lastName: true,
+                            phone: true,
+                            role: true,
+                            status: true,
+                        },
+                    },
+                },
+            },
         },
     });
 

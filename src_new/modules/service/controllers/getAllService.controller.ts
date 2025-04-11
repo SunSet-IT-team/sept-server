@@ -1,16 +1,21 @@
 import {Request, Response} from 'express';
 import {getAllServicesService} from '../services/getAllService.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
 
 export const getAllServices = async (
     req: Request,
     res: Response
 ): Promise<void> => {
     try {
-        const services = await getAllServicesService();
-        res.status(200).json(services);
+        const result = await getAllServicesService();
+        sendResponse(res, 200, successResponse(result));
         return;
-    } catch (error) {
-        res.status(500).json({message: 'Ошибка при получении сервисов'});
+    } catch (err: any) {
+        sendResponse(res, 400, errorResponse(err.message));
         return;
     }
 };
