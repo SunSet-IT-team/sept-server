@@ -48,6 +48,8 @@ enum ChatType {
   GENERAL
   ORDER_CUSTOMER
   ORDER_ADMIN
+  SUPPORT_CUSTOMER
+  SUPPORT_EXECUTOR
 }
 
 model User {
@@ -202,6 +204,8 @@ model Service {
   id       String   @id @default(uuid())
   name     String
   priority Int      @default(100)
+
+  createdAt DateTime    @default(now())
 
   orders   Order[]
 }

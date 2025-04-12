@@ -1,22 +1,53 @@
-// routes/executor.routes.ts
+// routes/order.routes.ts
 import {Router} from 'express';
-import {Role} from '@prisma/client';
 import {checkRole} from '../../../core/middleware/checkRole';
+import {authMiddleware} from '../../../core/middleware/authMiddleware';
+import {Role} from '@prisma/client';
+import {createOrder} from '../controllers/createOrder.controller';
+import {getMyOrders} from '../controllers/getMyOrders.controller';
+import {getOrderById} from '../controllers/getOrderById.controller';
+import {updateOrder} from '../controllers/updateOrder.controller';
+import {UpdateOrderDTO} from '../dtos/updateOrder.dto';
+import {validateDto} from '../../../core/utils/validateDto';
+import {CreateOrderDTO} from '../dtos/createOrder.dto';
+import {deleteOrder} from '../controllers/deleteOrder.controller';
+import {acceptOrder} from '../controllers/acceptOrder.controller';
+import {rejectOrder} from '../controllers/rejectOrder.controller';
+import {upload} from '../../../core/middleware/upload';
+import {completeOrder} from '../controllers/completeOrder.controller';
 
-const executorRouter = Router();
+const orderRouter = Router();
 
-// Получение профиля исполнителя
-executorRouter.get('/me', checkRole(Role.EXECUTOR), () => {});
-executorRouter.patch('/me', checkRole(Role.EXECUTOR), () => {});
+orderRouter.post(
+    '/',
+    validateDto(CreateOrderDTO),
+    checkRole(Role.CUSTOMER),
+    createOrder
+);
+orderRouter.get('/my', checkRole([Role.CUSTOMER, Role.EXECUTOR]), getMyOrders);
 
-executorRouter.delete('/:id', checkRole(Role.ADMIN), () => {});
-executorRouter.patch('/:id', checkRole(Role.ADMIN), () => {});
+orderRouter.get('/executor/:executorId', checkRole(Role.ADMIN), getMyOrders);
+orderRouter.get('/customer/:customerId', checkRole(Role.ADMIN), getMyOrders);
 
-executorRouter.get('/:id', () => {});
-// Получение заказов исполнителя с пагинацией
-executorRouter.get('/:executorId/order', checkRole(Role.EXECUTOR), () => {});
+orderRouter.get('/:id', authMiddleware, getOrderById);
 
-// Получение рейтинга исполнителя
-executorRouter.get('/:executorId/rating', checkRole(Role.EXECUTOR), () => {});
+orderRouter.patch(
+    '/:id',
+    validateDto(UpdateOrderDTO),
+    checkRole([Role.CUSTOMER, Role.ADMIN]),
+    updateOrder
+);
 
-export default executorRouter;
+orderRouter.delete('/:id', checkRole([Role.CUSTOMER, Role.ADMIN]), deleteOrder);
+
+orderRouter.post('/:id/accept', checkRole(Role.EXECUTOR), acceptOrder);
+orderRouter.post('/:id/reject', checkRole(Role.EXECUTOR), rejectOrder);
+
+orderRouter.post(
+    '/:id/complete',
+    checkRole(Role.EXECUTOR),
+    upload.fields([{name: 'reportFiles', maxCount: 10}]),
+    completeOrder
+);
+
+export default orderRouter;

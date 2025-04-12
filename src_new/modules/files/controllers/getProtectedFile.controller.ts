@@ -8,7 +8,7 @@ export const getProtectedFileController = async (
 ) => {
     try {
         const {filename} = req.params;
-        const user = req.user!; // уже прошёл через authMiddleware
+        const user = req.user!;
 
         await sendProtectedFile({filename, user, res});
     } catch (err: any) {

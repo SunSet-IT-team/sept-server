@@ -5,6 +5,7 @@ import {RegisterCustomerDTO} from '../dtos/registerCustomer.dto';
 import {hashPassword} from '../utils/hashPassword';
 import {Role, AccountStatus} from '@prisma/client';
 import {v4 as uuidv4} from 'uuid';
+import {generateVerificationCode} from '../utils/generateVerificationCode';
 
 export const registerCustomerService = async (dto: RegisterCustomerDTO) => {
     const {email, password, firstName, lastName, phone, address} = dto;
@@ -25,7 +26,7 @@ export const registerCustomerService = async (dto: RegisterCustomerDTO) => {
 
     if (existingUser) {
         if (existingUser.status === AccountStatus.UNVERIFIED) {
-            const newCode = uuidv4();
+            const newCode = generateVerificationCode();
 
             await prisma.emailVerification.upsert({
                 where: {userId: existingUser.id},
@@ -86,7 +87,7 @@ export const registerCustomerService = async (dto: RegisterCustomerDTO) => {
             },
             emailVerification: {
                 create: {
-                    code: uuidv4(),
+                    code: generateVerificationCode(),
                     expiresAt: new Date(Date.now() + 15 * 60 * 1000),
                 },
             },

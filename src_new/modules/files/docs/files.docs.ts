@@ -1,35 +1,86 @@
 /**
  * @swagger
  * tags:
- *   name: Files
- *   description: Защищённый доступ к файлам
+ *   - name: File
+ *     description: Загрузка и доступ к файлам
+ */
 
- * /files/{filename}:
+/**
+ * @swagger
+ * /api/files/upload:
+ *   post:
+ *     summary: Загрузка одного или нескольких файлов
+ *     tags: [File]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               files:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *     responses:
+ *       201:
+ *         description: Файлы успешно загружены
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       url:
+ *                         type: string
+ *                       filename:
+ *                         type: string
+ *       400:
+ *         description: Ошибка при загрузке
+ *       401:
+ *         description: Неавторизованный доступ
+ */
+
+/**
+ * @swagger
+ * /api/files/{filename}:
  *   get:
- *     summary: Получить файл (защищённо)
- *     tags: [Files]
+ *     summary: Получить защищённый файл по названию
+ *     tags: [File]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: filename
  *         required: true
- *         description: Название файла (сгенерированное uuid-название, включая расширение)
+ *         description: Название файла (с UUID и расширением)
  *         schema:
  *           type: string
- *           example: 7f3ab238-86f1-4db9-b5bc-1d7a126caa19.png
+ *           example: "a1b2c3d4-5678-90ab-cdef-1234567890ab.jpg"
  *     responses:
  *       200:
- *         description: Файл успешно найден и отдан
+ *         description: Файл успешно отдан
  *         content:
  *           application/octet-stream:
  *             schema:
  *               type: string
  *               format: binary
- *       403:
- *         description: Нет доступа к файлу (не владелец и не админ)
- *       404:
- *         description: Файл не найден
  *       401:
  *         description: Неавторизованный доступ
+ *       403:
+ *         description: Доступ запрещён (не владелец и не админ)
+ *       404:
+ *         description: Файл не найден
  */

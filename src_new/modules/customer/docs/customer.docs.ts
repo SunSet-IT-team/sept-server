@@ -2,72 +2,20 @@
  * @swagger
  * tags:
  *   name: Customer
- *   description: Управление заказчиками
- */
-
-/**
- * @swagger
- * /customer/list:
- *   get:
- *     summary: Получить список заказчиков с пагинацией и фильтрацией
- *     tags: [Customer]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: page
- *         in: query
- *         description: Номер страницы
- *         schema:
- *           type: integer
- *           default: 1
- *       - name: limit
- *         in: query
- *         description: Количество элементов на странице
- *         schema:
- *           type: integer
- *           default: 10
- *       - name: sortBy
- *         in: query
- *         description: Поле для сортировки
- *         schema:
- *           type: string
- *           enum: [firstName, lastName, createdAt]
- *           default: createdAt
- *       - name: order
- *         in: query
- *         description: Направление сортировки
- *         schema:
- *           type: string
- *           enum: [asc, desc]
- *           default: desc
- *       - name: firstName
- *         in: query
- *         description: Имя заказчика (частичное совпадение)
- *         schema:
- *           type: string
- *       - name: lastName
- *         in: query
- *         description: Фамилия заказчика (частичное совпадение)
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Список заказчиков успешно получен
- *       401:
- *         description: Неавторизован
+ *   description: Управление профилем заказчика
  */
 
 /**
  * @swagger
  * /customer/me:
  *   get:
- *     summary: Получить собственный профиль заказчика
+ *     summary: Получить свой профиль заказчика
  *     tags: [Customer]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Профиль заказчика успешно получен
+ *         description: Успешно
  *       401:
  *         description: Неавторизован
  */
@@ -76,7 +24,7 @@
  * @swagger
  * /customer/me:
  *   patch:
- *     summary: Обновить собственный профиль заказчика
+ *     summary: Обновить свой профиль заказчика
  *     tags: [Customer]
  *     security:
  *       - bearerAuth: []
@@ -97,7 +45,38 @@
  *       200:
  *         description: Профиль обновлён
  *       400:
- *         description: Ошибка валидации
+ *         description: Ошибка обновления
+ */
+
+/**
+ * @swagger
+ * /customer/list:
+ *   get:
+ *     summary: Получить список заказчиков (для админа)
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *     responses:
+ *       200:
+ *         description: Список заказчиков
  */
 
 /**
@@ -114,20 +93,14 @@
  *         required: true
  *         schema:
  *           type: string
- *           format: uuid
- *         description: UUID заказчика
  *     responses:
  *       200:
- *         description: Профиль заказчика успешно получен
+ *         description: Профиль найден
  *       404:
- *         description: Заказчик не найден
- */
-
-/**
- * @swagger
- * /customer/{id}:
+ *         description: Не найден
+ *
  *   patch:
- *     summary: Обновить профиль заказчика по ID (только для администратора)
+ *     summary: Обновить профиль заказчика по ID (админ)
  *     tags: [Customer]
  *     security:
  *       - bearerAuth: []
@@ -137,8 +110,6 @@
  *         required: true
  *         schema:
  *           type: string
- *           format: uuid
- *         description: UUID заказчика
  *     requestBody:
  *       required: true
  *       content:
@@ -154,20 +125,12 @@
  *                 type: string
  *     responses:
  *       200:
- *         description: Профиль успешно обновлён
+ *         description: Обновлено
  *       403:
  *         description: Нет прав
- *       400:
- *         description: Ошибка валидации
- *       404:
- *         description: Заказчик не найден
- */
-
-/**
- * @swagger
- * /customer/{id}:
+ *
  *   delete:
- *     summary: Удалить профиль заказчика по ID (только для администратора)
+ *     summary: Удалить заказчика по ID (админ)
  *     tags: [Customer]
  *     security:
  *       - bearerAuth: []
@@ -177,13 +140,45 @@
  *         required: true
  *         schema:
  *           type: string
- *           format: uuid
- *         description: UUID заказчика
  *     responses:
  *       200:
- *         description: Профиль заказчика помечен как удалённый
- *       403:
- *         description: Нет прав
+ *         description: Удалён
  *       404:
- *         description: Заказчик не найден
+ *         description: Не найден
+ */
+
+/**
+ * @swagger
+ * /customer/address:
+ *   post:
+ *     summary: Создать новый адрес заказчика
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - value
+ *             properties:
+ *               value:
+ *                 type: string
+ *                 description: Полный адрес
+ *               city:
+ *                 type: string
+ *               postalCode:
+ *                 type: string
+ *               coordinates:
+ *                 type: string
+ *               isDefault:
+ *                 type: boolean
+ *                 description: Сделать адрес основным
+ *     responses:
+ *       201:
+ *         description: Адрес создан
+ *       400:
+ *         description: Ошибка валидации
  */

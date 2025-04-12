@@ -9,7 +9,6 @@ import {orderRouter} from '../modules/order/order.routes'; // Заказы
 import {favoriteRouter} from '../modules/favorite/favorite.routes'; // Избранное
 import {reviewRouter} from '../modules/review/review.routes'; // Отзывы
 import {adminRouter} from '../modules/admin/admin.routes';
-import {verifyCode} from '../modules/auth/services/verifyCode.service';
 
 const apiRouter = Router();
 
