@@ -1,44 +1,70 @@
-// dtos/executor.dto.ts
 import {
     IsOptional,
     IsString,
-    IsPhoneNumber,
-    IsEmail,
-    Length,
     IsInt,
     Min,
+    MaxLength,
+    IsEnum,
+    Matches,
+    IsArray,
+    IsUUID,
 } from 'class-validator';
+import {WorkFormat} from '@prisma/client';
 
-export class UpdateExecutorProfileDTO {
+export class UpdateExecutorDTO {
     @IsOptional()
     @IsString()
-    @Length(2, 50)
+    @MaxLength(50)
     firstName?: string;
 
     @IsOptional()
     @IsString()
-    @Length(2, 50)
+    @MaxLength(50)
     lastName?: string;
 
     @IsOptional()
-    @IsPhoneNumber()
+    @IsString()
+    @Matches(/^[+\d\s\-()]+$/, {message: 'Некорректный номер телефона'})
     phone?: string;
 
     @IsOptional()
-    @IsEmail()
-    email?: string;
-
-    @IsOptional()
     @IsString()
-    @Length(10, 500)
+    @MaxLength(1000)
     about?: string;
 
     @IsOptional()
+    @IsInt()
+    @Min(0)
+    experience?: number;
+
+    @IsOptional()
     @IsString()
+    @MaxLength(255)
     companyName?: string;
 
     @IsOptional()
-    @IsInt()
-    @Min(1)
-    experience?: number;
+    @IsString()
+    @MaxLength(1000)
+    description?: string;
+
+    @IsOptional()
+    @IsEnum(WorkFormat, {
+        message:
+            'workFormat должен быть одним из: INDIVIDUAL, LEGAL_ENTITY, SOLE_PROPRIETOR',
+    })
+    workFormat?: WorkFormat;
+
+    @IsOptional()
+    @IsArray()
+    @IsUUID('all', {each: true})
+    fileIdsToDelete?: string[];
+
+    @IsOptional()
+    profilePhoto?: any;
+
+    @IsOptional()
+    registrationDoc?: any;
+
+    @IsOptional()
+    licenseDoc?: any;
 }

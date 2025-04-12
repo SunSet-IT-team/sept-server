@@ -1,27 +1,21 @@
 import {Router} from 'express';
 import {Role} from '@prisma/client';
 import {checkRole} from '../../../core/middleware/checkRole';
+import {authMiddleware} from '../../../core/middleware/authMiddleware';
+import {getCustomerProfile} from '../controllers/getCustomerProfile.controller';
+import {updateCustomerProfile} from '../controllers/updateCustomerProfile.controller';
+import {getCustomersList} from '../controllers/getCustomersProfileList.controller';
+import {deleteCustomerProfile} from '../controllers/deleteCustomerProfile.controller';
 
 const customerRouter = Router();
 
-/**
- * 👤 Текущий исполнитель (только EXECUTOR)
- */
-customerRouter.get('/me', checkRole(Role.EXECUTOR), () => {});
-customerRouter.patch('/me', checkRole(Role.EXECUTOR), () => {});
+customerRouter.get('/me', checkRole(Role.EXECUTOR), getCustomerProfile);
+customerRouter.patch('/me', checkRole(Role.EXECUTOR), updateCustomerProfile);
 
-customerRouter.get('/list', checkRole([Role.ADMIN]), () => {});
+customerRouter.get('/list', authMiddleware, getCustomersList);
 
-customerRouter.get('/:id', () => {});
-customerRouter.patch('/:id', checkRole(Role.ADMIN), () => {});
-customerRouter.delete('/:id', checkRole(Role.ADMIN), () => {});
-
-customerRouter.get(
-    '/:executorId/orders',
-    checkRole([Role.EXECUTOR, Role.ADMIN]),
-    () => {}
-);
-
-customerRouter.get('/:executorId/reviews', () => {});
+customerRouter.get('/:id', authMiddleware, getCustomerProfile);
+customerRouter.patch('/:id', checkRole(Role.ADMIN), updateCustomerProfile);
+customerRouter.delete('/:id', checkRole(Role.ADMIN), deleteCustomerProfile);
 
 export default customerRouter;

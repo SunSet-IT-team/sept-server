@@ -105,6 +105,7 @@ model ExecutorProfile {
 
   companyName      String?
   description      String?
+  city             String?
   rating           Float?   @default(0.0)
   completedOrders  Int      @default(0)
 

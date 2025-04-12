@@ -1,6 +1,6 @@
-import {IsOptional, IsString, MaxLength, Matches} from 'class-validator';
+import {IsOptional, IsString, MaxLength} from 'class-validator';
 
-export class UpdateCustomerDTO {
+export class UpdateAdminDTO {
     @IsOptional()
     @IsString()
     @MaxLength(50)
@@ -13,6 +13,5 @@ export class UpdateCustomerDTO {
 
     @IsOptional()
     @IsString()
-    @Matches(/^[+\d\s\-()]+$/, {message: 'Некорректный номер телефона'})
     phone?: string;
 }
