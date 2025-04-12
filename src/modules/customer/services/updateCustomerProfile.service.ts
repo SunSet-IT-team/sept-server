@@ -1,12 +1,13 @@
-import {prisma} from '../../../db/prisma';
+import {prisma} from '../../../core/database/prisma';
+import {UpdateCustomerDTO} from '../dtos/updateExecutorProfile.dto';
 
-export async function updateCustomerProfile(
-    userId: number,
-    address: string,
-    name: string
-) {
-    return prisma.customerProfile.update({
-        where: {userId},
-        data: {address, name},
+export const updateCustomerProfileService = async (
+    userId: string,
+    data: UpdateCustomerDTO
+) => {
+    return prisma.user.update({
+        where: {id: userId},
+        data,
+        select: {id: true, firstName: true, lastName: true, phone: true},
     });
-}
+};
