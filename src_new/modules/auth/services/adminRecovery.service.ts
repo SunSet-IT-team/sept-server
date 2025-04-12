@@ -1,15 +1,14 @@
-// services/adminRecoveryService.ts
 import {prisma} from '../../../core/database/prisma';
-import {sendVerificationEmail} from '../utils/email';
+import {sendEmail} from '../../../core/utils/email/sendEmail';
+import {recoveryEmail} from '../../../core/utils/email/templates/recoveryEmail';
 import {generateVerificationCode} from '../utils/generateVerificationCode';
-import bcrypt from 'bcrypt';
 import {hashPassword} from '../utils/hashPassword';
 
 export const adminRecoveryService = async (
     email: string,
     code: string,
     newPassword: string
-) => {
+): Promise<{message: string; userId: string}> => {
     const admin = await prisma.adminProfile.findFirst({
         where: {
             user: {
@@ -27,6 +26,10 @@ export const adminRecoveryService = async (
 
     if (admin.recoveryCode !== code) {
         throw new Error('Неверный код восстановления');
+    }
+
+    if (newPassword.length < 6) {
+        throw new Error('Пароль должен содержать минимум 6 символов');
     }
 
     const hashedPassword = await hashPassword(newPassword);
@@ -47,7 +50,14 @@ export const adminRecoveryService = async (
         },
     });
 
-    await sendVerificationEmail(updatedUser.email, newRecoveryCode);
+    await sendEmail(
+        updatedUser.email,
+        'Новый код восстановления',
+        recoveryEmail(newRecoveryCode)
+    );
 
-    return {message: 'Пароль успешно обновлен и новый код отправлен на email'};
+    return {
+        message: 'Пароль успешно обновлён. Новый код отправлен на email.',
+        userId: updatedUser.id,
+    };
 };

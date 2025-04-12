@@ -1,12 +1,13 @@
 import {Response} from 'express';
 import {ApiResponse} from '../types/response';
 
-export const sendResponse = <T>(
+export const sendResponse = (
     res: Response,
     statusCode: number,
-    payload: ApiResponse<T>
-): void => {
-    res.status(statusCode).json(payload);
+    data: object
+) => {
+    const code = typeof statusCode === 'number' ? statusCode : 500;
+    res.status(code).json(data);
 };
 
 export const successResponse = <T>(

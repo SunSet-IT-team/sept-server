@@ -1,14 +1,8 @@
-// middlewares/roleCheck.ts
 import {Request, Response, NextFunction} from 'express';
 import {Role} from '@prisma/client';
 import {decodeJwtToken} from '../../modules/auth/utils/jwt';
 
-interface JwtPayload {
-    sub: string;
-    role: Role;
-}
-
-export const checkRole = (requiredRole: Role) => {
+export const checkRole = (requiredRoles: Role[] | Role) => {
     return async (
         req: Request,
         res: Response,
@@ -22,15 +16,20 @@ export const checkRole = (requiredRole: Role) => {
         }
 
         try {
-            const decoded = decodeJwtToken(token) as JwtPayload;
+            const decoded = decodeJwtToken(token);
 
-            if (decoded.role !== requiredRole) {
+            const rolesArray = Array.isArray(requiredRoles)
+                ? requiredRoles
+                : [requiredRoles];
+
+            if (!rolesArray.includes(decoded.role)) {
                 res.status(403).json({
                     message: 'Недостаточно прав для доступа',
                 });
+                return;
             }
 
-            req.user = {id: decoded.sub, role: decoded.role};
+            req.user = {id: decoded.id, role: decoded.role};
 
             next();
         } catch (error) {

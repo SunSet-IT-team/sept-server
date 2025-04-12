@@ -5,20 +5,20 @@ import {
     sendResponse,
     successResponse,
 } from '../../../core/utils/sendResponse';
+import {extractRoleFromUrl} from '../utils/extractRoleFromUrl';
 
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
-        const result = await loginService(req.body);
-        res.status(200).json({success: true, ...result});
+        const expectedRole = extractRoleFromUrl(req.originalUrl);
+
+        const result = await loginService(req.body, expectedRole);
 
         sendResponse(res, 200, successResponse(result));
-        return;
     } catch (err: any) {
         sendResponse(
             res,
             err.statusCode || 401,
             errorResponse(err.message || 'Ошибка входа')
         );
-        return;
     }
 };

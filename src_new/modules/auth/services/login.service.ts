@@ -1,11 +1,14 @@
 import {prisma} from '../../../core/database/prisma';
 import {comparePasswords} from '../utils/hashPassword';
-import {Role} from '@prisma/client';
+import {Role, AccountStatus} from '@prisma/client';
 import {UnauthorizedError} from '../utils/errors';
 import {LoginDTO} from '../dtos/login.dto';
 import {generateToken} from '../utils/jwt';
 
-export const loginService = async ({email, password}: LoginDTO) => {
+export const loginService = async (
+    {email, password}: LoginDTO,
+    expectedRole: Role
+) => {
     const user = await prisma.user.findUnique({
         where: {email},
         include: {
@@ -23,6 +26,14 @@ export const loginService = async ({email, password}: LoginDTO) => {
         throw new UnauthorizedError('Неверные учетные данные');
     }
 
+    if (user.role !== expectedRole) {
+        throw new UnauthorizedError('Неверный тип пользователя');
+    }
+
+    if (user.status !== AccountStatus.VERIFIED) {
+        throw new UnauthorizedError('Подтвердите email перед входом');
+    }
+
     const isPasswordValid = await comparePasswords(password, user.password);
     if (!isPasswordValid) {
         throw new UnauthorizedError('Неверные учетные данные');
@@ -35,30 +46,22 @@ export const loginService = async ({email, password}: LoginDTO) => {
 
     let safeProfile: Record<string, any> | null = null;
 
-    switch (user.role) {
-        case Role.EXECUTOR:
-            if (user.executorProfile) {
-                const {id, workFormat, experience, about, companyName} =
-                    user.executorProfile;
-                safeProfile = {id, workFormat, experience, about, companyName};
-            }
-            break;
-        case Role.CUSTOMER:
-            if (user.customerProfile) {
-                const {id, orders, addresses} = user.customerProfile;
-                safeProfile = {
-                    id,
-                    ordersCount: orders.length,
-                    addresses: addresses.map((addr) => ({
-                        id: addr.id,
-                        value: addr.value,
-                    })),
-                };
-            }
-            break;
-        case Role.ADMIN:
-            safeProfile = null;
-            break;
+    if (user.role === Role.EXECUTOR && user.executorProfile) {
+        const {id, workFormat, experience, about, companyName} =
+            user.executorProfile;
+        safeProfile = {id, workFormat, experience, about, companyName};
+    }
+
+    if (user.role === Role.CUSTOMER && user.customerProfile) {
+        const {id, orders, addresses} = user.customerProfile;
+        safeProfile = {
+            id,
+            ordersCount: orders.length,
+            addresses: addresses.map((addr) => ({
+                id: addr.id,
+                value: addr.value,
+            })),
+        };
     }
 
     return {

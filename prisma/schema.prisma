@@ -39,33 +39,41 @@ enum FileType {
 }
 
 enum WorkFormat {
-  INDIVIDUAL     // частное лицо
-  LEGAL_ENTITY   // юридическое лицо
-  SOLE_PROPRIETOR // ИП
+  INDIVIDUAL
+  LEGAL_ENTITY
+  SOLE_PROPRIETOR
+}
+
+enum ChatType {
+  GENERAL
+  ORDER_CUSTOMER
+  ORDER_ADMIN
 }
 
 model User {
-  id             String       @id @default(uuid())
-  email          String       @unique
-  password       String
-  phone          String?
-  firstName      String?
-  lastName       String?
-  role           Role
+  id               String           @id @default(uuid())
+  email            String           @unique
+  password         String
+  phone            String?
+  firstName        String?
+  lastName         String?
+  role             Role
+  status           AccountStatus    @default(UNVERIFIED)
+  statusUpdatedAt  DateTime         @default(now())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
-  status         AccountStatus @default(UNVERIFIED)
-  statusUpdatedAt DateTime     @default(now())
+  executorProfile  ExecutorProfile?
+  customerProfile  CustomerProfile?
+  adminProfile     AdminProfile?
 
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  executorProfile ExecutorProfile?
-  customerProfile CustomerProfile?
-  adminProfile    AdminProfile?
-
-  reviewsGiven    Review[]    @relation("ReviewAuthor")
-  reviewsReceived Review[]    @relation("ReviewTarget")
+  reviewsGiven     Review[]         @relation("ReviewAuthor")
+  reviewsReceived  Review[]         @relation("ReviewTarget")
   emailVerification EmailVerification?
+  auditLogs        AuditLog[]
+  files            File[]
+  messages         Message[]
+  chatParticipants ChatParticipant[]
 }
 
 model AdminProfile {
@@ -83,6 +91,7 @@ model CustomerProfile {
 
   orders     Order[]
   addresses  Address[]
+  favorites  Favorite[] @relation("CustomerFavorites")
 }
 
 model ExecutorProfile {
@@ -90,8 +99,8 @@ model ExecutorProfile {
   userId           String   @unique
   user             User     @relation(fields: [userId], references: [id])
 
-  workFormat       String
-  experience       Int?     
+  workFormat       WorkFormat
+  experience       Int?
   about            String?
 
   companyName      String?
@@ -101,60 +110,91 @@ model ExecutorProfile {
 
   orders           Order[]
   files            File[]
+  favorites        Favorite[] @relation("ExecutorFavorites")
 }
 
+model Favorite {
+  id          String   @id @default(uuid())
+  customerId  String
+  executorId  String
+  createdAt   DateTime @default(now())
+
+  customer    CustomerProfile @relation("CustomerFavorites", fields: [customerId], references: [id])
+  executor    ExecutorProfile @relation("ExecutorFavorites", fields: [executorId], references: [id])
+
+  @@unique([customerId, executorId])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String
+  action      String
+  targetType  String
+  targetId    String
+  timestamp   DateTime @default(now())
+  meta        Json?
+
+  user        User     @relation(fields: [userId], references: [id])
+}
 
 model File {
   id          String   @id @default(uuid())
   userId      String
-  user        ExecutorProfile @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  executorId  String?
+  executor    ExecutorProfile? @relation(fields: [executorId], references: [id])
+
   reportId    String?
   report      Report?  @relation(name: "ReportFiles", fields: [reportId], references: [id])
+
+  messageId   String?
+  message     Message? @relation(fields: [messageId], references: [id])
 
   url         String
   filename    String
   mimetype    String
   type        FileType
-  size        Int?     // размер файла в байтах
+  size        Int?
   uploadedAt  DateTime @default(now())
 }
 
 model Order {
   id           String      @id @default(uuid())
 
-  title       String      @default("")
-  objectType  String
-  comment     String?
+  title        String      @default("")
+  objectType   String
+  comment      String?
 
   distanceToSeptic       Float
   septicDepth            Float
   septicVolume           Float
   septicConstructionType String
 
-  report      String?
   paymentMethod String
-  workDate    DateTime
-  status      OrderStatus @default(PENDING)
-  priority    Int         @default(100)
-  price       Float?
+  workDate      DateTime
+  status        OrderStatus @default(PENDING)
+  priority      Int         @default(100)
+  price         Float?
 
-  addressId   String?
-  address     Address?    @relation(fields: [addressId], references: [id])
+  addressId     String?
+  address       Address?    @relation(fields: [addressId], references: [id])
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
-  customerId  String
-  executorId  String?
+  customerId    String
+  executorId    String?
 
-  customer    CustomerProfile @relation(fields: [customerId], references: [id])
-  executor    ExecutorProfile? @relation(fields: [executorId], references: [id])
+  customer      CustomerProfile @relation(fields: [customerId], references: [id])
+  executor      ExecutorProfile? @relation(fields: [executorId], references: [id])
 
-  serviceId   String?    @unique
-  service     Service?   @relation(fields: [serviceId], references: [id])
+  serviceId     String?
+  service       Service?   @relation(fields: [serviceId], references: [id])
 
-  reports     Report[]
-  reviews     Review[]
+  reports       Report[]
+  reviews       Review[]
+  chats         Chat[]
 }
 
 model Service {
@@ -162,10 +202,8 @@ model Service {
   name     String
   priority Int      @default(100)
 
-  order    Order?   @relation
+  orders   Order[]
 }
-
-
 
 model Review {
   id         String   @id @default(uuid())
@@ -217,4 +255,38 @@ model Report {
   orderId   String
   order     Order    @relation(fields: [orderId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model Chat {
+  id          String   @id @default(uuid())
+  orderId     String?
+  order       Order?   @relation(fields: [orderId], references: [id])
+  type        ChatType @default(GENERAL)
+  createdAt   DateTime @default(now())
+
+  participants ChatParticipant[]
+  messages     Message[]
+}
+
+model ChatParticipant {
+  id        String   @id @default(uuid())
+  chatId    String
+  userId    String
+
+  user      User     @relation(fields: [userId], references: [id])
+  chat      Chat     @relation(fields: [chatId], references: [id])
+
+  @@unique([chatId, userId])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  chatId     String
+  senderId   String
+  text       String?
+  createdAt  DateTime @default(now())
+
+  chat       Chat     @relation(fields: [chatId], references: [id])
+  sender     User     @relation(fields: [senderId], references: [id])
+  files      File[]
 }

@@ -7,6 +7,7 @@ import {
     Matches,
 } from 'class-validator';
 import {Type} from 'class-transformer';
+import {WorkFormat} from '@prisma/client';
 
 export class RegisterExecutorDTO {
     @IsEmail({}, {message: 'Некорректный email'})
@@ -30,7 +31,7 @@ export class RegisterExecutorDTO {
 
     @IsString()
     @IsNotEmpty({message: 'Формат работы обязателен'})
-    workFormat!: string;
+    workFormat!: WorkFormat;
 
     @IsOptional()
     @IsString()
