@@ -38,7 +38,6 @@ export const getExecutorsListService = async (query: any) => {
                         lastName: true,
                         phone: true,
                         status: true,
-                        files: true,
                         executorProfile: {
                             select: {
                                 city: true,

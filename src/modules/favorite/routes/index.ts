@@ -2,21 +2,13 @@
 import {Router} from 'express';
 import {Role} from '@prisma/client';
 import {checkRole} from '../../../core/middleware/checkRole';
+import {getFavorites} from '../controllers/getFavorites.controller';
+import {toggleFavorite} from '../controllers/toggleFavorite.controller';
 
-const executorRouter = Router();
+const favoriteRouter = Router();
 
-// Получение профиля исполнителя
-executorRouter.get('/me', checkRole(Role.EXECUTOR), () => {});
-executorRouter.patch('/me', checkRole(Role.EXECUTOR), () => {});
+favoriteRouter.post('/:executorId', checkRole(Role.CUSTOMER), toggleFavorite);
 
-executorRouter.delete('/:id', checkRole(Role.ADMIN), () => {});
-executorRouter.patch('/:id', checkRole(Role.ADMIN), () => {});
+favoriteRouter.get('/', checkRole(Role.CUSTOMER), getFavorites);
 
-executorRouter.get('/:id', () => {});
-// Получение заказов исполнителя с пагинацией
-executorRouter.get('/:executorId/order', checkRole(Role.EXECUTOR), () => {});
-
-// Получение рейтинга исполнителя
-executorRouter.get('/:executorId/rating', checkRole(Role.EXECUTOR), () => {});
-
-export default executorRouter;
+export default favoriteRouter;

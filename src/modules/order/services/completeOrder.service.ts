@@ -13,11 +13,15 @@ export const completeOrderService = async (
         include: {executor: true},
     });
 
+    const executor = await prisma.executorProfile.findUnique({
+        where: {userId: executorId},
+    });
+
     if (!order) throw new Error('Заказ не найден');
     if (order.status !== OrderStatus.IN_PROGRESS) {
         throw new Error('Можно завершить только заказ в статусе IN_PROGRESS');
     }
-    if (order.executorId !== executorId) {
+    if (order.executorId !== executor?.id) {
         throw new Error('Вы не являетесь исполнителем этого заказа');
     }
 

@@ -52,7 +52,7 @@
  * @swagger
  * /customer/list:
  *   get:
- *     summary: Получить список заказчиков (для админа)
+ *     summary: Получить список заказчиков
  *     tags: [Customer]
  *     security:
  *       - bearerAuth: []
@@ -61,22 +61,114 @@
  *         name: page
  *         schema:
  *           type: integer
+ *           example: 1
+ *         description: Номер страницы
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
+ *           example: 10
+ *         description: Кол-во элементов на странице
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
+ *           enum: [firstName, lastName, email, status]
+ *           example: firstName
+ *         description: Поле сортировки
  *       - in: query
  *         name: order
  *         schema:
  *           type: string
  *           enum: [asc, desc]
+ *           example: asc
+ *         description: Направление сортировки
+ *       - in: query
+ *         name: firstName
+ *         schema:
+ *           type: string
+ *           example: Иван
+ *         description: Фильтр по имени
+ *       - in: query
+ *         name: lastName
+ *         schema:
+ *           type: string
+ *           example: Иванов
+ *         description: Фильтр по фамилии
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *           example: example@mail.com
+ *         description: Фильтр по email
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *             enum: [UNVERIFIED, VERIFIED, DELETED, BANNED]
+ *         style: form
+ *         explode: true
+ *         description: Фильтрация по статусу (один или несколько)
  *     responses:
  *       200:
  *         description: Список заказчиков
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ *                     items:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                               email:
+ *                                 type: string
+ *                               firstName:
+ *                                 type: string
+ *                               lastName:
+ *                                 type: string
+ *                               phone:
+ *                                 type: string
+ *                               status:
+ *                                 type: string
+ *                                 enum: [UNVERIFIED, VERIFIED, DELETED, BANNED]
+ *                           addresses:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 id:
+ *                                   type: string
+ *                                 value:
+ *                                   type: string
+ *                                 city:
+ *                                   type: string
+ *                                 postalCode:
+ *                                   type: string
  */
 
 /**
