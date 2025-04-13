@@ -9,6 +9,7 @@ import {apiRouter} from './routes';
 import path from 'path';
 import {createAdmin} from './core/utils/createAdmin';
 
+
 const email = process.env.ADMIN_EMAIL || 'admin@admin.com';
 const password = process.env.ADMIN_PASSWORD || '123456';
 const code = process.env.ADMIN_CODE || '123456';
