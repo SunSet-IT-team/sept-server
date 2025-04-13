@@ -2,100 +2,326 @@
 <html lang="ru">
     <head>
         <meta charset="UTF-8" />
-        <title>Чат по заказу</title>
+        <title>Чат с файлами (Защищён)</title>
         <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
         <style>
             body {
-                font-family: sans-serif;
-                margin: 20px;
+                font-family: 'Segoe UI', sans-serif;
+                margin: 0;
+                padding: 2rem;
+                background: #f0f2f5;
+            }
+            h2 {
+                margin-bottom: 1rem;
+            }
+            #chatContainer {
+                max-width: 600px;
+                margin: 0 auto;
+                background: #fff;
+                padding: 1rem;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            #loginForm {
+                margin-bottom: 1rem;
+            }
+            #chat {
+                display: none;
+                flex-direction: column;
             }
             #messages {
+                background: #fafafa;
                 border: 1px solid #ccc;
-                height: 300px;
-                overflow-y: scroll;
+                border-radius: 8px;
                 padding: 10px;
+                height: 400px;
+                overflow-y: auto;
                 margin-bottom: 10px;
+                display: flex;
+                flex-direction: column;
             }
-            .message {
-                margin-bottom: 8px;
+            .msg {
+                margin: 6px 0;
+                padding: 8px 12px;
+                border-radius: 12px;
+                max-width: 70%;
+                word-break: break-word;
+            }
+            .mine {
+                background-color: #dcf8c6;
+                align-self: flex-end;
+                text-align: right;
+            }
+            .others {
+                background-color: #f1f0f0;
+                align-self: flex-start;
+            }
+            .meta {
+                font-size: 0.8rem;
+                color: #666;
+                margin-bottom: 4px;
+            }
+            #messageInput,
+            #fileInput,
+            #tokenInput,
+            #chatIdInput {
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-size: 1rem;
+            }
+            #messageInput {
+                width: 70%;
+            }
+            #fileInput {
+                margin-top: 8px;
+            }
+            .file-link {
+                display: inline-block;
+                margin-top: 4px;
+                color: #007bff;
+                text-decoration: none;
+            }
+            .file-link:hover {
+                text-decoration: underline;
+            }
+            button {
+                padding: 8px 16px;
+                font-size: 1rem;
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #005bbf;
+            }
+            .preview-image {
+                max-width: 200px;
+                border-radius: 6px;
+                margin-top: 5px;
+                display: block;
             }
         </style>
     </head>
     <body>
-        <h1>Чат по заказу</h1>
+        <div id="chatContainer">
+            <h2>Чат заказа</h2>
 
-        <div>
-            <label>JWT Token:</label>
-            <input type="text" id="token" style="width: 500px" />
+            <div id="loginForm">
+                <label>JWT Token:</label><br />
+                <input
+                    type="text"
+                    id="tokenInput"
+                    style="width: 100%"
+                /><br /><br />
+
+                <label>Chat ID:</label><br />
+                <input
+                    type="text"
+                    id="chatIdInput"
+                    style="width: 100%"
+                /><br /><br />
+
+                <button onclick="connect()">Подключиться</button>
+            </div>
+
+            <div id="chat">
+                <div id="messages"></div>
+
+                <input type="file" id="fileInput" multiple />
+                <div style="display: flex; gap: 10px; margin-top: 10px">
+                    <input
+                        type="text"
+                        id="messageInput"
+                        placeholder="Введите сообщение..."
+                    />
+                    <button onclick="sendMessage()">Отправить</button>
+                </div>
+            </div>
         </div>
-        <div>
-            <label>Order ID:</label>
-            <input type="number" id="orderId" />
-            <button onclick="joinChat()">Войти в чат</button>
-        </div>
-
-        <div id="messages"></div>
-
-        <input type="text" id="text" placeholder="Введите сообщение..." />
-        <button onclick="sendMessage()">Отправить</button>
 
         <script>
-            let socket;
-            let orderId = null;
+            let socket = null;
+            let userId = null;
+            let currentToken = null;
 
-            function joinChat() {
-                orderId = Number(document.getElementById('orderId').value);
-                const token = document.getElementById('token').value;
+            // Раскодируем userId из токена
+            function decodeUserId(token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.sub; // значение userId
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            // Форматируем время
+            function formatTime(ts) {
+                const d = new Date(ts);
+                return d.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                });
+            }
+
+            // Делаем защищённую загрузку файла
+            async function getFileUrl(filename) {
+                const resp = await fetch(
+                    `http://localhost:4001/api/files/${filename}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${currentToken}`,
+                        },
+                    }
+                );
+                if (!resp.ok) throw new Error('Ошибка загрузки файла');
+                const blob = await resp.blob();
+                return URL.createObjectURL(blob);
+            }
+
+            // Рендер одного сообщения
+            async function renderMessage(msg) {
+                const isMine = msg.isMine || msg.senderId === userId;
+                const container = document.createElement('div');
+                container.className = 'msg ' + (isMine ? 'mine' : 'others');
+
+                let fileLinksHtml = '';
+                if (msg.files && msg.files.length) {
+                    for (const f of msg.files) {
+                        try {
+                            // f.filename должна быть в БД
+                            const fileObjectUrl = await getFileUrl(f.url);
+                            if (f.mimetype && f.mimetype.startsWith('image/')) {
+                                fileLinksHtml += `<img class="preview-image" src="${fileObjectUrl}" alt="${f.filename}" />`;
+                            } else {
+                                fileLinksHtml += `<a class="file-link" href="${fileObjectUrl}" target="_blank">📎 ${f.filename}</a>`;
+                            }
+                        } catch (err) {
+                            fileLinksHtml += `<div style="color:red">[Не удалось загрузить ${f.filename}]</div>`;
+                        }
+                    }
+                }
+
+                container.innerHTML = `
+        <div class="meta">
+          ${msg.sender?.firstName || 'Без имени'} (${
+                    msg.sender?.role || 'Роль'
+                })
+          · ${formatTime(msg.createdAt)}
+        </div>
+        <div>${msg.text || '[Без текста]'}</div>
+        ${fileLinksHtml}
+      `;
+
+                const messagesEl = document.getElementById('messages');
+                messagesEl.appendChild(container);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+
+            // Загрузка предыдущих сообщений
+            async function loadMessages(chatId, token) {
+                const res = await fetch(
+                    `http://localhost:4001/api/chat/${chatId}/messages?page=1&limit=50`,
+                    {
+                        headers: {Authorization: `Bearer ${token}`},
+                    }
+                );
+                const json = await res.json();
+                if (json?.success && Array.isArray(json.data?.items)) {
+                    const messagesEl = document.getElementById('messages');
+                    messagesEl.innerHTML = '';
+                    // Рендерим по очереди (await), чтобы дождаться blob для каждого
+                    for (const m of json.data.items) {
+                        await renderMessage(m);
+                    }
+                }
+            }
+
+            // Загрузка файлов в /api/files/upload
+            async function uploadFiles() {
+                const fileInput = document.getElementById('fileInput');
+                if (!fileInput.files.length) return [];
+
+                const formData = new FormData();
+                for (const f of fileInput.files) {
+                    formData.append('files', f);
+                }
+
+                const res = await fetch(
+                    'http://localhost:4001/api/files/upload',
+                    {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${currentToken}`,
+                        },
+                        body: formData,
+                    }
+                );
+                const json = await res.json();
+                return Array.isArray(json?.data) ? json.data : [];
+            }
+
+            function connect() {
+                const token = document
+                    .getElementById('tokenInput')
+                    .value.trim();
+                const chatId = document
+                    .getElementById('chatIdInput')
+                    .value.trim();
+
+                if (!token || !chatId) {
+                    alert('Укажите токен и chatId!');
+                    return;
+                }
+
+                userId = decodeUserId(token);
+                currentToken = token;
 
                 socket = io('http://localhost:4001', {
                     auth: {token},
                 });
 
-                socket.on('connect', () => {
-                    console.log('Подключено:', socket.id);
-                    socket.emit('chat:join', orderId);
+                socket.on('connect', async () => {
+                    console.log('[socket] connected as', userId);
+                    // Подключаемся к чату
+                    socket.emit('joinChat', {chatId});
+                    document.getElementById('chat').style.display = 'flex';
+
+                    // Загружаем историю
+                    await loadMessages(chatId, token);
                 });
 
-                // История сообщений
-                socket.on('chat:history', (messages) => {
-                    document.getElementById('messages').innerHTML = '';
-                    messages.forEach((msg) => renderMessage(msg));
+                socket.on('newMessage', async (msg) => {
+                    await renderMessage(msg);
                 });
 
-                // Новые сообщения
-                socket.on('message:received', (msg) => {
-                    renderMessage(msg);
-                });
-
-                socket.on('message:status', (status) => {
-                    console.log('📬 Статус:', status);
-                });
-
-                socket.on('disconnect', () => {
-                    console.log('Отключено');
-                });
-
-                socket.on('error', (err) => {
-                    console.error('Ошибка:', err);
+                socket.on('connect_error', (err) => {
+                    alert('Ошибка подключения: ' + err.message);
                 });
             }
 
-            function sendMessage() {
-                const text = document.getElementById('text').value;
-                if (socket && orderId && text.trim()) {
-                    socket.emit('message:send', {
-                        orderId,
-                        content: text,
-                    });
-                    document.getElementById('text').value = '';
-                }
-            }
+            async function sendMessage() {
+                const chatId = document
+                    .getElementById('chatIdInput')
+                    .value.trim();
+                const text = document
+                    .getElementById('messageInput')
+                    .value.trim();
+                const tempId = 'temp_' + Date.now();
 
-            function renderMessage(msg) {
-                const div = document.createElement('div');
-                div.className = 'message';
-                div.textContent = `[${msg.senderId}] ${msg.content}`;
-                document.getElementById('messages').appendChild(div);
+                const files = await uploadFiles();
+
+                socket.emit('sendMessage', {
+                    chatId,
+                    text,
+                    tempId,
+                    fileIds: files.map((f) => f.id),
+                });
+
+                document.getElementById('messageInput').value = '';
+                document.getElementById('fileInput').value = '';
             }
         </script>
     </body>

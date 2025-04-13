@@ -1,4 +1,3 @@
-// src/server.ts
 import http from 'http';
 import app from './app';
 import {initSocket} from './modules/chat';

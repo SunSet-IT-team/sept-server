@@ -1,67 +1,78 @@
-import {AccountStatus} from '@prisma/client';
-import {prisma} from '../../../db/prisma';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import {prisma} from '../../../core/database/prisma';
+import {comparePasswords} from '../utils/hashPassword';
+import {Role, AccountStatus} from '@prisma/client';
+import {UnauthorizedError} from '../utils/errors';
+import {LoginDTO} from '../dtos/login.dto';
+import {generateToken} from '../utils/jwt';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret_key';
+export const loginService = async (
+    {email, password}: LoginDTO,
+    expectedRole: Role
+) => {
+    const user = await prisma.user.findUnique({
+        where: {email},
+        include: {
+            executorProfile: true,
+            customerProfile: {
+                include: {
+                    orders: true,
+                    addresses: true,
+                },
+            },
+        },
+    });
 
-interface LoginResult {
-    success: boolean;
-    token?: string;
-    error?: string;
-}
+    if (!user) {
+        throw new UnauthorizedError('Неверные учетные данные');
+    }
 
-export async function login({
-    email,
-    password,
-}: {
-    email: string;
-    password: string;
-}): Promise<LoginResult> {
-    try {
-        const user = await prisma.user.findUnique({where: {email}});
+    if (user.role !== expectedRole) {
+        throw new UnauthorizedError('Неверный тип пользователя');
+    }
 
-        if (!user) {
-            return {
-                success: false,
-                error: 'Неверный email, пароль или роль',
-            };
-        }
+    if (user.status !== AccountStatus.VERIFIED) {
+        throw new UnauthorizedError('Подтвердите email перед входом');
+    }
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return {
-                success: false,
-                error: 'Неверный email или пароль',
-            };
-        }
+    const isPasswordValid = await comparePasswords(password, user.password);
+    if (!isPasswordValid) {
+        throw new UnauthorizedError('Неверные учетные данные');
+    }
 
-        if (user.status === AccountStatus['DELETED']) {
-            return {
-                success: false,
-                error: 'Пользователь удален',
-            };
-        }
+    const token = generateToken({
+        sub: user.id,
+        role: user.role,
+    });
 
-        if (user.status === AccountStatus['UNVERIFIED']) {
-            return {
-                success: false,
-                error: 'Email не подтвержден',
-            };
-        }
+    let safeProfile: Record<string, any> | null = null;
 
-        const token = jwt.sign({userId: user.id, role: user.role}, JWT_SECRET, {
-            expiresIn: '7d',
-        });
+    if (user.role === Role.EXECUTOR && user.executorProfile) {
+        const {id, workFormat, experience, about, companyName} =
+            user.executorProfile;
+        safeProfile = {id, workFormat, experience, about, companyName};
+    }
 
-        return {
-            success: true,
-            token,
-        };
-    } catch (error) {
-        return {
-            success: false,
-            error: 'Произошла ошибка при входе в систему',
+    if (user.role === Role.CUSTOMER && user.customerProfile) {
+        const {id, orders, addresses} = user.customerProfile;
+        safeProfile = {
+            id,
+            ordersCount: orders.length,
+            addresses: addresses.map((addr) => ({
+                id: addr.id,
+                value: addr.value,
+            })),
         };
     }
-}
+
+    return {
+        token,
+        user: {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profile: safeProfile,
+        },
+    };
+};

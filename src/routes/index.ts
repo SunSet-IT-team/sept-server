@@ -1,25 +1,26 @@
-// src/modules/routes/index.ts
-
 import {Router} from 'express';
+import {authRouter} from '../modules/auth/routes';
+import {serviceRouter} from '../modules/service/routes';
+import fileRouter from '../modules/files/routes';
+import executorRouter from '../modules/executor/routes';
+import customerRouter from '../modules/customer/routes';
+import orderRouter from '../modules/order/routes';
+import {chatRouter} from '../modules/chat/router';
+import {adminRouter} from '../modules/admin/routes';
+import reviewRouter from '../modules/review/routes';
+import favoriteRouter from '../modules/favorite/routes';
+import {statsRouter} from '../modules/stats/routes';
 
-import {customerRouter} from '../modules/customer/customer.routes'; // Заказчики
-import routerExecutor from '../modules/executor/executor.routes'; // Исполнители
-import {serviceRouter} from '../modules/service/service.routes'; // Услуги
-import {orderRouter} from '../modules/order/order.routes'; // Заказы
-import {favoriteRouter} from '../modules/favorite/favorite.routes'; // Избранное
-import {reviewRouter} from '../modules/review/review.routes'; // Отзывы
-import {adminRouter} from '../modules/admin/admin.routes';
-import {verifyCode} from '../modules/auth/services/verifyCode.service';
+export const apiRouter = Router();
 
-const apiRouter = Router();
-
-apiRouter.use('/customer', customerRouter);
-apiRouter.use('/executor', routerExecutor);
-apiRouter.use('/admin', adminRouter);
-
-apiRouter.use('/services', serviceRouter);
-apiRouter.use('/orders', orderRouter);
-apiRouter.use('/favorites', favoriteRouter);
-apiRouter.use('/reviews', reviewRouter);
-
-export {apiRouter};
+apiRouter.use('/auth', authRouter); // Авторизация / регистрация / подтверждение почты / смена пароля
+apiRouter.use('/service', serviceRouter); // Создание / удаление / получение / обновление услуг
+apiRouter.use('/files', fileRouter); // Защищённый доступ к файлам
+apiRouter.use('/executor', executorRouter); // Работа с исполнителями
+apiRouter.use('/customer', customerRouter); // Работа с заказчиками
+apiRouter.use('/admin', adminRouter); // Работа с админами
+apiRouter.use('/order', orderRouter); // Работа с заказами
+apiRouter.use('/chat', chatRouter); // Работа с чатами
+apiRouter.use('/review', reviewRouter); // Работа с отзывами
+apiRouter.use('/favorite', favoriteRouter); // Работа с избранными
+apiRouter.use('/admin', statsRouter); // Статистика

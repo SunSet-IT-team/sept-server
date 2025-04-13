@@ -1,7 +1,24 @@
 import {Request, Response} from 'express';
-import {login as loginUser} from '../services/login.service';
+import {loginService} from '../services/login.service';
+import {
+    errorResponse,
+    sendResponse,
+    successResponse,
+} from '../../../core/utils/sendResponse';
+import {extractRoleFromUrl} from '../utils/extractRoleFromUrl';
 
-export async function login(req: Request, res: Response) {
-    const result = await loginUser(req.body);
-    res.json(result);
-}
+export const login = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const expectedRole = extractRoleFromUrl(req.originalUrl);
+
+        const result = await loginService(req.body, expectedRole);
+
+        sendResponse(res, 200, successResponse(result));
+    } catch (err: any) {
+        sendResponse(
+            res,
+            err.statusCode || 401,
+            errorResponse(err.message || 'Ошибка входа')
+        );
+    }
+};
