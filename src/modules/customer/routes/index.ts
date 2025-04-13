@@ -12,8 +12,8 @@ import {createAddress} from '../controllers/createAddress.controller';
 
 const customerRouter = Router();
 
-customerRouter.get('/me', checkRole(Role.EXECUTOR), getCustomerProfile);
-customerRouter.patch('/me', checkRole(Role.EXECUTOR), updateCustomerProfile);
+customerRouter.get('/me', checkRole(Role.CUSTOMER), getCustomerProfile);
+customerRouter.patch('/me', checkRole(Role.CUSTOMER), updateCustomerProfile);
 
 customerRouter.get('/list', authMiddleware, getCustomersList);
 
