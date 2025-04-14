@@ -24,9 +24,9 @@ export const getMyOrders = async (req: Request, res: Response) => {
 
         const result = await getMyOrdersService({
             role,
-            userId: id,
-            executorId: executorId as string,
-            customerId: customerId as string,
+            userId: Number(id),
+            executorId: Number(executorId),
+            customerId: Number(customerId),
             filters,
         });
 

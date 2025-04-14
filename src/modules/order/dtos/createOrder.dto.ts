@@ -1,11 +1,9 @@
-// modules/order/dtos/createOrder.dto.ts
 import {
     IsString,
     IsNumber,
     IsOptional,
     IsUUID,
     IsDateString,
-    IsEnum,
 } from 'class-validator';
 
 export class CreateOrderDTO {
@@ -35,12 +33,13 @@ export class CreateOrderDTO {
     workDate!: string;
 
     @IsOptional()
-    @IsUUID()
-    addressId?: string;
+    addressId?: number;
 
     @IsOptional()
-    @IsUUID()
-    serviceId?: string;
+    address?: string;
+
+    @IsOptional()
+    serviceId?: number;
 
     @IsOptional()
     @IsNumber()

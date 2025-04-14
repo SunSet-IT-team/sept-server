@@ -1,10 +1,12 @@
 import {prisma} from '../../../core/database/prisma';
 import {AccountStatus} from '@prisma/client';
+import {generateToken} from '../utils/jwt';
+import {getUserById} from '../../user/services/getUser';
 
 export const verifyEmailService = async (
     code: string,
     email: string
-): Promise<{message: string; userId: string}> => {
+): Promise<{message: string; token: string; user: any}> => {
     const emailVerification = await prisma.emailVerification.findFirst({
         where: {
             code,
@@ -58,8 +60,12 @@ export const verifyEmailService = async (
         },
     });
 
+    const token = generateToken({sub: user.id, role: user.role});
+    const userDto = await getUserById(user.id);
+
     return {
         message: 'Email успешно подтверждён',
-        userId: user.id,
+        token,
+        user: userDto,
     };
 };

@@ -3,12 +3,13 @@ import {sendEmail} from '../../../core/utils/email/sendEmail';
 import {recoveryEmail} from '../../../core/utils/email/templates/recoveryEmail';
 import {generateVerificationCode} from '../utils/generateVerificationCode';
 import {hashPassword} from '../utils/hashPassword';
+import {getUserById} from '../../user/services/getUser';
 
 export const adminRecoveryService = async (
     email: string,
     code: string,
     newPassword: string
-): Promise<{message: string; userId: string}> => {
+): Promise<{message: string; user: any}> => {
     const admin = await prisma.adminProfile.findFirst({
         where: {
             user: {
@@ -56,8 +57,10 @@ export const adminRecoveryService = async (
         recoveryEmail(newRecoveryCode)
     );
 
+    const userDto = await getUserById(updatedUser.id);
+
     return {
         message: 'Пароль успешно обновлён. Новый код отправлен на email.',
-        userId: updatedUser.id,
+        user: userDto,
     };
 };

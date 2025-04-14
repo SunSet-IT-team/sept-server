@@ -3,8 +3,8 @@ import {getFileTypeByKey} from '../../../auth/utils/files/getFileTypeByKey';
 
 export async function handleFileUpload(
     files: Record<string, Express.Multer.File[]>,
-    userId: string,
-    reportId?: string
+    userId: number,
+    reportId?: number
 ) {
     const filePromises: Promise<any>[] = [];
 

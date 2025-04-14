@@ -8,9 +8,9 @@ import {
 
 export const getOrderById = async (req: Request, res: Response) => {
     try {
-        const userId = req.user?.id;
+        const userId = Number(req.user?.id);
         const role = req.user?.role;
-        const {id} = req.params;
+        const id = Number(req.params.id);
 
         if (!userId || !role) {
             return sendResponse(res, 401, errorResponse('Не авторизован'));

@@ -31,7 +31,7 @@
  *         description: Поле для сортировки
  *         schema:
  *           type: string
- *           enum: [rating, experience, completedOrders, companyName, city, createdAt]
+ *           enum: [priority, rating, experience, completedOrders, companyName, city, createdAt]
  *           default: rating
  *       - name: order
  *         in: query

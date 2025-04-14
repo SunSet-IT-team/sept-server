@@ -8,7 +8,7 @@ import {
 
 export const deleteExecutorProfile = async (req: Request, res: Response) => {
     try {
-        const {id} = req.params;
+        const id = Number(req.params.id);
 
         if (!id) {
             return sendResponse(

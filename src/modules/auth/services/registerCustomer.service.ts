@@ -4,10 +4,14 @@ import {sendEmail} from '../../../core/utils/email/sendEmail';
 import {RegisterCustomerDTO} from '../dtos/registerCustomer.dto';
 import {hashPassword} from '../utils/hashPassword';
 import {Role, AccountStatus} from '@prisma/client';
-import {v4 as uuidv4} from 'uuid';
 import {generateVerificationCode} from '../utils/generateVerificationCode';
+import {getUserById} from '../../user/services/getUser';
+import {handleFileUpload} from '../utils/files/handleFileUpload';
 
-export const registerCustomerService = async (dto: RegisterCustomerDTO) => {
+export const registerCustomerService = async (
+    dto: RegisterCustomerDTO,
+    files: Record<string, Express.Multer.File[]>
+) => {
     const {email, password, firstName, lastName, phone, address} = dto;
 
     const existingUser = await prisma.user.findUnique({
@@ -48,17 +52,11 @@ export const registerCustomerService = async (dto: RegisterCustomerDTO) => {
                 verificationEmail(newCode)
             );
 
+            const userDto = await getUserById(existingUser.id);
+
             return {
-                id: existingUser.id,
-                email: existingUser.email,
-                role: existingUser.role,
-                firstName: existingUser.firstName,
-                lastName: existingUser.lastName,
-                phone: existingUser.phone,
-                status: existingUser.status,
-                verificationCode: newCode,
-                addresses: existingUser.customerProfile?.addresses ?? [],
                 message: 'Код подтверждения отправлен повторно',
+                user: userDto,
             };
         }
 
@@ -66,8 +64,9 @@ export const registerCustomerService = async (dto: RegisterCustomerDTO) => {
     }
 
     const hashedPassword = await hashPassword(password);
+    const code = generateVerificationCode();
 
-    const user = await prisma.user.create({
+    const createdUser = await prisma.user.create({
         data: {
             email,
             password: hashedPassword,
@@ -87,42 +86,29 @@ export const registerCustomerService = async (dto: RegisterCustomerDTO) => {
             },
             emailVerification: {
                 create: {
-                    code: generateVerificationCode(),
+                    code,
                     expiresAt: new Date(Date.now() + 15 * 60 * 1000),
                 },
             },
         },
-        include: {
-            customerProfile: {
-                include: {
-                    addresses: {
-                        select: {id: true, value: true},
-                    },
-                },
-            },
-            emailVerification: true,
-        },
     });
 
-    if (!user.emailVerification || !user.customerProfile) {
-        throw new Error('Не удалось создать верификацию');
+    // загружаем файлы, если есть
+    if (files && Object.keys(files).length > 0) {
+        await handleFileUpload(files, createdUser.id);
     }
 
     await sendEmail(
-        user.email,
+        createdUser.email,
         'Подтверждение почты',
-        verificationEmail(user.emailVerification.code)
+        verificationEmail(code)
     );
 
+    const userDto = await getUserById(createdUser.id);
+
     return {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phone,
-        status: user.status,
-        verificationCode: user.emailVerification.code,
-        addresses: user.customerProfile.addresses,
+        message:
+            'Регистрация прошла успешно. Код подтверждения отправлен на email.',
+        user: userDto,
     };
 };

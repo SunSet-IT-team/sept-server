@@ -8,7 +8,7 @@ import {createAddressService} from '../services/createAddress.service';
 
 export const createAddress = async (req: Request, res: Response) => {
     try {
-        const userId = req.user?.id;
+        const userId = Number(req.user?.id);
         if (!userId) {
             return sendResponse(
                 res,

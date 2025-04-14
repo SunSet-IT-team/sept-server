@@ -1,8 +1,8 @@
 import {prisma} from '../../../core/database/prisma';
 
 interface ToggleFavoriteData {
-    userId: string;
-    executorId: string;
+    userId: number;
+    executorId: number;
 }
 
 export const toggleFavoriteService = async ({

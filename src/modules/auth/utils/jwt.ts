@@ -5,12 +5,12 @@ import {Role} from '@prisma/client';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 interface GenerateTokenPayload {
-    sub: string;
+    sub: number;
     role: Role;
 }
 
 interface DecodedUser {
-    sub: string;
+    sub: number;
     role: Role;
     iat: number;
     exp: number;
@@ -19,10 +19,11 @@ interface DecodedUser {
 export const generateToken = ({sub, role}: GenerateTokenPayload) => {
     return jwt.sign({sub, role}, JWT_SECRET, {expiresIn: '30d'});
 };
+export const decodeJwtToken = (token: string): {id: number; role: Role} => {
+    if (!token) throw new UnauthorizedError('Токен не предоставлен');
 
-export const decodeJwtToken = (token: string): {id: string; role: Role} => {
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as DecodedUser;
+        const decoded = jwt.verify(token, JWT_SECRET) as unknown as DecodedUser;
 
         if (!decoded.sub || !decoded.role) {
             throw new UnauthorizedError('Некорректный токен');
@@ -32,7 +33,7 @@ export const decodeJwtToken = (token: string): {id: string; role: Role} => {
             id: decoded.sub,
             role: decoded.role,
         };
-    } catch (error) {
+    } catch {
         throw new UnauthorizedError('Недействительный или истёкший токен');
     }
 };

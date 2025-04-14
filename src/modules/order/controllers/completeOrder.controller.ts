@@ -11,8 +11,8 @@ import {validate} from 'class-validator';
 
 export const completeOrder = async (req: Request, res: Response) => {
     try {
-        const executorId = req.user?.id;
-        const orderId = req.params.id;
+        const executorId = Number(req.user?.id);
+        const orderId = Number(req.params.id);
         const files = req.files as Record<string, Express.Multer.File[]>;
 
         const dto = plainToInstance(CompleteOrderDTO, req.body);

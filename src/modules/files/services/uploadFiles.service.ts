@@ -3,7 +3,7 @@ import {FileType} from '@prisma/client';
 
 export const uploadFilesService = async (
     files: Express.Multer.File[],
-    userId: string
+    userId: number
 ) => {
     // Загрузим файлы поштучно, чтобы получить их ID
     const results = await Promise.all(

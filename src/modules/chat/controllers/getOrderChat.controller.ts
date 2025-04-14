@@ -8,8 +8,8 @@ import {getOrCreateOrderChatForUser} from '../services/getOrderChat.service';
 
 export const getOrderChat = async (req: Request, res: Response) => {
     try {
-        const userId = req.user?.id;
-        const orderId = req.params.id;
+        const userId = Number(req.user?.id);
+        const orderId = Number(req.params.id);
 
         if (!userId || !orderId) {
             return sendResponse(res, 400, errorResponse('Некорректные данные'));

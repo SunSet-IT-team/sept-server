@@ -3,10 +3,10 @@ import {handleFileUpload} from '../utils/files/handleFileUpload';
 import {Role, AccountStatus} from '@prisma/client';
 import {RegisterExecutorDTO} from '../dtos/registerExecutor.dto';
 import {hashPassword} from '../utils/hashPassword';
-import {v4 as uuidv4} from 'uuid';
 import {sendEmail} from '../../../core/utils/email/sendEmail';
 import {verificationEmail} from '../../../core/utils/email/templates/verificationEmail';
 import {generateVerificationCode} from '../utils/generateVerificationCode';
+import {getUserById} from '../../user/services/getUser';
 
 export const registerExecutorService = async (dto: RegisterExecutorDTO) => {
     const {
@@ -54,9 +54,12 @@ export const registerExecutorService = async (dto: RegisterExecutorDTO) => {
                 verificationEmail(newCode)
             );
 
-            throw new Error(
-                'Аккаунт уже существует, но не подтверждён. Проверьте почту для повторной верификации.'
-            );
+            const userDto = await getUserById(existingUser.id);
+
+            return {
+                message: 'Код подтверждения отправлен повторно',
+                userDto,
+            };
         }
 
         throw new Error('Пользователь с таким email уже зарегистрирован');
@@ -65,7 +68,7 @@ export const registerExecutorService = async (dto: RegisterExecutorDTO) => {
     const hashedPassword = await hashPassword(password);
     const code = generateVerificationCode();
 
-    const user = await prisma.user.create({
+    const createdUser = await prisma.user.create({
         data: {
             email,
             password: hashedPassword,
@@ -89,31 +92,19 @@ export const registerExecutorService = async (dto: RegisterExecutorDTO) => {
                 },
             },
         },
-        include: {
-            executorProfile: true,
-            emailVerification: true,
-        },
     });
 
-    const executorId = user.executorProfile?.id;
-    if (!executorId) {
-        throw new Error('Профиль исполнителя не создан');
-    }
-
     if (files) {
-        await handleFileUpload(files, user.id);
+        await handleFileUpload(files, createdUser.id);
     }
 
-    await sendEmail(user.email, 'Подтверждение почты', verificationEmail(code));
+    await sendEmail(email, 'Подтверждение почты', verificationEmail(code));
+
+    const userDto = await getUserById(createdUser.id);
 
     return {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phone,
-        status: user.status,
-        verificationCode: code,
+        message:
+            'Регистрация прошла успешно. Код подтверждения отправлен на email.',
+        user: userDto,
     };
 };

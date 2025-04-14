@@ -2,7 +2,7 @@ import {prisma} from '../../../core/database/prisma';
 import {UpdateServiceDTO} from '../dtos/updateService.dto';
 
 export const updateServiceService = async (
-    id: string,
+    id: number,
     serviceData: UpdateServiceDTO
 ) => {
     return await prisma.service.update({

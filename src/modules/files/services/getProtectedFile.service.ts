@@ -5,19 +5,13 @@ import {getLocalFilePath} from '../utils/getLocalFilePath';
 
 interface Options {
     filename: string;
-    user: {
-        id: string;
-        role: string;
-    };
     res: Response;
 }
 
-export const sendProtectedFile = async ({filename, user, res}: Options) => {
+export const sendProtectedFile = async ({filename, res}: Options) => {
     const file = await prisma.file.findFirst({
         where: {url: filename},
     });
-
-    console.log(filename);
 
     if (!file) {
         throw new Error('Файл не найден в базе');

@@ -11,7 +11,7 @@ export class GetChatsQueryDTO {
 
     @IsOptional()
     @IsString()
-    orderId?: string;
+    orderId?: number;
 
     @IsOptional()
     @IsInt()

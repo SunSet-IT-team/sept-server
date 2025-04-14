@@ -9,7 +9,7 @@ import {
 
 export const createReview = async (req: Request, res: Response) => {
     try {
-        const authorId = req.user?.id;
+        const authorId = Number(req.user?.id);
         const {orderId} = req.params;
         const {text, rating} = req.body;
 
@@ -25,7 +25,7 @@ export const createReview = async (req: Request, res: Response) => {
         }
 
         const review = await createReviewService({
-            orderId,
+            orderId: Number(orderId),
             text,
             rating: Number(rating),
             authorId,

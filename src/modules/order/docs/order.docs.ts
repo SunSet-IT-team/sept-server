@@ -27,33 +27,47 @@
  *               - septicConstructionType
  *               - paymentMethod
  *               - workDate
- *               - addressId
- *               - serviceId
  *             properties:
  *               objectType:
  *                 type: string
+ *                 example: Жилой дом
  *               comment:
  *                 type: string
+ *                 example: Нужно срочно
  *               distanceToSeptic:
  *                 type: number
+ *                 example: 15.5
  *               septicDepth:
  *                 type: number
+ *                 example: 3.2
  *               septicVolume:
  *                 type: number
+ *                 example: 5.0
  *               septicConstructionType:
  *                 type: string
+ *                 example: Бетонные кольца
  *               paymentMethod:
  *                 type: string
+ *                 example: Наличные
  *               workDate:
  *                 type: string
  *                 format: date-time
+ *                 example: 2024-08-01T09:00:00.000Z
  *               addressId:
+ *                 type: integer
+ *                 example: 12
+ *               address:
  *                 type: string
+ *                 example: Москва, ул. Ленина, д. 1
  *               serviceId:
- *                 type: string
+ *                 type: integer
+ *                 example: 3
+ *               price:
+ *                 type: number
+ *                 example: 25000
  *     responses:
  *       201:
- *         description: Заказ создан
+ *         description: Заказ успешно создан
  *       400:
  *         description: Ошибка валидации
  *       401:
@@ -64,7 +78,7 @@
  * @swagger
  * /order/executor/{executorId}:
  *   get:
- *     summary: Получить заказы исполнителя (только администратор)
+ *     summary: Получить заказы исполнителя (только админ)
  *     tags: [Order]
  *     security:
  *       - bearerAuth: []
@@ -73,27 +87,23 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *         description: Номер страницы
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *         description: Количество записей на страницу
  *       - in: query
  *         name: status
  *         schema:
  *           type: string
  *           enum: [PENDING, IN_PROGRESS, COMPLETED, REJECTED]
- *         description: Статус заказа
  *     responses:
  *       200:
- *         description: Список заказов исполнителя
+ *         description: Список заказов
  *       403:
  *         description: Нет доступа
  */
@@ -102,7 +112,7 @@
  * @swagger
  * /order/customer/{customerId}:
  *   get:
- *     summary: Получить заказы заказчика (только администратор)
+ *     summary: Получить заказы заказчика (только админ)
  *     tags: [Order]
  *     security:
  *       - bearerAuth: []
@@ -111,27 +121,23 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
- *           format: uuid
+ *           type: integer
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *         description: Номер страницы
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *         description: Количество записей на страницу
  *       - in: query
  *         name: status
  *         schema:
  *           type: string
  *           enum: [PENDING, IN_PROGRESS, COMPLETED, REJECTED]
- *         description: Статус заказа
  *     responses:
  *       200:
- *         description: Список заказов заказчика
+ *         description: Список заказов
  *       403:
  *         description: Нет доступа
  */
@@ -140,7 +146,7 @@
  * @swagger
  * /order/my:
  *   get:
- *     summary: Получить свои заказы (для заказчика и исполнителя)
+ *     summary: Получить свои заказы (для заказчика или исполнителя)
  *     tags: [Order]
  *     security:
  *       - bearerAuth: []
@@ -149,17 +155,14 @@
  *         name: page
  *         schema:
  *           type: integer
- *         description: Номер страницы
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *         description: Количество записей на страницу
  *       - in: query
  *         name: status
  *         schema:
  *           type: string
- *         description: Статус заказа
  *     responses:
  *       200:
  *         description: Список заказов
@@ -178,10 +181,10 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *     responses:
  *       200:
- *         description: Детали заказа
+ *         description: Заказ найден
  *       404:
  *         description: Заказ не найден
  */
@@ -199,9 +202,8 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *     requestBody:
- *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -225,9 +227,11 @@
  *                 type: string
  *                 format: date-time
  *               addressId:
- *                 type: string
+ *                 type: integer
  *               serviceId:
- *                 type: string
+ *                 type: integer
+ *               price:
+ *                 type: number
  *     responses:
  *       200:
  *         description: Заказ обновлён
@@ -248,12 +252,12 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *     responses:
  *       200:
  *         description: Заказ удалён
  *       404:
- *         description: Не найден
+ *         description: Заказ не найден
  */
 
 /**
@@ -269,7 +273,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *     responses:
  *       200:
  *         description: Заказ принят
@@ -290,7 +294,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *     responses:
  *       200:
  *         description: Заказ отклонён
@@ -311,9 +315,8 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *     requestBody:
- *       required: false
  *       content:
  *         multipart/form-data:
  *           schema:
@@ -321,7 +324,7 @@
  *             properties:
  *               text:
  *                 type: string
- *                 description: Описание отчёта
+ *                 example: Работа завершена, отчёт прилагается
  *               reportFiles:
  *                 type: array
  *                 items:

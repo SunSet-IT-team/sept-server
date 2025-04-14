@@ -3,10 +3,11 @@ import {AccountStatus} from '@prisma/client';
 import {sendEmail} from '../../../core/utils/email/sendEmail';
 import {verificationEmail} from '../../../core/utils/email/templates/verificationEmail';
 import {generateVerificationCode} from '../utils/generateVerificationCode';
+import {getUserById} from '../../user/services/getUser';
 
 export const resendVerificationService = async (
     email: string
-): Promise<{message: string}> => {
+): Promise<{message: string; verificationCode: string; user: any}> => {
     const user = await prisma.user.findUnique({
         where: {email},
         include: {emailVerification: true},
@@ -42,7 +43,11 @@ export const resendVerificationService = async (
         verificationEmail(newCode)
     );
 
+    const userDto = await getUserById(user.id);
+
     return {
         message: 'Код подтверждения был отправлен повторно на email',
+        verificationCode: newCode,
+        user: userDto,
     };
 };

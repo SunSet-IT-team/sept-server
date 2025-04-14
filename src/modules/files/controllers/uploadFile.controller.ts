@@ -8,7 +8,7 @@ import {
 
 export const uploadFiles = async (req: Request, res: Response) => {
     try {
-        const userId = req.user?.id;
+        const userId = Number(req.user?.id);
         const files = req.files as Express.Multer.File[];
 
         if (!userId || !files || files.length === 0) {

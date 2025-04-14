@@ -2,8 +2,8 @@ import {prisma} from '../../../core/database/prisma';
 import {OrderStatus} from '@prisma/client';
 
 export const acceptOrderService = async (
-    orderId: string,
-    executorUserId: string
+    orderId: number,
+    executorUserId: number
 ) => {
     const order = await prisma.order.findUnique({
         where: {id: orderId},

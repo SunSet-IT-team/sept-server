@@ -53,7 +53,7 @@ enum ChatType {
 }
 
 model User {
-  id               String           @id @default(uuid())
+  id               Int           @id @default(autoincrement())
   email            String           @unique
   password         String
   phone            String?
@@ -64,6 +64,7 @@ model User {
   statusUpdatedAt  DateTime         @default(now())
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+  priority         Int              @default(100)
 
   executorProfile  ExecutorProfile?
   customerProfile  CustomerProfile?
@@ -72,24 +73,24 @@ model User {
   reviewsGiven     Review[]         @relation("ReviewAuthor")
   reviewsReceived  Review[]         @relation("ReviewTarget")
   emailVerification EmailVerification?
-  auditLogs        AuditLog[]
   files            File[]
   messages         Message[]
   chatParticipants ChatParticipant[]
 }
 
 model AdminProfile {
-  id           String @id @default(uuid())
-  userId       String @unique
+  id               Int           @id @default(autoincrement())
+  userId       Int @unique
   recoveryCode String?
 
   user         User   @relation(fields: [userId], references: [id])
 }
 
 model CustomerProfile {
-  id         String    @id @default(uuid())
-  userId     String    @unique
+  id               Int           @id @default(autoincrement())
+  userId     Int    @unique
   user       User      @relation(fields: [userId], references: [id])
+  priority         Int              @default(100)
 
   orders     Order[]
   addresses  Address[]
@@ -97,9 +98,10 @@ model CustomerProfile {
 }
 
 model ExecutorProfile {
-  id               String   @id @default(uuid())
-  userId           String   @unique
+  id               Int           @id @default(autoincrement())
+  userId           Int   @unique
   user             User     @relation(fields: [userId], references: [id])
+  priority         Int              @default(100)
 
   workFormat       WorkFormat
   experience       Int?
@@ -117,9 +119,9 @@ model ExecutorProfile {
 }
 
 model Favorite {
-  id          String   @id @default(uuid())
-  customerId  String
-  executorId  String
+  id               Int           @id @default(autoincrement())
+  customerId  Int
+  executorId  Int
   createdAt   DateTime @default(now())
 
   customer    CustomerProfile @relation("CustomerFavorites", fields: [customerId], references: [id])
@@ -128,30 +130,19 @@ model Favorite {
   @@unique([customerId, executorId])
 }
 
-model AuditLog {
-  id          String   @id @default(uuid())
-  userId      String
-  action      String
-  targetType  String
-  targetId    String
-  timestamp   DateTime @default(now())
-  meta        Json?
-
-  user        User     @relation(fields: [userId], references: [id])
-}
 
 model File {
-  id          String   @id @default(uuid())
-  userId      String
+  id               Int           @id @default(autoincrement())
+  userId      Int
   user        User     @relation(fields: [userId], references: [id])
 
-  executorId  String?
+  executorId  Int?
   executor    ExecutorProfile? @relation(fields: [executorId], references: [id])
 
-  reportId    String?
+  reportId    Int?
   report      Report?  @relation(name: "ReportFiles", fields: [reportId], references: [id])
 
-  messageId   String?
+  messageId   Int?
   message     Message? @relation(fields: [messageId], references: [id])
 
   url         String
@@ -163,7 +154,7 @@ model File {
 }
 
 model Order {
-  id           String      @id @default(uuid())
+  id               Int           @id @default(autoincrement())
 
   title        String      @default("")
   objectType   String
@@ -180,19 +171,19 @@ model Order {
   priority      Int         @default(100)
   price         Float?
 
-  addressId     String?
+  addressId     Int?
   address       Address?    @relation(fields: [addressId], references: [id])
 
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  customerId    String
-  executorId    String?
+  customerId    Int
+  executorId    Int?
 
   customer      CustomerProfile @relation(fields: [customerId], references: [id])
   executor      ExecutorProfile? @relation(fields: [executorId], references: [id])
 
-  serviceId     String?
+  serviceId     Int?
   service       Service?   @relation(fields: [serviceId], references: [id])
 
   reports       Report[]
@@ -201,7 +192,7 @@ model Order {
 }
 
 model Service {
-  id       String   @id @default(uuid())
+  id               Int           @id @default(autoincrement())
   name     String
   priority Int      @default(100)
 
@@ -211,14 +202,14 @@ model Service {
 }
 
 model Review {
-  id         String   @id @default(uuid())
+  id               Int           @id @default(autoincrement())
   text       String
   rating     Int
   createdAt  DateTime @default(now())
 
-  authorId   String
-  targetId   String
-  orderId    String?
+  authorId   Int
+  targetId   Int
+  orderId    Int?
 
   author     User     @relation("ReviewAuthor", fields: [authorId], references: [id])
   target     User     @relation("ReviewTarget", fields: [targetId], references: [id])
@@ -226,8 +217,8 @@ model Review {
 }
 
 model Address {
-  id           String   @id @default(uuid())
-  userId       String
+  id               Int           @id @default(autoincrement())
+  userId       Int
   user         CustomerProfile @relation(fields: [userId], references: [id])
 
   value        String
@@ -242,8 +233,8 @@ model Address {
 }
 
 model EmailVerification {
-  id        String   @id @default(uuid())
-  userId    String   @unique
+  id               Int           @id @default(autoincrement())
+  userId    Int   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   code      String
@@ -254,17 +245,17 @@ model EmailVerification {
 }
 
 model Report {
-  id        String   @id @default(uuid())
+  id               Int           @id @default(autoincrement())
   text      String?
   files     File[]   @relation("ReportFiles")
-  orderId   String
+  orderId   Int
   order     Order    @relation(fields: [orderId], references: [id])
   createdAt DateTime @default(now())
 }
 
 model Chat {
-  id          String   @id @default(uuid())
-  orderId     String?
+  id               Int           @id @default(autoincrement())
+  orderId     Int?
   order       Order?   @relation(fields: [orderId], references: [id])
   type        ChatType @default(GENERAL)
   createdAt   DateTime @default(now())
@@ -274,9 +265,9 @@ model Chat {
 }
 
 model ChatParticipant {
-  id        String   @id @default(uuid())
-  chatId    String
-  userId    String
+  id               Int           @id @default(autoincrement())
+  chatId    Int
+  userId    Int
 
   user      User     @relation(fields: [userId], references: [id])
   chat      Chat     @relation(fields: [chatId], references: [id])
@@ -285,9 +276,9 @@ model ChatParticipant {
 }
 
 model Message {
-  id         String   @id @default(uuid())
-  chatId     String
-  senderId   String
+  id               Int           @id @default(autoincrement())
+  chatId     Int
+  senderId   Int
   text       String?
   createdAt  DateTime @default(now())
 

@@ -2,7 +2,7 @@ import {Server, Socket} from 'socket.io';
 import {prisma} from '../../../core/database/prisma';
 
 export const registerOrderChatHandlers = (io: Server, socket: Socket) => {
-    socket.on('joinOrderChat', async (orderId: string) => {
+    socket.on('joinOrderChat', async (orderId: number) => {
         const chat = await prisma.chat.findFirst({
             where: {
                 orderId,
@@ -14,7 +14,7 @@ export const registerOrderChatHandlers = (io: Server, socket: Socket) => {
             return socket.emit('error', 'Чат по заказу не найден');
         }
 
-        socket.join(chat.id);
+        socket.join(chat.id.toString());
         socket.emit('joinedChat', chat.id);
     });
 
@@ -24,7 +24,7 @@ export const registerOrderChatHandlers = (io: Server, socket: Socket) => {
         const message = await prisma.message.create({
             data: {
                 chatId,
-                senderId: socket.user!.id,
+                senderId: Number(socket.user!.id),
                 text,
             },
         });

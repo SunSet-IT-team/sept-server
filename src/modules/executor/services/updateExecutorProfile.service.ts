@@ -3,9 +3,10 @@ import {UpdateExecutorDTO} from '../dtos/updateExecutorProfile.dto';
 import {handleFileUpload} from '../../auth/utils/files/handleFileUpload';
 import fs from 'fs';
 import path from 'path';
+import {toUserDto} from '../../user/utils/toUser';
 
 export const updateExecutorProfileService = async (
-    userId: string,
+    userId: number,
     dto: UpdateExecutorDTO,
     files: Record<string, Express.Multer.File[]>
 ) => {
@@ -19,9 +20,6 @@ export const updateExecutorProfileService = async (
 
     const {firstName, lastName, phone, fileIdsToDelete, ...executorData} = dto;
 
-    console.log(dto);
-
-    // 🧼 Удаляем undefined/null/пустые строки
     const filteredUserData: any = {};
     if (firstName) filteredUserData.firstName = firstName;
     if (lastName) filteredUserData.lastName = lastName;
@@ -40,26 +38,24 @@ export const updateExecutorProfileService = async (
         data: filteredUserData,
     });
 
-    const updated = await prisma.executorProfile.update({
+    await prisma.executorProfile.update({
         where: {userId},
         data: filteredExecutorData,
     });
 
-    if (
-        fileIdsToDelete &&
-        Array.isArray(fileIdsToDelete) &&
-        fileIdsToDelete.length > 0
-    ) {
+    if (fileIdsToDelete?.length) {
+        const numericIdsToDelete = fileIdsToDelete.map((id) => Number(id));
+
         const filesToDelete = await prisma.file.findMany({
             where: {
-                id: {in: fileIdsToDelete},
+                id: {in: numericIdsToDelete},
                 userId,
             },
         });
 
         await prisma.file.deleteMany({
             where: {
-                id: {in: fileIdsToDelete},
+                id: {in: numericIdsToDelete},
                 userId,
             },
         });
@@ -80,5 +76,35 @@ export const updateExecutorProfileService = async (
         await handleFileUpload(files, userId);
     }
 
-    return updated;
+    const fullUser = await prisma.user.findUnique({
+        where: {id: userId},
+        include: {
+            executorProfile: {
+                select: {
+                    orders: true,
+                },
+                include: {
+                    orders: true,
+                    user: {
+                        include: {
+                            files: {
+                                select: {
+                                    id: true,
+                                    url: true,
+                                    filename: true,
+                                    type: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    if (!fullUser?.executorProfile) {
+        throw new Error('Ошибка при получении обновлённого профиля');
+    }
+
+    return toUserDto(fullUser);
 };

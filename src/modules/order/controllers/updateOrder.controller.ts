@@ -8,8 +8,8 @@ import {updateOrderService} from '../services/updateOrder.service';
 
 export const updateOrder = async (req: Request, res: Response) => {
     try {
-        const orderId = req.params.id;
-        const userId = req.user?.id;
+        const orderId = Number(req.params.id);
+        const userId = Number(req.user?.id);
         const role = req.user?.role;
 
         if (!orderId || !userId || !role) {

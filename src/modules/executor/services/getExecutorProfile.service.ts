@@ -1,36 +1,36 @@
 import {prisma} from '../../../core/database/prisma';
+import {FileType} from '@prisma/client';
+import {toUserDto} from '../../user/utils/toUser';
 
-export const getExecutorProfileService = async (userId: string) => {
-    const executor = await prisma.executorProfile.findUnique({
-        where: {userId},
+export const getExecutorProfileService = async (userId: number) => {
+    const user = await prisma.user.findUnique({
+        where: {id: userId},
         include: {
-            user: {
-                select: {
-                    email: true,
-                    firstName: true,
-                    lastName: true,
-                    phone: true,
-                    status: true,
-                    files: true,
+            executorProfile: {
+                include: {
+                    orders: true,
+                    user: {
+                        select: {
+                            phone: true,
+                            files: {
+                                where: {type: FileType.PROFILE_PHOTO},
+                                select: {
+                                    id: true,
+                                    url: true,
+                                    filename: true,
+                                    type: true,
+                                },
+                            },
+                        },
+                    },
                 },
             },
         },
     });
 
-    if (!executor) {
+    if (!user || !user.executorProfile) {
         throw new Error('Профиль исполнителя не найден');
     }
 
-    return {
-        id: executor.id,
-        workFormat: executor.workFormat,
-        experience: executor.experience,
-        about: executor.about,
-        companyName: executor.companyName,
-        description: executor.description,
-        completedOrders: executor.completedOrders,
-        rating: executor.rating,
-        files: executor.user.files,
-        user: executor.user,
-    };
+    return toUserDto(user);
 };

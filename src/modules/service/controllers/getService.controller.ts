@@ -12,7 +12,7 @@ export const getService = async (
 ): Promise<void> => {
     try {
         const {id} = req.params;
-        const result = await getServiceByIdService(id);
+        const result = await getServiceByIdService(Number(id));
         if (!result) {
             sendResponse(res, 404, errorResponse('Сервис не найден'));
             return;

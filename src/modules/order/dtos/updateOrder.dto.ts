@@ -41,7 +41,7 @@ export class UpdateOrderDTO {
 
     @IsOptional()
     @IsUUID()
-    addressId?: string;
+    addressId?: number;
 
     @IsOptional()
     @IsNumber()

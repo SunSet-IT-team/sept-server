@@ -9,7 +9,7 @@ import {createOrderService} from '../services/createOrder.service';
 
 export const createOrder = async (req: Request, res: Response) => {
     try {
-        const customerId = req.user?.id;
+        const customerId = Number(req.user?.id);
         const dto = req.body;
 
         if (!customerId) {
