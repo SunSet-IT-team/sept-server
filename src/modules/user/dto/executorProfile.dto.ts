@@ -1,5 +1,4 @@
 export interface ExecutorProfileDto {
-    id: number;
     workFormat: string;
     experience: number | null;
     about: string | null;

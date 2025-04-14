@@ -54,13 +54,13 @@
  *                 format: date-time
  *                 example: 2024-08-01T09:00:00.000Z
  *               addressId:
- *                 type: integer
+ *                 type: number
  *                 example: 12
  *               address:
  *                 type: string
  *                 example: Москва, ул. Ленина, д. 1
  *               serviceId:
- *                 type: integer
+ *                 type: number
  *                 example: 3
  *               price:
  *                 type: number
@@ -87,7 +87,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: number
  *       - in: query
  *         name: page
  *         schema:
@@ -121,7 +121,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: number
  *       - in: query
  *         name: page
  *         schema:
@@ -181,7 +181,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: number
  *     responses:
  *       200:
  *         description: Заказ найден
@@ -202,7 +202,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: number
  *     requestBody:
  *       content:
  *         application/json:
@@ -227,9 +227,9 @@
  *                 type: string
  *                 format: date-time
  *               addressId:
- *                 type: integer
+ *                 type: number
  *               serviceId:
- *                 type: integer
+ *                 type: number
  *               price:
  *                 type: number
  *     responses:
@@ -252,7 +252,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: number
  *     responses:
  *       200:
  *         description: Заказ удалён
@@ -273,7 +273,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: number
  *     responses:
  *       200:
  *         description: Заказ принят
@@ -294,7 +294,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: number
  *     responses:
  *       200:
  *         description: Заказ отклонён
@@ -315,7 +315,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: number
  *     requestBody:
  *       content:
  *         multipart/form-data:
