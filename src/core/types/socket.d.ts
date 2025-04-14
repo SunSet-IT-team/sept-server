@@ -3,7 +3,7 @@ import 'socket.io';
 declare module 'socket.io' {
     interface Socket {
         user?: {
-            id: string;
+            id: number;
             role: string;
         };
     }

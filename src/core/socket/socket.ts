@@ -5,7 +5,7 @@ import {prisma} from '../database/prisma';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 type SocketWithUser = Socket & {
-    user?: {id: string; role: string};
+    user?: {id: number; role: string};
 };
 
 export const configureSocket = (io: Server) => {
@@ -51,7 +51,7 @@ export const configureSocket = (io: Server) => {
                             text,
                             files: {
                                 connect: Array.isArray(fileIds)
-                                    ? fileIds.map((id: string) => ({id}))
+                                    ? fileIds.map((id: number) => ({id}))
                                     : [],
                             },
                         },
