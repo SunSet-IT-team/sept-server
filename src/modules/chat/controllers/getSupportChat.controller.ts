@@ -8,9 +8,9 @@ import {getSupportChatService} from '../services/getSupportChat.service';
 
 export const getSupportChat = async (req: Request, res: Response) => {
     try {
-        const userId = req.user?.id;
+        const userId = Number(req.user?.id);
         const role = req.user?.role;
-        const orderId = req.params.orderId;
+        const orderId = Number(req.params.orderId);
 
         if (!userId || !role || !orderId) {
             return sendResponse(res, 400, errorResponse('Некорректные данные'));

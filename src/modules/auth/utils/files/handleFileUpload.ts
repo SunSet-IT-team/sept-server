@@ -5,7 +5,7 @@ import {getFileTypeByKey} from './getFileTypeByKey';
 
 export async function handleFileUpload(
     files: Record<string, Express.Multer.File[]>,
-    userId: string
+    userId: number
 ) {
     const filePromises: Promise<any>[] = [];
 

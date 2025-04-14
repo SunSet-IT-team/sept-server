@@ -7,7 +7,7 @@ import {
 } from '../../../core/utils/sendResponse';
 
 export const getAdminProfile = async (req: Request, res: Response) => {
-    const userId = req.params.id || req.user!.id;
+    const userId = Number(req.params.id) || Number(req.user!.id);
     try {
         const admin = await getAdminProfileService(userId);
         sendResponse(res, 200, successResponse(admin));

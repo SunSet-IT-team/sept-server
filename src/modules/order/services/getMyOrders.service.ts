@@ -6,9 +6,9 @@ import {selectOrder} from '../../../core/prisma/selects';
 
 interface GetOrdersParams extends PaginationParams {
     role: 'CUSTOMER' | 'EXECUTOR' | 'ADMIN';
-    userId?: string;
-    executorId?: string;
-    customerId?: string;
+    userId?: number;
+    executorId?: number;
+    customerId?: number;
 }
 
 export const getMyOrdersService = async ({

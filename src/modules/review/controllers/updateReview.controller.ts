@@ -8,8 +8,8 @@ import {
 
 export const updateReview = async (req: Request, res: Response) => {
     try {
-        const reviewId = req.params.reviewId;
-        const userId = req.user?.id;
+        const reviewId = Number(req.params.reviewId);
+        const userId = Number(req.user?.id);
         const userRole = req.user?.role;
         if (!reviewId || !userId || !userRole) {
             return sendResponse(res, 400, errorResponse('Недостаточно данных'));

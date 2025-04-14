@@ -2,7 +2,7 @@ import {prisma} from '../../../core/database/prisma';
 import {CreateAddressDTO} from '../dtos/createAddress.dto';
 
 export const createAddressService = async (
-    userId: string,
+    userId: number,
     dto: CreateAddressDTO
 ) => {
     const customer = await prisma.customerProfile.findUnique({

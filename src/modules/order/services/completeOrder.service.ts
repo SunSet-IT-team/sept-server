@@ -3,8 +3,8 @@ import {OrderStatus} from '@prisma/client';
 import {handleFileUpload} from '../utils/files/handleFileUpload';
 
 export const completeOrderService = async (
-    orderId: string,
-    executorId: string,
+    orderId: number,
+    executorId: number,
     dto: {text?: string},
     files: Record<string, Express.Multer.File[]>
 ) => {

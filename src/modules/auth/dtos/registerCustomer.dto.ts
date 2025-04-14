@@ -1,4 +1,6 @@
 import {IsEmail, IsString, IsOptional, IsPhoneNumber} from 'class-validator';
+import {Type} from 'class-transformer';
+import {Express} from 'express';
 
 export class RegisterCustomerDTO {
     @IsEmail()
@@ -19,7 +21,10 @@ export class RegisterCustomerDTO {
     @IsPhoneNumber()
     phone?: string;
 
-    @IsOptional()
     @IsString()
     address!: string;
+
+    @IsOptional()
+    @Type(() => Object)
+    profilePhoto?: Express.Multer.File;
 }

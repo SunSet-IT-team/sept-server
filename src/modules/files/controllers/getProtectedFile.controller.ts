@@ -8,9 +8,8 @@ export const getProtectedFileController = async (
 ) => {
     try {
         const {filename} = req.params;
-        const user = req.user!;
 
-        await sendProtectedFile({filename, user, res});
+        await sendProtectedFile({filename, res});
     } catch (err: any) {
         sendResponse(
             res,

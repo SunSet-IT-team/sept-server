@@ -8,8 +8,8 @@ import {acceptOrderService} from '../services/acceptOrder.service';
 
 export const acceptOrder = async (req: Request, res: Response) => {
     try {
-        const executorId = req.user?.id;
-        const orderId = req.params.id;
+        const executorId = Number(req.user?.id);
+        const orderId = Number(req.params.id);
 
         if (!orderId || !executorId) {
             return sendResponse(res, 401, errorResponse('Не авторизован'));

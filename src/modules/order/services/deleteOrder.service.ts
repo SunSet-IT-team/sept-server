@@ -2,8 +2,8 @@ import {Role} from '@prisma/client';
 import {prisma} from '../../../core/database/prisma';
 
 export const deleteOrderService = async (
-    orderId: string,
-    userId: string,
+    orderId: number,
+    userId: number,
     role: Role
 ) => {
     if (role !== Role.CUSTOMER && role !== Role.ADMIN) {

@@ -13,7 +13,7 @@ export const getReviews = async (req: Request, res: Response) => {
             return sendResponse(res, 400, errorResponse('Нет targetId'));
         }
 
-        const reviews = await getReviewsService(targetId);
+        const reviews = await getReviewsService(Number(targetId));
         return sendResponse(res, 200, successResponse(reviews));
     } catch (err: any) {
         return sendResponse(res, 400, errorResponse(err.message));

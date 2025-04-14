@@ -1,8 +1,8 @@
 import {prisma} from '../../../core/database/prisma';
 
 interface DeleteReviewData {
-    reviewId: string;
-    userId: string;
+    reviewId: number;
+    userId: number;
     userRole: string;
 }
 
@@ -47,7 +47,7 @@ export const deleteReviewService = async ({
     return {message: 'Отзыв удалён'};
 };
 
-async function recalcExecutorRating(executorUserId: string) {
+async function recalcExecutorRating(executorUserId: number) {
     const reviews = await prisma.review.findMany({
         where: {targetId: executorUserId},
         select: {rating: true},

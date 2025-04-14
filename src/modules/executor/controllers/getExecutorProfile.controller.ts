@@ -8,7 +8,7 @@ import {
 
 export const getExecutorProfile = async (req: Request, res: Response) => {
     try {
-        const executorId = req.user?.id;
+        const executorId = Number(req.user?.id);
         if (!executorId) {
             return sendResponse(
                 res,

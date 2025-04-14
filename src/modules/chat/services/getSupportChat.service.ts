@@ -2,9 +2,9 @@ import {prisma} from '../../../core/database/prisma';
 import {ChatType, Role} from '@prisma/client';
 
 export const getSupportChatService = async (
-    userId: string,
+    userId: number,
     role: Role,
-    orderId: string
+    orderId: number
 ) => {
     if (role !== Role.CUSTOMER && role !== Role.EXECUTOR) {
         throw new Error(

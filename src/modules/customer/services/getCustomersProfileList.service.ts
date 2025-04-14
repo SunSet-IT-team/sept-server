@@ -1,9 +1,9 @@
-import {Prisma, Role} from '@prisma/client';
+import {Prisma} from '@prisma/client';
 import {prisma} from '../../../core/database/prisma';
 import {paginate} from '../../../core/utils/pagination';
+import {getUserById} from '../../user/services/getUser';
 
 export const getCustomersListService = async (query: any) => {
-    // Определяем сопоставление полей для сортировки (orderMap)
     const orderMap: Record<
         string,
         Prisma.CustomerProfileOrderByWithRelationInput
@@ -16,23 +16,14 @@ export const getCustomersListService = async (query: any) => {
 
     const {page, limit, sortBy, order, ...filters} = query;
 
-    return paginate(
+    const result = await paginate(
         prisma.customerProfile,
         {page, limit, sortBy, order, filters},
         {
             defaultSortBy: 'firstName',
             defaultOrder: 'asc',
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        email: true,
-                        firstName: true,
-                        lastName: true,
-                        phone: true,
-                        status: true,
-                    },
-                },
+                user: true, // этого достаточно, чтобы потом получить user.id
                 addresses: true,
             },
             orderMap,
@@ -40,7 +31,6 @@ export const getCustomersListService = async (query: any) => {
                 const where: Prisma.CustomerProfileWhereInput = {};
                 const userFilters: any = {};
 
-                // Фильтры по имени, фамилии, email
                 if (filters.firstName) {
                     userFilters.firstName = {
                         contains: filters.firstName,
@@ -59,16 +49,12 @@ export const getCustomersListService = async (query: any) => {
                         mode: 'insensitive',
                     };
                 }
-
-                // Фильтр по статусу
                 if (filters.status) {
                     userFilters.status = {equals: filters.status};
                 }
 
-                // ВАЖНО: Принудительно role='CUSTOMER'
                 userFilters.role = {equals: 'CUSTOMER'};
 
-                // Если есть хотя бы один фильтр пользователя, подставляем
                 if (Object.keys(userFilters).length > 0) {
                     where.user = userFilters;
                 }
@@ -77,4 +63,15 @@ export const getCustomersListService = async (query: any) => {
             },
         }
     );
+
+    const items = await Promise.all(
+        result.items.map((customerProfile) =>
+            getUserById(customerProfile.userId)
+        )
+    );
+
+    return {
+        ...result,
+        items,
+    };
 };

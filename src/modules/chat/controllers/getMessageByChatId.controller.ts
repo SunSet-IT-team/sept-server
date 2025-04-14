@@ -8,7 +8,7 @@ import {getMessagesByChatIdService} from '../services/getMessageByChatId.service
 
 export const getMessagesByChatId = async (req: Request, res: Response) => {
     try {
-        const chatId = req.params.id;
+        const chatId = Number(req.params.id);
         if (!chatId) {
             return sendResponse(res, 400, errorResponse('chatId обязателен'));
         }

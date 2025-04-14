@@ -56,8 +56,7 @@ export class UpdateExecutorDTO {
 
     @IsOptional()
     @IsArray()
-    @IsUUID('all', {each: true})
-    fileIdsToDelete?: string[];
+    fileIdsToDelete?: number[];
 
     @IsOptional()
     profilePhoto?: any;

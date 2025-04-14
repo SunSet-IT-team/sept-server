@@ -13,7 +13,8 @@ export const registerCustomer = async (
 ): Promise<void> => {
     try {
         const dto: RegisterCustomerDTO | any = req.body;
-        const user = await registerCustomerService(dto);
+        const files = req.files as Record<string, Express.Multer.File[]>;
+        const user = await registerCustomerService(dto, files);
 
         sendResponse(res, 200, successResponse(user));
         return;

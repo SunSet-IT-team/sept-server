@@ -2,8 +2,8 @@ import {Role} from '@prisma/client';
 import {prisma} from '../../../core/database/prisma';
 
 export const getOrderByIdService = async (
-    orderId: string,
-    userId: string,
+    orderId: number,
+    userId: number,
     role: Role
 ) => {
     const order = await prisma.order.findUnique({

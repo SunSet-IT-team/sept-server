@@ -12,7 +12,7 @@ export const deleteService = async (
 ): Promise<void> => {
     try {
         const {id} = req.params;
-        const result = await deleteServiceService(id);
+        const result = await deleteServiceService(Number(id));
         if (!result) {
             sendResponse(res, 404, errorResponse('Сервис не найден'));
             return;

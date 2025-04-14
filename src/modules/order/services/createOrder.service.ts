@@ -1,11 +1,10 @@
-// modules/order/services/createOrder.service.ts
 import {prisma} from '../../../core/database/prisma';
 import {CreateOrderDTO} from '../dtos/createOrder.dto';
 import {OrderStatus} from '@prisma/client';
 
 export const createOrderService = async (
     dto: CreateOrderDTO,
-    customerId: string
+    customerId: number
 ) => {
     const {
         objectType,
@@ -17,6 +16,7 @@ export const createOrderService = async (
         paymentMethod,
         workDate,
         addressId,
+        address, // строка
         serviceId,
         price,
     } = dto;
@@ -39,8 +39,41 @@ export const createOrderService = async (
     };
 
     if (price) data.price = price;
-    if (addressId) data.address = {connect: {id: addressId}};
-    if (serviceId) data.service = {connect: {id: serviceId}};
+
+    if (addressId) {
+        // Используем существующий адрес
+        data.address = {
+            connect: {
+                id: addressId,
+            },
+        };
+    } else if (address) {
+        // Создаём новый адрес
+        const newAddress = await prisma.address.create({
+            data: {
+                value: address,
+                user: {
+                    connect: {
+                        userId: customerId,
+                    },
+                },
+            },
+        });
+
+        data.address = {
+            connect: {
+                id: newAddress.id,
+            },
+        };
+    }
+
+    if (serviceId) {
+        data.service = {
+            connect: {
+                id: serviceId,
+            },
+        };
+    }
 
     return prisma.order.create({
         data,

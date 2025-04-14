@@ -1,6 +1,6 @@
 import {prisma} from '../../../core/database/prisma';
 
-export const getReviewsService = async (targetId: string) => {
+export const getReviewsService = async (targetId: number) => {
     return prisma.review.findMany({
         where: {targetId},
         include: {

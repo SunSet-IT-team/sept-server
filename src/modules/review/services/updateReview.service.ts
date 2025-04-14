@@ -1,10 +1,10 @@
 import {prisma} from '../../../core/database/prisma';
 
 interface UpdateReviewData {
-    reviewId: string;
+    reviewId: number;
     text?: string;
     rating?: number;
-    userId: string; // кто пытается обновить
+    userId: number; // кто пытается обновить
     userRole: string; // нужна роль, чтобы понимать, admin ли
 }
 
@@ -56,7 +56,7 @@ export const updateReviewService = async ({
     return updatedReview;
 };
 
-async function recalcExecutorRating(executorUserId: string) {
+async function recalcExecutorRating(executorUserId: number) {
     const reviews = await prisma.review.findMany({
         where: {targetId: executorUserId},
         select: {rating: true},

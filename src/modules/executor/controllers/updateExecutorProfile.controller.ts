@@ -8,8 +8,10 @@ import {
 
 export const updateExecutorProfile = async (req: Request, res: Response) => {
     try {
-        const isAdminUpdating = !!req.params.id;
-        const targetUserId = isAdminUpdating ? req.params.id : req.user?.id;
+        const isAdminUpdating = Number(!!req.params.id);
+        const targetUserId = isAdminUpdating
+            ? Number(req.params.id)
+            : Number(req.user?.id);
 
         if (!targetUserId) {
             return sendResponse(

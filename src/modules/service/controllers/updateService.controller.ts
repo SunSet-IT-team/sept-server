@@ -14,7 +14,7 @@ export const updateService = async (
     try {
         const {id} = req.params;
         const serviceData: UpdateServiceDTO = req.body;
-        const result = await updateServiceService(id, serviceData);
+        const result = await updateServiceService(Number(id), serviceData);
 
         if (!result) {
             sendResponse(res, 404, errorResponse('Сервис не найден'));

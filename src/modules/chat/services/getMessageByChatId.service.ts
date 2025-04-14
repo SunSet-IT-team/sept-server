@@ -2,7 +2,7 @@ import {prisma} from '../../../core/database/prisma';
 import {paginate, PaginationParams} from '../../../core/utils/pagination';
 
 export const getMessagesByChatIdService = async (
-    chatId: string,
+    chatId: number,
     query: PaginationParams
 ) => {
     return paginate(prisma.message, query, {

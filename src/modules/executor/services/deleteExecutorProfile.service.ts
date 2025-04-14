@@ -1,7 +1,7 @@
 import {prisma} from '../../../core/database/prisma';
 import {AccountStatus} from '@prisma/client';
 
-export const deleteExecutorProfileService = async (userId: string) => {
+export const deleteExecutorProfileService = async (userId: number) => {
     const executor = await prisma.executorProfile.findUnique({
         where: {userId},
     });

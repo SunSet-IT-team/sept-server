@@ -1,8 +1,7 @@
-// services/getFavoritesList.service.ts
 import {prisma} from '../../../core/database/prisma';
 import {paginate} from '../../../core/utils/pagination';
 
-export const getFavoritesService = async (query: any, customerId: string) => {
+export const getFavoritesService = async (query: any, customerId: number) => {
     const {page, limit, sortBy, order, ...filters} = query;
 
     return paginate(
@@ -14,23 +13,17 @@ export const getFavoritesService = async (query: any, customerId: string) => {
             include: {
                 executor: {
                     include: {
-                        user: true, // если нужно
+                        user: true,
                     },
                 },
             },
             orderMap: {
-                // Например, сортировать по времени добавления в избранное
                 createdAt: {createdAt: order || 'desc'},
             },
             transformFilters: (filters) => {
                 const where: any = {};
-
-                // customerId обязателен
                 where.customerId = customerId;
-
-                // Если хотим фильтровать исполнителей по городу
                 if (filters.city) {
-                    // city лежит в executorProfile
                     where.executor = {
                         city: {
                             contains: filters.city,

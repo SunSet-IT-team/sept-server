@@ -1,10 +1,10 @@
 import {prisma} from '../../../core/database/prisma';
 
 interface CreateReviewData {
-    orderId: string;
+    orderId: number;
     text: string;
     rating: number;
-    authorId: string;
+    authorId: number;
 }
 
 export const createReviewService = async ({
@@ -73,7 +73,7 @@ export const createReviewService = async ({
  * Пересчитываем средний рейтинг исполнителя по всем отзывам,
  * где targetId = userId исполнителя.
  */
-async function recalcExecutorRating(executorUserId: string) {
+async function recalcExecutorRating(executorUserId: number) {
     const reviews = await prisma.review.findMany({
         where: {targetId: executorUserId},
         select: {rating: true},

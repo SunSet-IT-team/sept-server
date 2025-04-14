@@ -9,7 +9,7 @@ import {getFavoritesService} from '../services/getFavorites.service';
 
 export const getFavorites = async (req: Request, res: Response) => {
     try {
-        const userId = req.user?.id;
+        const userId = Number(req.user?.id);
         if (!userId) {
             return sendResponse(res, 401, errorResponse('Не авторизован'));
         }

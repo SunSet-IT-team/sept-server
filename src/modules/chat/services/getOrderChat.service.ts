@@ -2,8 +2,8 @@ import {prisma} from '../../../core/database/prisma';
 import {ChatType} from '@prisma/client';
 
 export const getOrCreateOrderChatForUser = async (
-    orderId: string,
-    userId: string
+    orderId: number,
+    userId: number
 ) => {
     let chat = await prisma.chat.findFirst({
         where: {
