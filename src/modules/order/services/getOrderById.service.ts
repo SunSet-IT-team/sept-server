@@ -1,5 +1,6 @@
 import {Role} from '@prisma/client';
 import {prisma} from '../../../core/database/prisma';
+import {toOrderDto} from '../utils/toOrder';
 
 export const getOrderByIdService = async (
     orderId: number,
@@ -9,20 +10,16 @@ export const getOrderByIdService = async (
     const order = await prisma.order.findUnique({
         where: {id: orderId},
         include: {
-            customer: {
-                include: {
-                    user: true,
-                },
-            },
-            executor: {
-                include: {
-                    user: true,
-                },
-            },
+            customer: true, // теперь это User
+            executor: true, // теперь это User
             service: true,
-            address: true,
-            reports: true,
+            reports: {
+                include: {
+                    files: true,
+                },
+            },
             reviews: true,
+            chats: true,
         },
     });
 
@@ -30,16 +27,13 @@ export const getOrderByIdService = async (
         throw new Error('Заказ не найден');
     }
 
-    const customerUserId = order.customer.userId;
-    const executorUserId = order.executor?.userId;
-
     const isAdmin = role === Role.ADMIN;
-    const isCustomer = role === Role.CUSTOMER && userId === customerUserId;
-    const isExecutor = role === Role.EXECUTOR && userId === executorUserId;
+    const isCustomer = role === Role.CUSTOMER && userId === order.customerId;
+    const isExecutor = role === Role.EXECUTOR && userId === order.executorId;
 
     if (!isAdmin && !isCustomer && !isExecutor) {
         throw new Error('Нет доступа к заказу');
     }
 
-    return order;
+    return await toOrderDto(order);
 };

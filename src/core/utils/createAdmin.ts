@@ -1,6 +1,5 @@
 import {AccountStatus, Role} from '@prisma/client';
 import {prisma} from '../database/prisma';
-import bcrypt from 'bcrypt';
 import {hashPassword} from '../../modules/auth/utils/hashPassword';
 
 interface CreateAdminParams {
@@ -25,13 +24,16 @@ export const createAdmin = async ({
         data: {
             email,
             password: hashedPassword,
-            role: Role['ADMIN'],
-            status: AccountStatus['VERIFIED'],
+            firstName: 'Admin',
+            role: Role.ADMIN,
+            status: AccountStatus.VERIFIED,
             adminProfile: {
-                create: {recoveryCode: code},
+                create: {
+                    recoveryCode: code,
+                },
             },
         },
     });
 
-    return admin;
+    return {adminID: admin.id, email: admin.email, password: password};
 };

@@ -1,4 +1,3 @@
-// User
 export const selectUser = {
     id: true,
     email: true,
@@ -11,10 +10,8 @@ export const selectUser = {
     updatedAt: true,
 };
 
-// Executor
 export const selectExecutor = {
     id: true,
-    userId: true,
     workFormat: true,
     experience: true,
     about: true,
@@ -23,21 +20,14 @@ export const selectExecutor = {
     city: true,
     rating: true,
     completedOrders: true,
-    user: {select: selectUser},
 };
 
-// Customer
 export const selectCustomer = {
     id: true,
-    userId: true,
-    user: {select: selectUser},
 };
 
-// Admin
 export const selectAdmin = {
     id: true,
-    userId: true,
-    user: {select: selectUser},
 };
 
 // Address
@@ -114,7 +104,6 @@ export const selectChatParticipant = {
     user: {select: selectUser},
 };
 
-// Order
 export const selectOrder = {
     id: true,
     title: true,
@@ -129,12 +118,12 @@ export const selectOrder = {
     status: true,
     priority: true,
     price: true,
+    city: true,
     createdAt: true,
     updatedAt: true,
-    address: {select: selectAddress},
     service: {select: selectService},
-    customer: {select: selectCustomer},
-    executor: {select: selectExecutor},
+    customer: {select: selectUser},
+    executor: {select: selectUser},
     reports: {select: selectReport},
     chats: {
         select: {

@@ -1,13 +1,24 @@
 import {ExecutorProfileDto} from '../dto/executorProfile.dto';
 import {FileType} from '@prisma/client';
 
-export const toExecutorProfile = (executor: any): ExecutorProfileDto => {
-    const photo = executor.user.files.find(
-        (f: any) => f.type === FileType.PROFILE_PHOTO
-    );
+export const toExecutorProfile = (
+    executor: any,
+    files: any[],
+    phone: string | null = null
+): ExecutorProfileDto => {
+    const getFile = (type: FileType) =>
+        files.find((f) => f.type === type) || null;
+
+    const formatFile = (file: any) =>
+        file
+            ? {
+                  id: file.id,
+                  url: file.url,
+                  type: file.type,
+              }
+            : null;
 
     return {
-        id: executor.id,
         workFormat: executor.workFormat,
         experience: executor.experience,
         about: executor.about,
@@ -16,14 +27,10 @@ export const toExecutorProfile = (executor: any): ExecutorProfileDto => {
         city: executor.city,
         completedOrders: executor.completedOrders,
         rating: executor.rating,
-        phone: executor.user.phone,
+        phone: phone ?? null,
         priority: executor.priority,
-        profilePhoto: photo
-            ? {
-                  id: photo.id,
-                  url: photo.url,
-                  type: photo.type,
-              }
-            : null,
+        profilePhoto: formatFile(getFile(FileType.PROFILE_PHOTO)),
+        licenseDoc: formatFile(getFile(FileType.LICENSE)),
+        registrationDoc: formatFile(getFile(FileType.REGISTRATION_CERTIFICATE)),
     };
 };

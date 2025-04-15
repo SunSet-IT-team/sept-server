@@ -54,17 +54,17 @@ enum ChatType {
 
 model User {
   id               Int           @id @default(autoincrement())
-  email            String           @unique
+  email            String        @unique
   password         String
   phone            String?
-  firstName        String?
+  firstName        String
   lastName         String?
   role             Role
-  status           AccountStatus    @default(UNVERIFIED)
-  statusUpdatedAt  DateTime         @default(now())
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  priority         Int              @default(100)
+  status           AccountStatus @default(UNVERIFIED)
+  statusUpdatedAt  DateTime      @default(now())
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  priority         Int           @default(100)
 
   executorProfile  ExecutorProfile?
   customerProfile  CustomerProfile?
@@ -76,176 +76,166 @@ model User {
   files            File[]
   messages         Message[]
   chatParticipants ChatParticipant[]
+
+  customerOrders   Order[]         @relation("CustomerOrders")
+  executorOrders   Order[]         @relation("ExecutorOrders")
 }
 
 model AdminProfile {
-  id               Int           @id @default(autoincrement())
-  userId       Int @unique
-  recoveryCode String?
-
+  id           Int    @id @default(autoincrement())
+  userId       Int    @unique
+  recoveryCode String
   user         User   @relation(fields: [userId], references: [id])
 }
 
 model CustomerProfile {
-  id               Int           @id @default(autoincrement())
-  userId     Int    @unique
-  user       User      @relation(fields: [userId], references: [id])
-  priority         Int              @default(100)
+  id           Int    @id @default(autoincrement())
+  userId       Int    @unique
+  user         User   @relation(fields: [userId], references: [id])
+  priority     Int    @default(100)
+  reviewCount  Int    @default(0)
 
-  orders     Order[]
-  addresses  Address[]
-  favorites  Favorite[] @relation("CustomerFavorites")
+  addresses    Address[]
+  favorites    Favorite[] @relation("CustomerFavorites")
 }
 
 model ExecutorProfile {
-  id               Int           @id @default(autoincrement())
-  userId           Int   @unique
-  user             User     @relation(fields: [userId], references: [id])
-  priority         Int              @default(100)
+  id               Int    @id @default(autoincrement())
+  userId           Int    @unique
+  user             User   @relation(fields: [userId], references: [id])
+  priority         Int    @default(100)
 
   workFormat       WorkFormat
-  experience       Int?
+  experience       Int
   about            String?
-
   companyName      String?
   description      String?
-  city             String?
-  rating           Float?   @default(0.0)
-  completedOrders  Int      @default(0)
+  city             String
+  rating           Float   @default(0.0)
+  completedOrders  Int     @default(0)
 
-  orders           Order[]
   files            File[]
   favorites        Favorite[] @relation("ExecutorFavorites")
 }
 
 model Favorite {
-  id               Int           @id @default(autoincrement())
-  customerId  Int
-  executorId  Int
-  createdAt   DateTime @default(now())
+  id         Int    @id @default(autoincrement())
+  customerId Int
+  executorId Int
+  createdAt  DateTime @default(now())
 
-  customer    CustomerProfile @relation("CustomerFavorites", fields: [customerId], references: [id])
-  executor    ExecutorProfile @relation("ExecutorFavorites", fields: [executorId], references: [id])
+  customer   CustomerProfile @relation("CustomerFavorites", fields: [customerId], references: [id])
+  executor   ExecutorProfile @relation("ExecutorFavorites", fields: [executorId], references: [id])
 
   @@unique([customerId, executorId])
 }
 
-
 model File {
-  id               Int           @id @default(autoincrement())
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  id         Int    @id @default(autoincrement())
+  userId     Int
+  user       User   @relation(fields: [userId], references: [id])
 
-  executorId  Int?
-  executor    ExecutorProfile? @relation(fields: [executorId], references: [id])
+  executorId Int?
+  executor   ExecutorProfile? @relation(fields: [executorId], references: [id])
 
-  reportId    Int?
-  report      Report?  @relation(name: "ReportFiles", fields: [reportId], references: [id])
+  reportId   Int?
+  report     Report?  @relation(name: "ReportFiles", fields: [reportId], references: [id])
 
-  messageId   Int?
-  message     Message? @relation(fields: [messageId], references: [id])
+  messageId  Int?
+  message    Message? @relation(fields: [messageId], references: [id])
 
-  url         String
-  filename    String
-  mimetype    String
-  type        FileType
-  size        Int?
-  uploadedAt  DateTime @default(now())
+  url        String
+  filename   String
+  mimetype   String
+  type       FileType
+  size       Int?
+  uploadedAt DateTime @default(now())
 }
 
 model Order {
-  id               Int           @id @default(autoincrement())
+  id                         Int           @id @default(autoincrement())
+  title                      String        @default("")
+  objectType                 String
+  comment                    String?
 
-  title        String      @default("")
-  objectType   String
-  comment      String?
+  distanceToSeptic           Float
+  septicDepth                Float
+  septicVolume               Float
+  septicConstructionType     String
+  paymentMethod              String
+  workDate                   DateTime
+  status                     OrderStatus   @default(PENDING)
+  priority                   Int           @default(100)
+  price                      Float?
+  city                       String
 
-  distanceToSeptic       Float
-  septicDepth            Float
-  septicVolume           Float
-  septicConstructionType String
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
 
-  paymentMethod String
-  workDate      DateTime
-  status        OrderStatus @default(PENDING)
-  priority      Int         @default(100)
-  price         Float?
+  customerId                 Int
+  executorId                 Int
+  serviceId                  Int
 
-  addressId     Int?
-  address       Address?    @relation(fields: [addressId], references: [id])
+  customer                   User          @relation("CustomerOrders", fields: [customerId], references: [id])
+  executor                   User          @relation("ExecutorOrders", fields: [executorId], references: [id])
+  service                    Service       @relation(fields: [serviceId], references: [id])
 
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  customerId    Int
-  executorId    Int?
-
-  customer      CustomerProfile @relation(fields: [customerId], references: [id])
-  executor      ExecutorProfile? @relation(fields: [executorId], references: [id])
-
-  serviceId     Int?
-  service       Service?   @relation(fields: [serviceId], references: [id])
-
-  reports       Report[]
-  reviews       Review[]
-  chats         Chat[]
+  reports                    Report[]
+  reviews                    Review[]
+  chats                      Chat[]
 }
 
 model Service {
-  id               Int           @id @default(autoincrement())
-  name     String
-  priority Int      @default(100)
+  id        Int     @id @default(autoincrement())
+  name      String
+  priority  Int     @default(100)
+  createdAt DateTime @default(now())
 
-  createdAt DateTime    @default(now())
-
-  orders   Order[]
+  orders    Order[]
 }
 
 model Review {
-  id               Int           @id @default(autoincrement())
-  text       String
-  rating     Int
-  createdAt  DateTime @default(now())
+  id        Int     @id @default(autoincrement())
+  text      String
+  rating    Int
+  createdAt DateTime @default(now())
 
-  authorId   Int
-  targetId   Int
-  orderId    Int?
+  authorId  Int
+  targetId  Int
+  orderId   Int?
 
-  author     User     @relation("ReviewAuthor", fields: [authorId], references: [id])
-  target     User     @relation("ReviewTarget", fields: [targetId], references: [id])
-  order      Order?   @relation(fields: [orderId], references: [id])
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  target    User     @relation("ReviewTarget", fields: [targetId], references: [id])
+  order     Order?   @relation(fields: [orderId], references: [id])
 }
 
 model Address {
-  id               Int           @id @default(autoincrement())
-  userId       Int
-  user         CustomerProfile @relation(fields: [userId], references: [id])
+  id          Int    @id @default(autoincrement())
+  userId      Int
+  user        CustomerProfile @relation(fields: [userId], references: [id])
 
-  value        String
-  city         String?
-  postalCode   String?
-  coordinates  String?
-
-  isDefault    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-
-  orders       Order[]
+  value       String
+  city        String?
+  postalCode  String?
+  coordinates String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
 
 model EmailVerification {
-  id               Int           @id @default(autoincrement())
-  userId    Int   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         Int    @id @default(autoincrement())
+  userId     Int    @unique
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  code      String
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  code       String
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Report {
-  id               Int           @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   text      String?
   files     File[]   @relation("ReportFiles")
   orderId   Int
@@ -254,35 +244,35 @@ model Report {
 }
 
 model Chat {
-  id               Int           @id @default(autoincrement())
-  orderId     Int?
-  order       Order?   @relation(fields: [orderId], references: [id])
-  type        ChatType @default(GENERAL)
-  createdAt   DateTime @default(now())
+  id           Int    @id @default(autoincrement())
+  orderId      Int?
+  order        Order?   @relation(fields: [orderId], references: [id])
+  type         ChatType @default(GENERAL)
+  createdAt    DateTime @default(now())
 
   participants ChatParticipant[]
   messages     Message[]
 }
 
 model ChatParticipant {
-  id               Int           @id @default(autoincrement())
-  chatId    Int
-  userId    Int
+  id       Int @id @default(autoincrement())
+  chatId   Int
+  userId   Int
 
-  user      User     @relation(fields: [userId], references: [id])
-  chat      Chat     @relation(fields: [chatId], references: [id])
+  user     User @relation(fields: [userId], references: [id])
+  chat     Chat @relation(fields: [chatId], references: [id])
 
   @@unique([chatId, userId])
 }
 
 model Message {
-  id               Int           @id @default(autoincrement())
-  chatId     Int
-  senderId   Int
-  text       String?
-  createdAt  DateTime @default(now())
+  id        Int    @id @default(autoincrement())
+  chatId    Int
+  senderId  Int
+  text      String?
+  createdAt DateTime @default(now())
 
-  chat       Chat     @relation(fields: [chatId], references: [id])
-  sender     User     @relation(fields: [senderId], references: [id])
-  files      File[]
+  chat      Chat @relation(fields: [chatId], references: [id])
+  sender    User @relation(fields: [senderId], references: [id])
+  files     File[]
 }

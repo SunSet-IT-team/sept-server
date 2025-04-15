@@ -1,10 +1,4 @@
-import {
-    IsString,
-    IsNumber,
-    IsOptional,
-    IsUUID,
-    IsDateString,
-} from 'class-validator';
+import {IsString, IsNumber, IsOptional, IsDateString} from 'class-validator';
 
 export class CreateOrderDTO {
     @IsString()
@@ -32,14 +26,14 @@ export class CreateOrderDTO {
     @IsDateString()
     workDate!: string;
 
-    @IsOptional()
-    addressId?: number;
+    @IsString()
+    city!: string;
 
-    @IsOptional()
-    address?: string;
+    @IsNumber()
+    serviceId!: number;
 
-    @IsOptional()
-    serviceId?: number;
+    @IsNumber()
+    executorId!: number;
 
     @IsOptional()
     @IsNumber()

@@ -27,13 +27,16 @@
  *               - septicConstructionType
  *               - paymentMethod
  *               - workDate
+ *               - city
+ *               - serviceId
+ *               - executorId
  *             properties:
  *               objectType:
  *                 type: string
  *                 example: Жилой дом
  *               comment:
  *                 type: string
- *                 example: Нужно срочно
+ *                 example: Нужно срочно приехать до обеда
  *               distanceToSeptic:
  *                 type: number
  *                 example: 15.5
@@ -53,21 +56,41 @@
  *                 type: string
  *                 format: date-time
  *                 example: 2024-08-01T09:00:00.000Z
- *               addressId:
- *                 type: integer
- *                 example: 12
- *               address:
+ *               city:
  *                 type: string
- *                 example: Москва, ул. Ленина, д. 1
+ *                 example: Москва
  *               serviceId:
  *                 type: integer
  *                 example: 3
+ *               executorId:
+ *                 type: integer
+ *                 example: 7
  *               price:
  *                 type: number
  *                 example: 25000
  *     responses:
  *       201:
  *         description: Заказ успешно создан
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 42
+ *                 status:
+ *                   type: string
+ *                   example: PENDING
+ *                 workDate:
+ *                   type: string
+ *                   format: date-time
+ *                 executor:
+ *                   type: object
+ *                   description: Профиль исполнителя
+ *                 customer:
+ *                   type: object
+ *                   description: Профиль заказчика
  *       400:
  *         description: Ошибка валидации
  *       401:

@@ -8,4 +8,6 @@ export interface UserDto {
     role: Role;
     name: string;
     profile: ExecutorProfileDto | CustomerProfileDto | null;
+    customerOrdersCount: number;
+    executorOrdersCount: number;
 }

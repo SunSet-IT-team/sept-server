@@ -15,12 +15,10 @@ export const registerExecutor = async (
         const dto: RegisterExecutorDTO = req.body;
         const files = req.files as Record<string, Express.Multer.File[]>;
 
-        const result = await registerExecutorService({...dto, files});
+        const result = await registerExecutorService(dto, files);
 
         sendResponse(res, 200, successResponse(result));
-        return;
     } catch (err: any) {
         sendResponse(res, err.code || 400, errorResponse(err.message));
-        return;
     }
 };

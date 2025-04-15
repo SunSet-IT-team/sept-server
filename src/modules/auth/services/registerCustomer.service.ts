@@ -14,36 +14,29 @@ export const registerCustomerService = async (
 ) => {
     const {email, password, firstName, lastName, phone, address} = dto;
 
+    // Проверка на существующего пользователя
     const existingUser = await prisma.user.findUnique({
         where: {email},
         include: {
             emailVerification: true,
             customerProfile: {
                 include: {
-                    addresses: {
-                        select: {id: true, value: true},
-                    },
+                    addresses: true,
                 },
             },
         },
     });
 
     if (existingUser) {
+        // Повторная отправка кода для UNVERIFIED
         if (existingUser.status === AccountStatus.UNVERIFIED) {
             const newCode = generateVerificationCode();
+            const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
             await prisma.emailVerification.upsert({
                 where: {userId: existingUser.id},
-                update: {
-                    code: newCode,
-                    used: false,
-                    expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-                },
-                create: {
-                    userId: existingUser.id,
-                    code: newCode,
-                    expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-                },
+                update: {code: newCode, used: false, expiresAt},
+                create: {userId: existingUser.id, code: newCode, expiresAt},
             });
 
             await sendEmail(
@@ -53,7 +46,6 @@ export const registerCustomerService = async (
             );
 
             const userDto = await getUserById(existingUser.id);
-
             return {
                 message: 'Код подтверждения отправлен повторно',
                 user: userDto,
@@ -63,8 +55,10 @@ export const registerCustomerService = async (
         throw new Error('Пользователь с таким email уже зарегистрирован');
     }
 
+    // Создание нового пользователя
     const hashedPassword = await hashPassword(password);
-    const code = generateVerificationCode();
+    const verificationCode = generateVerificationCode();
+    const verificationExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     const createdUser = await prisma.user.create({
         data: {
@@ -80,35 +74,36 @@ export const registerCustomerService = async (
                     addresses: {
                         create: {
                             value: address,
+                            isDefault: true,
                         },
                     },
                 },
             },
             emailVerification: {
                 create: {
-                    code,
-                    expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+                    code: verificationCode,
+                    expiresAt: verificationExpiresAt,
                 },
             },
         },
     });
 
-    // загружаем файлы, если есть
-    if (files && Object.keys(files).length > 0) {
+    // Обработка файлов
+    const hasFiles = files && Object.keys(files).length > 0;
+    if (hasFiles) {
         await handleFileUpload(files, createdUser.id);
     }
 
+    // Отправка кода
     await sendEmail(
         createdUser.email,
         'Подтверждение почты',
-        verificationEmail(code)
+        verificationEmail(verificationCode)
     );
 
     const userDto = await getUserById(createdUser.id);
 
     return {
-        message:
-            'Регистрация прошла успешно. Код подтверждения отправлен на email.',
         user: userDto,
     };
 };
