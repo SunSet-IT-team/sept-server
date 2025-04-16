@@ -7,7 +7,6 @@ export const toExecutorProfile = (executor: any): ExecutorProfileDto => {
     );
 
     return {
-        id: executor.id,
         workFormat: executor.workFormat,
         experience: executor.experience,
         about: executor.about,

@@ -7,7 +7,6 @@ export const toCustomerProfile = (customer: any): CustomerProfileDto => {
     );
 
     return {
-        id: customer.id,
         phone: customer.user.phone,
         profilePhoto: photo
             ? {

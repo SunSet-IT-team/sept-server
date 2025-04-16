@@ -139,12 +139,12 @@
  *                         type: object
  *                         properties:
  *                           id:
- *                             type: string
+ *                             type: number
  *                           user:
  *                             type: object
  *                             properties:
  *                               id:
- *                                 type: string
+ *                                 type: number
  *                               email:
  *                                 type: string
  *                               firstName:
@@ -162,7 +162,7 @@
  *                               type: object
  *                               properties:
  *                                 id:
- *                                   type: string
+ *                                   type: number
  *                                 value:
  *                                   type: string
  *                                 city:
@@ -184,7 +184,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *     responses:
  *       200:
  *         description: Профиль найден
@@ -201,7 +201,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *     requestBody:
  *       required: true
  *       content:
@@ -231,7 +231,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *     responses:
  *       200:
  *         description: Удалён

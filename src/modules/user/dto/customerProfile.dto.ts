@@ -1,5 +1,4 @@
 export interface CustomerProfileDto {
-    id: number;
     ordersCount: number;
     phone: string | null;
     priority: number;

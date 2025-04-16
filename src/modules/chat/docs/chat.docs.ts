@@ -19,7 +19,7 @@
  *         description: ID заказа
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *     responses:
  *       200:
  *         description: Чат получен
@@ -45,7 +45,7 @@
  *         description: ID чата
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *       - name: page
  *         in: query
  *         required: false
@@ -83,7 +83,7 @@
  *         description: ID заказа
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *     responses:
  *       200:
  *         description: Чат с поддержкой получен или создан
@@ -149,7 +149,7 @@
  *       - in: query
  *         name: orderId
  *         schema:
- *           type: string
+ *           type: number
  *         description: ID заказа
  *     responses:
  *       200:
