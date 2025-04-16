@@ -19,6 +19,7 @@ export const getMyOrdersService = async ({
     filters = {},
     ...pagination
 }: GetOrdersParams) => {
+    console.log(role, userId, executorId, customerId, filters, pagination);
     const where: any = {};
 
     if (filters.status) {
@@ -54,6 +55,9 @@ export const getMyOrdersService = async ({
             defaultSortBy: 'createdAt',
             defaultOrder: 'desc',
             transformFilters: () => where,
+            include: {
+                service: true,
+            },
             orderMap: {
                 createdAt: {
                     createdAt:

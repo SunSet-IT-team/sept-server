@@ -20,6 +20,7 @@ export const createOrderService = async (
         serviceId,
         executorId,
         price,
+        address, // 👈 добавили адрес
     } = dto;
 
     const data: any = {
@@ -32,6 +33,7 @@ export const createOrderService = async (
         paymentMethod,
         workDate: new Date(workDate),
         city,
+        address: address ?? '', // 👈 сюда добавили текст адреса
         status: OrderStatus.PENDING,
         priority: 100,
         customer: {
@@ -58,10 +60,11 @@ export const createOrderService = async (
         data,
         include: {
             service: true,
+            customer: true,
+            executor: true,
         },
     });
 
     const orderDto = await toOrderDto(order);
-
     return orderDto;
 };

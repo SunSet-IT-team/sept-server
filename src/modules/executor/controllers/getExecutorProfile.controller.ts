@@ -8,8 +8,8 @@ import {
 
 export const getExecutorProfile = async (req: Request, res: Response) => {
     try {
-        const executorId = Number(req.user?.id);
-        if (!executorId) {
+        const userId = Number(req.params.id) || Number(req.user!.id);
+        if (!userId) {
             return sendResponse(
                 res,
                 401,
@@ -17,7 +17,7 @@ export const getExecutorProfile = async (req: Request, res: Response) => {
             );
         }
 
-        const profile = await getExecutorProfileService(executorId);
+        const profile = await getExecutorProfileService(userId);
         sendResponse(res, 200, successResponse(profile));
     } catch (error: any) {
         sendResponse(

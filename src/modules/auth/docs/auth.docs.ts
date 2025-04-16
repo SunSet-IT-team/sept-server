@@ -213,9 +213,8 @@
  *             required:
  *               - email
  *               - password
- *               - firstName
- *               - lastName
  *               - phone
+ *               - companyName
  *               - workFormat
  *               - experience
  *               - city
@@ -231,12 +230,6 @@
  *                 type: string
  *                 format: password
  *                 example: qwerty123
- *               firstName:
- *                 type: string
- *                 example: Иван
- *               lastName:
- *                 type: string
- *                 example: Иванов
  *               phone:
  *                 type: string
  *                 example: +79001234567

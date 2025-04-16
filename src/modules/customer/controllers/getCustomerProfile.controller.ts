@@ -7,7 +7,7 @@ import {
 import {getCustomerProfileService} from '../services/getCustomerProfile.service';
 
 export const getCustomerProfile = async (req: Request, res: Response) => {
-    const userId = Number(req.user!.id);
+    const userId = Number(req.params.id) || Number(req.user!.id);
     try {
         const customer = await getCustomerProfileService(userId);
         sendResponse(res, 200, successResponse(customer));

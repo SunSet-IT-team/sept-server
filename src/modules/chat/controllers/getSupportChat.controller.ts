@@ -20,7 +20,7 @@ export const getSupportChat = async (req: Request, res: Response) => {
         const chat = await getSupportChatService(userId, role, orderId);
         return sendResponse(res, 200, successResponse(chat));
     } catch (err: any) {
-        console.error('[getSupportChat]', err);
+        // console.error('[getSupportChat]', err);
         return sendResponse(res, 500, errorResponse('Ошибка создания чата'));
     }
 };
