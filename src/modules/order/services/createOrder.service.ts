@@ -23,6 +23,18 @@ export const createOrderService = async (
         address, // 👈 добавили адрес
     } = dto;
 
+    const user = await prisma.user.findUnique({
+        where: {id: executorId},
+    });
+
+    if (!user) {
+        throw new Error('Исполнитель не найден');
+    }
+
+    if (user.role !== 'EXECUTOR') {
+        throw new Error('Пользователь не исполнитель');
+    }
+
     const data: any = {
         objectType,
         comment,
