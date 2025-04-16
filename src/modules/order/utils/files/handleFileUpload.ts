@@ -16,7 +16,7 @@ export async function handleFileUpload(
             filePromises.push(
                 prisma.file.create({
                     data: {
-                        url: `/files/${file.filename}`,
+                        url: `/uploads/${file.filename}`,
                         filename: file.filename,
                         mimetype: file.mimetype,
                         type: fileType,
