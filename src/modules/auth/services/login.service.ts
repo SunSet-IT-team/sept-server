@@ -28,7 +28,7 @@ export const loginService = async (
 
     const userDto = await getUserById(user.id);
 
-    const token = generateToken({sub: user.id, role: user.role});
+    const token = generateToken({sub: userDto.id, role: user.role});
 
     return {
         token,

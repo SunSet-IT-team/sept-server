@@ -33,16 +33,19 @@ export const updateExecutorProfileService = async (
         }
     }
 
+    // Обновляем пользователя
     await prisma.user.update({
         where: {id: userId},
         data: filteredUserData,
     });
 
+    // Обновляем профиль исполнителя
     await prisma.executorProfile.update({
         where: {userId},
         data: filteredExecutorData,
     });
 
+    // Удаление файлов
     if (fileIdsToDelete?.length) {
         const numericIdsToDelete = fileIdsToDelete.map((id) => Number(id));
 
@@ -72,33 +75,25 @@ export const updateExecutorProfileService = async (
         }
     }
 
+    // Загрузка новых файлов
     if (files) {
         await handleFileUpload(files, userId);
     }
 
+    // Получение актуального пользователя
     const fullUser = await prisma.user.findUnique({
         where: {id: userId},
         include: {
-            executorProfile: {
+            files: {
                 select: {
-                    orders: true,
-                },
-                include: {
-                    orders: true,
-                    user: {
-                        include: {
-                            files: {
-                                select: {
-                                    id: true,
-                                    url: true,
-                                    filename: true,
-                                    type: true,
-                                },
-                            },
-                        },
-                    },
+                    id: true,
+                    url: true,
+                    filename: true,
+                    type: true,
                 },
             },
+            executorOrders: true,
+            executorProfile: true,
         },
     });
 

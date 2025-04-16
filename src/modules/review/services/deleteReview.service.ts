@@ -11,15 +11,11 @@ export const deleteReviewService = async ({
     userId,
     userRole,
 }: DeleteReviewData) => {
-    // Найти отзыв
+    // Найти отзыв с заказом
     const review = await prisma.review.findUnique({
         where: {id: reviewId},
         include: {
-            order: {
-                include: {
-                    executor: true,
-                },
-            },
+            order: true, // теперь достаточно, чтобы получить executorId
         },
     });
 
@@ -27,19 +23,17 @@ export const deleteReviewService = async ({
         throw new Error('Отзыв не найден');
     }
 
-    // Проверка прав: либо автор, либо ADMIN
     if (review.authorId !== userId && userRole !== 'ADMIN') {
         throw new Error('Нет прав на удаление отзыва');
     }
 
-    const executorUserId = review.order?.executor?.userId;
+    const executorUserId = review.order?.executorId;
 
     // Удаляем отзыв
     await prisma.review.delete({
         where: {id: reviewId},
     });
 
-    // Пересчитываем рейтинг, если есть executor
     if (executorUserId) {
         await recalcExecutorRating(executorUserId);
     }
@@ -52,6 +46,7 @@ async function recalcExecutorRating(executorUserId: number) {
         where: {targetId: executorUserId},
         select: {rating: true},
     });
+
     if (!reviews.length) {
         await prisma.executorProfile.update({
             where: {userId: executorUserId},
@@ -59,8 +54,10 @@ async function recalcExecutorRating(executorUserId: number) {
         });
         return;
     }
+
     const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
     const average = sum / reviews.length;
+
     await prisma.executorProfile.update({
         where: {userId: executorUserId},
         data: {rating: average},

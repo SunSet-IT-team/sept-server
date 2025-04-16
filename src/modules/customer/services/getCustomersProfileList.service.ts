@@ -2,6 +2,7 @@ import {Prisma} from '@prisma/client';
 import {prisma} from '../../../core/database/prisma';
 import {paginate} from '../../../core/utils/pagination';
 import {getUserById} from '../../user/services/getUser';
+import {toUserDto} from '../../user/utils/toUser';
 
 export const getCustomersListService = async (query: any) => {
     const orderMap: Record<
@@ -66,7 +67,7 @@ export const getCustomersListService = async (query: any) => {
 
     const items = await Promise.all(
         result.items.map((customerProfile) =>
-            getUserById(customerProfile.userId)
+            toUserDto(getUserById(customerProfile.userId))
         )
     );
 

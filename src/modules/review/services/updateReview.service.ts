@@ -15,15 +15,10 @@ export const updateReviewService = async ({
     userId,
     userRole,
 }: UpdateReviewData) => {
-    // Находим отзыв
     const review = await prisma.review.findUnique({
         where: {id: reviewId},
         include: {
-            order: {
-                include: {
-                    executor: true,
-                },
-            },
+            order: true,
         },
     });
 
@@ -49,8 +44,8 @@ export const updateReviewService = async ({
         },
     });
 
-    if (review.order?.executor) {
-        await recalcExecutorRating(review.order.executor.userId);
+    if (review.order?.executorId) {
+        await recalcExecutorRating(review.order.executorId);
     }
 
     return updatedReview;
@@ -61,6 +56,7 @@ async function recalcExecutorRating(executorUserId: number) {
         where: {targetId: executorUserId},
         select: {rating: true},
     });
+
     if (!reviews.length) {
         await prisma.executorProfile.update({
             where: {userId: executorUserId},
@@ -68,8 +64,10 @@ async function recalcExecutorRating(executorUserId: number) {
         });
         return;
     }
+
     const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
     const average = sum / reviews.length;
+
     await prisma.executorProfile.update({
         where: {userId: executorUserId},
         data: {rating: average},
