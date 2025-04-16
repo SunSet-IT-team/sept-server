@@ -4,7 +4,7 @@ import {ChatType, Role} from '@prisma/client';
 export const getSupportChatService = async (
     userId: number,
     role: Role,
-    orderId: number
+    orderId?: number // делаем необязательным
 ) => {
     if (role !== Role.CUSTOMER && role !== Role.EXECUTOR) {
         throw new Error(
@@ -12,14 +12,19 @@ export const getSupportChatService = async (
         );
     }
 
-    const existing = await prisma.chat.findFirst({
-        where: {
-            type: ChatType.ORDER_ADMIN,
-            orderId,
-            participants: {
-                some: {userId},
-            },
+    const whereClause: any = {
+        type: ChatType.ORDER_ADMIN,
+        participants: {
+            some: {userId},
         },
+    };
+
+    if (orderId) {
+        whereClause.orderId = orderId;
+    }
+
+    const existing = await prisma.chat.findFirst({
+        where: whereClause,
         include: {
             participants: {
                 include: {user: true},
@@ -36,17 +41,19 @@ export const getSupportChatService = async (
 
     if (!admins.length) throw new Error('Нет администраторов для поддержки');
 
-    const chat = await prisma.chat.create({
-        data: {
-            type: ChatType.ORDER_ADMIN,
-            orderId,
-            participants: {
-                create: [
-                    {userId},
-                    ...admins.map((admin) => ({userId: admin.id})),
-                ],
-            },
+    const data: any = {
+        type: ChatType.ORDER_ADMIN,
+        participants: {
+            create: [{userId}, ...admins.map((admin) => ({userId: admin.id}))],
         },
+    };
+
+    if (orderId) {
+        data.orderId = orderId;
+    }
+
+    const chat = await prisma.chat.create({
+        data,
         include: {
             participants: {
                 include: {user: true},
