@@ -18,7 +18,7 @@
  *         name: orderId
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *         description: ID заказа, по которому оставляется отзыв
  *     requestBody:
  *       required: true
@@ -51,17 +51,17 @@
  *                   type: object
  *                   properties:
  *                     id:
- *                       type: string
+ *                       type: number
  *                     text:
  *                       type: string
  *                     rating:
  *                       type: integer
  *                     authorId:
- *                       type: string
+ *                       type: number
  *                     targetId:
- *                       type: string
+ *                       type: number
  *                     orderId:
- *                       type: string
+ *                       type: number
  *                     createdAt:
  *                       type: string
  *                       format: date-time
@@ -84,7 +84,7 @@
  *         name: targetId
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *         description: ID пользователя (обычно исполнителя), на которого оставлены отзывы
  *     responses:
  *       200:
@@ -103,7 +103,7 @@
  *                     type: object
  *                     properties:
  *                       id:
- *                         type: string
+ *                         type: number
  *                       text:
  *                         type: string
  *                       rating:
@@ -115,7 +115,7 @@
  *                         type: object
  *                         properties:
  *                           id:
- *                             type: string
+ *                             type: number
  *                           firstName:
  *                             type: string
  *                           lastName:
@@ -126,7 +126,7 @@
  *                         type: object
  *                         properties:
  *                           id:
- *                             type: string
+ *                             type: number
  *                           title:
  *                             type: string
  *                           status:
@@ -150,7 +150,7 @@
  *         name: reviewId
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *         description: ID отзыва, который нужно изменить
  *     requestBody:
  *       required: false
@@ -180,17 +180,17 @@
  *                   type: object
  *                   properties:
  *                     id:
- *                       type: string
+ *                       type: number
  *                     text:
  *                       type: string
  *                     rating:
  *                       type: integer
  *                     authorId:
- *                       type: string
+ *                       type: number
  *                     targetId:
- *                       type: string
+ *                       type: number
  *                     orderId:
- *                       type: string
+ *                       type: number
  *       400:
  *         description: Ошибка (например, нет прав или отзыв не найден)
  *       401:
@@ -206,7 +206,7 @@
  *         name: reviewId
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *         description: ID отзыва, который нужно удалить
  *     responses:
  *       200:

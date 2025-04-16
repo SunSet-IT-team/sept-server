@@ -42,7 +42,7 @@
  *                     type: object
  *                     properties:
  *                       id:
- *                         type: string
+ *                         type: number
  *                       url:
  *                         type: string
  *                       filename:
@@ -65,9 +65,9 @@
  *       - in: path
  *         name: filename
  *         required: true
- *         description: Название файла (с UUID и расширением)
+ *         description: Название файла (с ID и расширением)
  *         schema:
- *           type: string
+ *           type: number
  *           example: "a1b2c3d4-5678-90ab-cdef-1234567890ab.jpg"
  *     responses:
  *       200:

@@ -9,8 +9,7 @@ export const toCustomerProfile = (
     const photo = files.find((f) => f.type === FileType.PROFILE_PHOTO);
 
     return {
-        id: customer.id,
-        phone: phone ?? null,
+        phone: customer.user.phone,
         profilePhoto: photo
             ? {
                   id: photo.id,

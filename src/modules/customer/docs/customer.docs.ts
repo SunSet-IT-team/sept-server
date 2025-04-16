@@ -223,12 +223,12 @@
  *                         type: object
  *                         properties:
  *                           id:
- *                             type: string
+ *                             type: number
  *                           user:
  *                             type: object
  *                             properties:
  *                               id:
- *                                 type: string
+ *                                 type: number
  *                               email:
  *                                 type: string
  *                               firstName:
@@ -246,7 +246,7 @@
  *                               type: object
  *                               properties:
  *                                 id:
- *                                   type: string
+ *                                   type: number
  *                                 value:
  *                                   type: string
  *                                 city:
@@ -268,13 +268,42 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *     responses:
  *       200:
  *         description: Профиль найден
  *       404:
  *         description: Не найден
  *
+ *   patch:
+ *     summary: Обновить профиль заказчика по ID (админ)
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: number
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Обновлено
+ *       403:
+ *         description: Нет прав
  *
  *   delete:
  *     summary: Удалить заказчика по ID (админ)
@@ -286,7 +315,7 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
+ *           type: number
  *     responses:
  *       200:
  *         description: Удалён

@@ -118,8 +118,7 @@
  *               fileIdsToDelete:
  *                 type: array
  *                 items:
- *                   type: string
- *                   format: uuid
+ *                   type: number
  *               profilePhoto:
  *                 type: string
  *                 format: binary
@@ -153,9 +152,8 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
- *           format: uuid
- *         description: UUID исполнителя
+ *           type: number
+ *         description: ID исполнителя
  *     responses:
  *       200:
  *         description: Профиль исполнителя получен
@@ -176,9 +174,8 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
- *           format: uuid
- *         description: UUID исполнителя
+ *           type: number
+ *         description: ID исполнителя
  *     requestBody:
  *       required: true
  *       content:
@@ -206,7 +203,7 @@
  *               fileIdsToDelete:
  *                 type: array
  *                 items:
- *                   type: string
+ *                   type: number
  *                   format: uuid
  *               profilePhoto:
  *                 type: string
@@ -243,9 +240,8 @@
  *         in: path
  *         required: true
  *         schema:
- *           type: string
- *           format: uuid
- *         description: UUID исполнителя
+ *           type: number
+ *         description: id исполнителя
  *     responses:
  *       200:
  *         description: Исполнитель помечен удалённым

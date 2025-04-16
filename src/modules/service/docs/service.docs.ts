@@ -48,8 +48,8 @@
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: UUID услуги
+ *           type: number
+ *         description: ID услуги
  *     responses:
  *       200:
  *         description: Услуга успешно получена
@@ -110,8 +110,8 @@
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: UUID услуги
+ *           type: number
+ *         description: ID услуги
  *     requestBody:
  *       required: true
  *       content:
@@ -149,8 +149,8 @@
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: UUID услуги
+ *           type: number
+ *         description: ID услуги
  *     responses:
  *       200:
  *         description: Услуга успешно удалена
