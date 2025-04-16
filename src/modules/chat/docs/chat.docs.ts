@@ -71,22 +71,53 @@
 
 /**
  * @swagger
- * /chat/order/{orderId}/support:
+ * /chat/support:
  *   post:
- *     summary: Получить или создать чат с поддержкой по заказу
+ *     summary: Получить или создать чат с поддержкой
+ *     description: Создаёт или возвращает чат с поддержкой. Может быть привязан к заказу (если указан orderId).
  *     tags: [Chat]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - name: orderId
- *         in: path
- *         description: ID заказа
- *         required: true
- *         schema:
- *           type: number
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               orderId:
+ *                 type: integer
+ *                 description: ID заказа для привязки чата (необязательно)
+ *                 example: 123
  *     responses:
  *       200:
  *         description: Чат с поддержкой получен или создан
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 type:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 participants:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           email:
+ *                             type: string
+ *                           role:
+ *                             type: string
  *       401:
  *         description: Неавторизован
  *       500:
@@ -117,43 +148,6 @@
  *     responses:
  *       200:
  *         description: Список чатов с поддержкой
- *       403:
- *         description: Нет прав
- */
-
-/**
- * @swagger
- * /chat/admin/all:
- *   get:
- *     summary: Получить все чаты (только для администратора)
- *     tags: [Chat]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *         description: Номер страницы
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: Количество чатов на страницу
- *       - in: query
- *         name: type
- *         schema:
- *           type: string
- *           enum: [GENERAL, ORDER_CUSTOMER, ORDER_ADMIN, SUPPORT_CUSTOMER, SUPPORT_EXECUTOR]
- *         description: Тип чата
- *       - in: query
- *         name: orderId
- *         schema:
- *           type: number
- *         description: ID заказа
- *     responses:
- *       200:
- *         description: Список чатов
  *       403:
  *         description: Нет прав
  */

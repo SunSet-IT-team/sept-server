@@ -5,12 +5,13 @@ import {getMessagesByChatId} from '../controllers/getMessageByChatId.controller'
 import {getSupportChat} from '../controllers/getSupportChat.controller';
 import {checkRole} from '../../../core/middleware/checkRole';
 import {Role} from '@prisma/client';
+import {getAllChats} from '../controllers/getChats.controller';
 
 export const chatRouter = Router();
 
 chatRouter.get('/order/:id', authMiddleware, getOrderChat);
 chatRouter.get('/:id/messages', authMiddleware, getMessagesByChatId);
-chatRouter.post('/order/:orderId/support', authMiddleware, getSupportChat);
-chatRouter.get('/support', checkRole(Role.ADMIN), getSupportChat);
+chatRouter.post('/support', authMiddleware, getSupportChat);
+chatRouter.get('/support', checkRole(Role.ADMIN), getAllChats);
 
 // chatRouter.post('/support', authMiddleware, getSupportChat); // Создать чат с админом
