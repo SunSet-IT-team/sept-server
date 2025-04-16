@@ -1,4 +1,4 @@
-import {Role} from '@prisma/client';
+import {OrderStatus, Role} from '@prisma/client';
 import {prisma} from '../../../core/database/prisma';
 
 export const deleteOrderService = async (
@@ -12,17 +12,12 @@ export const deleteOrderService = async (
 
     const order = await prisma.order.findUnique({
         where: {id: orderId},
-        include: {customer: true},
     });
 
     if (!order) throw new Error('Заказ не найден');
 
-    if (order.customer.userId !== userId && role === Role.CUSTOMER) {
-        throw new Error('Вы не являетесь владельцем заказа');
-    }
-
-    if (order.status !== 'PENDING') {
-        throw new Error('Удалить можно только заказ в статусе PENDING');
+    if (order.status === OrderStatus.IN_PROGRESS) {
+        throw new Error('Удалить можно только заказ который в работе нельзя');
     }
 
     await prisma.order.delete({

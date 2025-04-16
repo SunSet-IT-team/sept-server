@@ -15,30 +15,26 @@ export const createReviewService = async ({
 }: CreateReviewData) => {
     const order = await prisma.order.findUnique({
         where: {id: orderId},
-        include: {
-            executor: true,
-            customer: {include: {user: true}},
-        },
     });
 
     if (!order) {
         throw new Error('Заказ не найден');
     }
 
-    // Проверка, что автор - владелец заказа
-    if (order.customer.userId !== authorId) {
+    // Проверка, что автор — владелец заказа
+    if (order.customerId !== authorId) {
         throw new Error('Вы не являетесь владельцем этого заказа');
     }
 
-    if (!order.executor) {
+    if (!order.executorId) {
         throw new Error('У заказа нет исполнителя');
     }
 
-    // Проверяем, что у автора ещё нет отзыва по этому же заказу/исполнителю
+    // Проверка, что отзыв ещё не был создан
     const existingReview = await prisma.review.findFirst({
         where: {
             authorId,
-            targetId: order.executor.userId,
+            targetId: order.executorId,
             orderId,
         },
     });
@@ -47,13 +43,13 @@ export const createReviewService = async ({
         throw new Error('Вы уже оставляли отзыв на этот заказ');
     }
 
-    // Создаём отзыв
+    // Создание отзыва
     const review = await prisma.review.create({
         data: {
             text,
             rating,
             authorId,
-            targetId: order.executor.userId,
+            targetId: order.executorId,
             orderId,
         },
         include: {
@@ -63,16 +59,12 @@ export const createReviewService = async ({
         },
     });
 
-    // Теперь пересчитаем рейтинг исполнителя
-    await recalcExecutorRating(order.executor.userId);
+    // Пересчёт рейтинга
+    await recalcExecutorRating(order.executorId);
 
     return review;
 };
 
-/**
- * Пересчитываем средний рейтинг исполнителя по всем отзывам,
- * где targetId = userId исполнителя.
- */
 async function recalcExecutorRating(executorUserId: number) {
     const reviews = await prisma.review.findMany({
         where: {targetId: executorUserId},
@@ -80,7 +72,6 @@ async function recalcExecutorRating(executorUserId: number) {
     });
 
     if (!reviews.length) {
-        // Если отзывов нет, выставим rating = 0
         await prisma.executorProfile.update({
             where: {userId: executorUserId},
             data: {rating: 0},

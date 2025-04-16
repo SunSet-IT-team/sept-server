@@ -1,5 +1,6 @@
 import {Role} from '@prisma/client';
 import {prisma} from '../../../core/database/prisma';
+import {toOrderDto} from '../utils/toOrder';
 
 export const updateOrderService = async (
     orderId: number,
@@ -7,31 +8,37 @@ export const updateOrderService = async (
     role: Role,
     data: Record<string, any>
 ) => {
-    if (role !== Role.CUSTOMER && role !== Role.ADMIN) {
-        throw new Error('Доступ запрещён');
-    }
-
     const order = await prisma.order.findUnique({
         where: {id: orderId},
-        include: {
-            customer: true,
-        },
     });
 
     if (!order) throw new Error('Заказ не найден');
 
-    if (order.customer.userId !== userId) {
+    const isOwner = order.customerId === userId;
+    const isAdmin = role === Role.ADMIN;
+
+    if (!isOwner && !isAdmin) {
         throw new Error('Нет доступа к редактированию заказа');
     }
 
-    if (order.status !== 'PENDING' && role !== Role.ADMIN) {
-        throw new Error('Заказ нельзя изменить после начала выполнения');
+    if (order.status !== 'PENDING' && !isAdmin) {
+        throw new Error('Нельзя изменить заказ после начала выполнения');
     }
 
     const updated = await prisma.order.update({
         where: {id: orderId},
         data,
+        include: {
+            service: true,
+            customer: {
+                include: {
+                    files: true,
+                    customerProfile: {include: {addresses: true}},
+                },
+            },
+            executor: {include: {files: true, executorProfile: true}},
+        },
     });
 
-    return updated;
+    return toOrderDto(updated);
 };
