@@ -100,13 +100,20 @@
  *         multipart/form-data:
  *           schema:
  *             type: object
- *             required: [email, password, address]
+ *             required:
+ *               - email
+ *               - password
+ *               - firstName
+ *               - phone
+ *               - address
  *             properties:
  *               email:
  *                 type: string
+ *                 format: email
  *                 example: user@example.com
  *               password:
  *                 type: string
+ *                 format: password
  *                 example: secret123
  *               firstName:
  *                 type: string
@@ -116,7 +123,7 @@
  *                 example: Иванов
  *               phone:
  *                 type: string
- *                 example: "+7 (999) 123-45-67"
+ *                 example: +79991234567
  *               address:
  *                 type: string
  *                 example: Москва, ул. Ленина, д.1
@@ -125,9 +132,68 @@
  *                 format: binary
  *     responses:
  *       200:
- *         description: Успешная регистрация
+ *         description: Успешная регистрация заказчика
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Регистрация прошла успешно. Код подтверждения отправлен на email.
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 42
+ *                     email:
+ *                       type: string
+ *                       example: user@example.com
+ *                     firstName:
+ *                       type: string
+ *                       example: Иван
+ *                     lastName:
+ *                       type: string
+ *                       example: Иванов
+ *                     phone:
+ *                       type: string
+ *                       example: +79991234567
+ *                     role:
+ *                       type: string
+ *                       example: CUSTOMER
+ *                     status:
+ *                       type: string
+ *                       example: UNVERIFIED
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     customerProfile:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                         addresses:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                               value:
+ *                                 type: string
+ *                               isDefault:
+ *                                 type: boolean
  *       400:
  *         description: Ошибка регистрации
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Пользователь с таким email уже зарегистрирован
  */
 
 /**
@@ -139,54 +205,149 @@
  *     consumes:
  *       - multipart/form-data
  *     requestBody:
+ *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
- *             required: [email, password, workFormat]
+ *             required:
+ *               - email
+ *               - password
+ *               - firstName
+ *               - lastName
+ *               - phone
+ *               - workFormat
+ *               - experience
+ *               - city
+ *               - profilePhoto
+ *               - registrationDoc
+ *               - licenseDoc
  *             properties:
  *               email:
  *                 type: string
+ *                 format: email
+ *                 example: example@mail.com
  *               password:
  *                 type: string
+ *                 format: password
+ *                 example: qwerty123
  *               firstName:
  *                 type: string
+ *                 example: Иван
  *               lastName:
  *                 type: string
+ *                 example: Иванов
  *               phone:
  *                 type: string
+ *                 example: +79001234567
  *               workFormat:
  *                 type: string
  *                 enum: [INDIVIDUAL, LEGAL_ENTITY, SOLE_PROPRIETOR]
  *               experience:
  *                 type: string
+ *                 example: "5"
+ *               city:
+ *                 type: string
+ *                 example: Москва
  *               about:
  *                 type: string
+ *                 example: "Работаю по всему региону. Отзывы положительные."
  *               companyName:
  *                 type: string
+ *                 example: ООО 'Септик-Мастер'
  *               profilePhoto:
  *                 type: string
  *                 format: binary
  *               registrationDoc:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
+ *                 type: string
+ *                 format: binary
  *               licenseDoc:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *               otherFiles:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Успешная регистрация исполнителя
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Регистрация прошла успешно. Код подтверждения отправлен на email.
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 12
+ *                     email:
+ *                       type: string
+ *                       example: example@mail.com
+ *                     firstName:
+ *                       type: string
+ *                       example: Иван
+ *                     lastName:
+ *                       type: string
+ *                       example: Иванов
+ *                     phone:
+ *                       type: string
+ *                       example: +79001234567
+ *                     role:
+ *                       type: string
+ *                       enum: [ADMIN, CUSTOMER, EXECUTOR]
+ *                       example: EXECUTOR
+ *                     status:
+ *                       type: string
+ *                       enum: [UNVERIFIED, VERIFIED, DELETED, BANNED]
+ *                       example: UNVERIFIED
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2024-04-15T12:00:00.000Z
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2024-04-15T12:00:00.000Z
+ *                     executorProfile:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 3
+ *                         workFormat:
+ *                           type: string
+ *                           enum: [INDIVIDUAL, LEGAL_ENTITY, SOLE_PROPRIETOR]
+ *                           example: INDIVIDUAL
+ *                         experience:
+ *                           type: integer
+ *                           example: 5
+ *                         about:
+ *                           type: string
+ *                           example: Опыт более 5 лет
+ *                         companyName:
+ *                           type: string
+ *                           example: ИП Иванов
+ *                         city:
+ *                           type: string
+ *                           example: Москва
+ *                         rating:
+ *                           type: number
+ *                           format: float
+ *                           example: 0.0
+ *                         completedOrders:
+ *                           type: integer
+ *                           example: 0
  *       400:
- *         description: Ошибка регистрации
+ *         description: Ошибка валидации или регистрации
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Пользователь с таким email уже зарегистрирован
  */
 
 /**

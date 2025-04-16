@@ -5,6 +5,8 @@ import {
     IsString,
     MinLength,
     Matches,
+    IsEnum,
+    IsNumberString,
 } from 'class-validator';
 import {Type} from 'class-transformer';
 import {WorkFormat} from '@prisma/client';
@@ -21,21 +23,25 @@ export class RegisterExecutorDTO {
     @IsNotEmpty({message: 'Имя обязательно'})
     firstName!: string;
 
+    @IsOptional()
     @IsString()
-    @IsNotEmpty({message: 'Фамилия обязательна'})
-    lastName!: string;
+    lastName?: string;
 
     @IsString()
     @Matches(/^\+?[0-9]{10,15}$/, {message: 'Номер телефона некорректный'})
     phone!: string;
 
-    @IsString()
-    @IsNotEmpty({message: 'Формат работы обязателен'})
+    @IsEnum(WorkFormat, {message: 'Недопустимый формат работы'})
     workFormat!: WorkFormat;
 
-    @IsOptional()
     @IsString()
-    experience?: string;
+    @IsNotEmpty({message: 'Опыт обязателен'})
+    @IsNumberString({}, {message: 'Опыт должен быть числом'})
+    experience!: string;
+
+    @IsString()
+    @IsNotEmpty({message: 'Город обязателен'})
+    city!: string;
 
     @IsOptional()
     @IsString()
@@ -45,7 +51,16 @@ export class RegisterExecutorDTO {
     @IsString()
     companyName?: string;
 
-    // Не валидируем файлы как обычные поля — они приходят отдельно через multer
+    // Файлы — приходят через multer, поэтому не валидируем содержимое
+    @IsOptional()
     @Type(() => Object)
-    files!: Record<string, Express.Multer.File[]>;
+    profilePhoto!: Express.Multer.File;
+
+    @IsOptional()
+    @Type(() => Object)
+    registrationDoc!: Express.Multer.File;
+
+    @IsOptional()
+    @Type(() => Object)
+    licenseDoc!: Express.Multer.File;
 }

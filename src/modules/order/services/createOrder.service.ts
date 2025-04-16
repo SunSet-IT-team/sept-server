@@ -1,6 +1,7 @@
 import {prisma} from '../../../core/database/prisma';
 import {CreateOrderDTO} from '../dtos/createOrder.dto';
 import {OrderStatus} from '@prisma/client';
+import {toOrderDto} from '../utils/toOrder';
 
 export const createOrderService = async (
     dto: CreateOrderDTO,
@@ -15,9 +16,9 @@ export const createOrderService = async (
         septicConstructionType,
         paymentMethod,
         workDate,
-        addressId,
-        address, // строка
+        city,
         serviceId,
+        executorId,
         price,
     } = dto;
 
@@ -30,41 +31,19 @@ export const createOrderService = async (
         septicConstructionType,
         paymentMethod,
         workDate: new Date(workDate),
+        city,
         status: OrderStatus.PENDING,
+        priority: 100,
         customer: {
-            connect: {
-                userId: customerId,
-            },
+            connect: {id: customerId},
+        },
+        executor: {
+            connect: {id: executorId},
         },
     };
 
-    if (price) data.price = price;
-
-    if (addressId) {
-        // Используем существующий адрес
-        data.address = {
-            connect: {
-                id: addressId,
-            },
-        };
-    } else if (address) {
-        // Создаём новый адрес
-        const newAddress = await prisma.address.create({
-            data: {
-                value: address,
-                user: {
-                    connect: {
-                        userId: customerId,
-                    },
-                },
-            },
-        });
-
-        data.address = {
-            connect: {
-                id: newAddress.id,
-            },
-        };
+    if (price) {
+        data.price = price;
     }
 
     if (serviceId) {
@@ -75,11 +54,14 @@ export const createOrderService = async (
         };
     }
 
-    return prisma.order.create({
+    const order = await prisma.order.create({
         data,
         include: {
             service: true,
-            address: true,
         },
     });
+
+    const orderDto = await toOrderDto(order);
+
+    return orderDto;
 };

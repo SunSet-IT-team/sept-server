@@ -12,4 +12,5 @@ export interface CustomerProfileDto {
         id: number;
         value: string;
     }[];
+    reviewCount: number;
 }

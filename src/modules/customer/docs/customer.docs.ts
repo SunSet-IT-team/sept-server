@@ -28,24 +28,108 @@
  *     tags: [Customer]
  *     security:
  *       - bearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               firstName:
  *                 type: string
+ *                 example: Алексей
  *               lastName:
  *                 type: string
+ *                 example: Смирнов
  *               phone:
  *                 type: string
+ *                 example: +79876543210
+ *               updateAddresses:
+ *                 type: string
+ *                 format: json
+ *                 description: JSON-массив адресов, которые нужно обновить
+ *                 example: '[{"id":1,"value":"Москва, Ленина 1","isDefault":true}]'
+ *               deleteAddressIds:
+ *                 type: string
+ *                 format: json
+ *                 description: JSON-массив ID адресов для удаления
+ *                 example: '[2, 3]'
+ *               newAddresses:
+ *                 type: string
+ *                 format: json
+ *                 description: JSON-массив новых адресов
+ *                 example: '[{"value":"СПб, Невский 100","isDefault":false}]'
+ *               profilePhoto:
+ *                 type: string
+ *                 format: binary
+ *                 description: Новое фото профиля
  *     responses:
  *       200:
- *         description: Профиль обновлён
+ *         description: Профиль успешно обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Профиль успешно обновлён
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 12
+ *                     email:
+ *                       type: string
+ *                       example: user@example.com
+ *                     firstName:
+ *                       type: string
+ *                     lastName:
+ *                       type: string
+ *                     phone:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                       example: CUSTOMER
+ *                     customerProfile:
+ *                       type: object
+ *                       properties:
+ *                         addresses:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                               value:
+ *                                 type: string
+ *                               isDefault:
+ *                                 type: boolean
+ *                         priority:
+ *                           type: integer
+ *                     profilePhoto:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                         url:
+ *                           type: string
+ *                         type:
+ *                           type: string
+ *                           example: PROFILE_PHOTO
  *       400:
- *         description: Ошибка обновления
+ *         description: Ошибка валидации или данных
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Пользователь не найден или не является заказчиком
  */
 
 /**
@@ -237,40 +321,124 @@
  *         description: Удалён
  *       404:
  *         description: Не найден
+ *
  */
 
 /**
  * @swagger
- * /customer/address:
- *   post:
- *     summary: Создать новый адрес заказчика
+ * /customer/{id}:
+ *   patch:
+ *     summary: Обновление профиля заказчика по ID
  *     tags: [Customer]
  *     security:
  *       - bearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID пользователя
+ *         schema:
+ *           type: integer
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
- *             required:
- *               - value
  *             properties:
- *               value:
+ *               firstName:
  *                 type: string
- *                 description: Полный адрес
- *               city:
+ *                 example: Алексей
+ *               lastName:
  *                 type: string
- *               postalCode:
+ *                 example: Смирнов
+ *               phone:
  *                 type: string
- *               coordinates:
+ *                 example: +79876543210
+ *               updateAddresses:
  *                 type: string
- *               isDefault:
- *                 type: boolean
- *                 description: Сделать адрес основным
+ *                 format: json
+ *                 description: JSON-массив адресов, которые нужно обновить
+ *                 example: '[{"id":1,"value":"Москва, Ленина 1","isDefault":true}]'
+ *               deleteAddressIds:
+ *                 type: string
+ *                 format: json
+ *                 description: JSON-массив ID адресов для удаления
+ *                 example: '[2, 3]'
+ *               newAddresses:
+ *                 type: string
+ *                 format: json
+ *                 description: JSON-массив новых адресов
+ *                 example: '[{"value":"СПб, Невский 100","isDefault":false}]'
+ *               profilePhoto:
+ *                 type: string
+ *                 format: binary
+ *                 description: Новое фото профиля
  *     responses:
- *       201:
- *         description: Адрес создан
+ *       200:
+ *         description: Профиль успешно обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Профиль успешно обновлён
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 12
+ *                     email:
+ *                       type: string
+ *                       example: user@example.com
+ *                     firstName:
+ *                       type: string
+ *                     lastName:
+ *                       type: string
+ *                     phone:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                       example: CUSTOMER
+ *                     customerProfile:
+ *                       type: object
+ *                       properties:
+ *                         addresses:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                               value:
+ *                                 type: string
+ *                               isDefault:
+ *                                 type: boolean
+ *                         priority:
+ *                           type: integer
+ *                     profilePhoto:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                         url:
+ *                           type: string
+ *                         type:
+ *                           type: string
+ *                           example: PROFILE_PHOTO
  *       400:
- *         description: Ошибка валидации
+ *         description: Ошибка валидации или данных
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Пользователь не найден или не является заказчиком
  */

@@ -29,7 +29,11 @@ authRouter.post(
     ]),
     registerExecutor
 );
-authRouter.post('/register/customer', registerCustomer);
+authRouter.post(
+    '/register/customer',
+    upload.fields([{name: 'profilePhoto', maxCount: 1}]),
+    registerCustomer
+);
 
 authRouter.post('/verify', verifyEmail);
 authRouter.post('/verify/resend', resendVerification);
