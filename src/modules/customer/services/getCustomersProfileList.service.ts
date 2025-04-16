@@ -24,7 +24,7 @@ export const getCustomersListService = async (query: any) => {
             defaultSortBy: 'firstName',
             defaultOrder: 'asc',
             include: {
-                user: true, // этого достаточно, чтобы потом получить user.id
+                user: true,
                 addresses: true,
             },
             orderMap,
@@ -65,10 +65,13 @@ export const getCustomersListService = async (query: any) => {
         }
     );
 
+    console.log(result, 3142);
+
     const items = await Promise.all(
-        result.items.map((customerProfile) =>
-            toUserDto(getUserById(customerProfile.userId))
-        )
+        result.items.map(async (customerProfile) => {
+            return await getUserById(customerProfile.userId);
+            // return toUserDto(user);
+        })
     );
 
     return {
