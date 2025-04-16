@@ -29,12 +29,7 @@ export const completeOrder = async (req: Request, res: Response) => {
             return sendResponse(res, 401, errorResponse('Не авторизован'));
         }
 
-        const result = await completeOrderService(
-            orderId,
-            executorId,
-            dto,
-            files
-        );
+        const result = await completeOrderService(orderId, executorId, files);
         sendResponse(res, 200, successResponse(result));
     } catch (err: any) {
         sendResponse(res, 400, errorResponse(err.message));
