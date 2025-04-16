@@ -30,6 +30,7 @@
  *               - city
  *               - serviceId
  *               - executorId
+ *               - address
  *             properties:
  *               objectType:
  *                 type: string
@@ -56,15 +57,18 @@
  *                 type: string
  *                 format: date-time
  *                 example: 2024-08-01T09:00:00.000Z
- *               addressId:
- *                 type: number
- *                 example: 12
- *               address:
+ *               city:
  *                 type: string
  *                 example: Москва
+ *               address:
+ *                 type: string
+ *                 example: Москва, ул. Пушкина, д. 10
  *               serviceId:
- *                 type: number
+ *                 type: integer
  *                 example: 3
+ *               executorId:
+ *                 type: integer
+ *                 example: 7
  *               price:
  *                 type: number
  *                 example: 25000
@@ -85,6 +89,9 @@
  *                 workDate:
  *                   type: string
  *                   format: date-time
+ *                 address:
+ *                   type: string
+ *                   example: Москва, ул. Пушкина, д. 10
  *                 executor:
  *                   type: object
  *                   description: Профиль исполнителя
@@ -324,7 +331,6 @@
  *       403:
  *         description: Нет доступа
  */
-
 /**
  * @swagger
  * /order/{id}/complete:
@@ -336,26 +342,56 @@
  *     parameters:
  *       - name: id
  *         in: path
+ *         description: ID заказа
  *         required: true
  *         schema:
- *           type: number
+ *           type: integer
  *     requestBody:
+ *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - total
  *             properties:
- *               text:
- *                 type: string
- *                 example: Работа завершена, отчёт прилагается
+ *               total:
+ *                 type: number
+ *                 description: Общая сумма работ (например, за что выставлен счёт)
+ *                 example: 15000
  *               reportFiles:
  *                 type: array
+ *                 description: Файлы, подтверждающие выполнение работ
  *                 items:
  *                   type: string
  *                   format: binary
  *     responses:
  *       200:
- *         description: Заказ завершён
+ *         description: Заказ успешно завершён и отчёт создан
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Заказ завершён и отчёт прикреплён
+ *                 reportId:
+ *                   type: integer
+ *                   example: 101
+ *                 order:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 42
+ *                     status:
+ *                       type: string
+ *                       example: COMPLETED
  *       400:
- *         description: Ошибка завершения
+ *         description: Ошибка завершения (например, неверный статус заказа)
+ *       403:
+ *         description: Нет прав завершать заказ
+ *       404:
+ *         description: Заказ не найден
  */

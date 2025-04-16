@@ -29,6 +29,9 @@ export class CreateOrderDTO {
     @IsString()
     city!: string;
 
+    @IsString()
+    address!: string;
+
     @IsNumber()
     serviceId!: number;
 

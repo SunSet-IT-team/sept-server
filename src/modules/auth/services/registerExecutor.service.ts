@@ -78,8 +78,8 @@ export const registerExecutorService = async (
             password: hashedPassword,
             role: Role.EXECUTOR,
             status: AccountStatus.UNVERIFIED,
-            firstName,
-            lastName,
+            firstName: null,
+            lastName: null,
             phone,
             executorProfile: {
                 create: {

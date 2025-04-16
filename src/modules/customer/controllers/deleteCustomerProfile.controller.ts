@@ -7,7 +7,7 @@ import {
 } from '../../../core/utils/sendResponse';
 
 export const deleteCustomerProfile = async (req: Request, res: Response) => {
-    const userId = Number(req.params.id);
+    const userId = Number(req.params.id) || Number(req.user!.id);
     try {
         await deleteCustomerProfileService(userId);
         sendResponse(res, 200, successResponse({message: 'Профиль удалён'}));

@@ -8,7 +8,7 @@ export const toUserDto = (user: any): UserDto => {
 
     let profile = null;
 
-    console.log(user);
+    // console.log(user);
 
     if (user.role === Role.EXECUTOR && user.executorProfile) {
         profile = toExecutorProfile(

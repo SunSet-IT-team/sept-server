@@ -24,6 +24,8 @@ export const getUserById = async (userId: number) => {
         },
     });
 
+    // console.log(user, 1);
+
     if (!user) throw new Error('Пользователь не найден');
 
     return toUserDto(user);
