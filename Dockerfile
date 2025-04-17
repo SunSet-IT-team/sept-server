@@ -2,6 +2,9 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Создаем папку uploads
+RUN mkdir -p /app/uploads
+
 # Установка зависимостей
 COPY package*.json ./
 COPY prisma ./prisma

@@ -18,13 +18,9 @@ import {completeOrder} from '../controllers/completeOrder.controller';
 
 const orderRouter = Router();
 
-orderRouter.post(
-    '/',
-    validateDto(CreateOrderDTO),
-    checkRole(Role.CUSTOMER),
-    createOrder
-);
-// orderRouter.get('/', authMiddleware, getMyOrders);
+
+orderRouter.get('/', authMiddleware, getMyOrders);
+
 orderRouter.get('/my', checkRole([Role.CUSTOMER, Role.EXECUTOR]), getMyOrders);
 
 orderRouter.get('/executor/:executorId', checkRole(Role.ADMIN), getMyOrders);
@@ -49,6 +45,13 @@ orderRouter.post(
     checkRole(Role.EXECUTOR),
     upload.fields([{name: 'reportFiles', maxCount: 10}]),
     completeOrder
+);
+
+orderRouter.post(
+    '/',
+    validateDto(CreateOrderDTO),
+    checkRole(Role.CUSTOMER),
+    createOrder
 );
 
 export default orderRouter;

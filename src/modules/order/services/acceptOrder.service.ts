@@ -3,7 +3,7 @@ import {OrderStatus} from '@prisma/client';
 
 export const acceptOrderService = async (
     orderId: number,
-    executorUserId: number
+    executorId: number
 ) => {
     const order = await prisma.order.findUnique({
         where: {id: orderId},
@@ -14,19 +14,11 @@ export const acceptOrderService = async (
         throw new Error('Можно принять только заказ в статусе PENDING');
     }
 
-    const executor = await prisma.executorProfile.findUnique({
-        where: {userId: executorUserId},
-    });
-
-    if (!executor) {
-        throw new Error('Профиль исполнителя не найден');
-    }
-
     const updated = await prisma.order.update({
         where: {id: orderId},
         data: {
             status: OrderStatus.IN_PROGRESS,
-            executorId: executor.id,
+            executorId,
         },
     });
 
