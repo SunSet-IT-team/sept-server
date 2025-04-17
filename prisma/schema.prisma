@@ -279,5 +279,4 @@ model Message {
   chat      Chat @relation(fields: [chatId], references: [id])
   sender    User @relation(fields: [senderId], references: [id])
   files     File[]
-  isReaded  Boolean  @default(false)
 }
