@@ -15,16 +15,15 @@ import {acceptOrder} from '../controllers/acceptOrder.controller';
 import {rejectOrder} from '../controllers/rejectOrder.controller';
 import {upload} from '../../../core/middleware/upload';
 import {completeOrder} from '../controllers/completeOrder.controller';
+import {getAdminOrders} from '../controllers/getAdminOrders.controller';
 
 const orderRouter = Router();
 
-
-orderRouter.get('/', authMiddleware, getMyOrders);
-
-orderRouter.get('/my', checkRole([Role.CUSTOMER, Role.EXECUTOR]), getMyOrders);
-
+orderRouter.get('/', authMiddleware, getAdminOrders);
 orderRouter.get('/executor/:executorId', checkRole(Role.ADMIN), getMyOrders);
 orderRouter.get('/customer/:customerId', checkRole(Role.ADMIN), getMyOrders);
+
+orderRouter.get('/my', checkRole([Role.CUSTOMER, Role.EXECUTOR]), getMyOrders);
 
 orderRouter.get('/:id', authMiddleware, getOrderById);
 

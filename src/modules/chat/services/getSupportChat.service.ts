@@ -1,65 +1,86 @@
 import {prisma} from '../../../core/database/prisma';
 import {ChatType, Role} from '@prisma/client';
+import {getUserById} from '../../user/services/getUser';
 
 export const getSupportChatService = async (
     userId: number,
     role: Role,
-    orderId?: number // делаем необязательным
+    orderId?: number,
+    theme?: string | null
 ) => {
-    if (role !== Role.CUSTOMER && role !== Role.EXECUTOR) {
+    if (![Role.CUSTOMER, Role.EXECUTOR, Role.ADMIN].includes(role)) {
         throw new Error(
-            'Только заказчик или исполнитель может обратиться в поддержку'
+            'Доступ разрешён только заказчику, исполнителю или админу'
         );
     }
 
-    const whereClause: any = {
-        type: ChatType.ORDER_ADMIN,
-        participants: {
-            some: {userId},
-        },
-    };
+    let finalTheme = theme?.trim();
+    if (!finalTheme && orderId) {
+        const order = await prisma.order.findUnique({
+            where: {id: orderId},
+            select: {id: true, service: {select: {name: true}}},
+        });
+        if (!order) throw new Error('Заказ не найден');
 
-    if (orderId) {
-        whereClause.orderId = orderId;
+        finalTheme = `Заявка №${order.id}\nУслуга: ${
+            order.service?.name ?? '—'
+        }`;
     }
 
-    const existing = await prisma.chat.findFirst({
+    const whereClause = {
+        type: ChatType.ORDER_ADMIN,
+        participants: {some: {userId}},
+        ...(orderId && {orderId}),
+    };
+
+    let chat = await prisma.chat.findFirst({
         where: whereClause,
         include: {
-            participants: {
-                include: {user: true},
+            participants: true,
+            messages: {orderBy: {createdAt: 'asc'}},
+        },
+    });
+
+    if (chat) {
+        if (finalTheme && chat.theme !== finalTheme) {
+            chat = await prisma.chat.update({
+                where: {id: chat.id},
+                data: {theme: finalTheme},
+                include: {
+                    participants: true,
+                    messages: {orderBy: {createdAt: 'asc'}},
+                },
+            });
+        }
+    } else {
+        const admins = await prisma.user.findMany({
+            where: {role: Role.ADMIN},
+            select: {id: true},
+        });
+        if (!admins.length) throw new Error('В системе нет администраторов');
+
+        chat = await prisma.chat.create({
+            data: {
+                type: ChatType.ORDER_ADMIN,
+                orderId: orderId ?? null,
+                theme: finalTheme ?? 'Чат поддержки',
+                participants: {
+                    create: [{userId}, ...admins.map((a) => ({userId: a.id}))],
+                },
             },
-        },
-    });
-
-    if (existing) return existing;
-
-    const admins = await prisma.user.findMany({
-        where: {role: Role.ADMIN},
-        select: {id: true},
-    });
-
-    if (!admins.length) throw new Error('Нет администраторов для поддержки');
-
-    const data: any = {
-        type: ChatType.ORDER_ADMIN,
-        participants: {
-            create: [{userId}, ...admins.map((admin) => ({userId: admin.id}))],
-        },
-    };
-
-    if (orderId) {
-        data.orderId = orderId;
+            include: {
+                participants: true,
+                messages: {orderBy: {createdAt: 'asc'}},
+            },
+        });
     }
 
-    const chat = await prisma.chat.create({
-        data,
-        include: {
-            participants: {
-                include: {user: true},
-            },
-        },
-    });
+    const participants = await Promise.all(
+        chat.participants.map(async (p) => ({
+            ...p,
+            user: await getUserById(p.userId),
+        }))
+    );
 
-    return chat;
+    return {...chat, participants};
 };

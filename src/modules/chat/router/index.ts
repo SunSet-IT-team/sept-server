@@ -13,5 +13,3 @@ chatRouter.get('/order/:id', authMiddleware, getOrderChat);
 chatRouter.get('/:id/messages', authMiddleware, getMessagesByChatId);
 chatRouter.post('/support', authMiddleware, getSupportChat);
 chatRouter.get('/support', checkRole(Role.ADMIN), getAllChats);
-
-// chatRouter.post('/support', authMiddleware, getSupportChat); // Создать чат с админом

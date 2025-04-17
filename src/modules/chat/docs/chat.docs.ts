@@ -73,25 +73,34 @@
  * @swagger
  * /chat/support:
  *   post:
- *     summary: Получить или создать чат с поддержкой
- *     description: Создаёт или возвращает чат с поддержкой. Может быть привязан к заказу (если указан orderId).
+ *     summary: Получить / создать чат с поддержкой
+ *     description: |
+ *       Возвращает существующий чат *ORDER_ADMIN* с участием пользователя или создаёт новый.<br/>
+ *       Если передан **orderId**, чат будет (или останется) привязан к заказу.<br/>
+ *       Опционально можно задать/изменить **theme** – произвольную тему обращения.
  *     tags: [Chat]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               orderId:
- *                 type: integer
- *                 description: ID заказа для привязки чата (необязательно)
- *                 example: 123
+ *
+ *     parameters:
+ *       - in: query
+ *         name: orderId
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: ID заказа, к которому следует привязать чат
+ *         example: 123
+ *       - in: query
+ *         name: theme
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Тема обращения в поддержку
+ *         example: "Не могу прикрепить отчёт"
+ *
  *     responses:
  *       200:
- *         description: Чат с поддержкой получен или создан
+ *         description: Чат получен или создан
  *         content:
  *           application/json:
  *             schema:
@@ -99,8 +108,18 @@
  *               properties:
  *                 id:
  *                   type: integer
+ *                   example: 17
+ *                 orderId:
+ *                   type: integer
+ *                   nullable: true
+ *                   example: 123
  *                 type:
  *                   type: string
+ *                   example: ORDER_ADMIN
+ *                 theme:
+ *                   type: string
+ *                   nullable: true
+ *                   example: "Не могу прикрепить отчёт"
  *                 createdAt:
  *                   type: string
  *                   format: date-time
@@ -109,17 +128,27 @@
  *                   items:
  *                     type: object
  *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 5
  *                       user:
  *                         type: object
  *                         properties:
  *                           id:
  *                             type: integer
+ *                             example: 42
  *                           email:
  *                             type: string
+ *                             example: user@example.com
  *                           role:
  *                             type: string
+ *                             example: CUSTOMER
  *       401:
  *         description: Неавторизован
+ *       403:
+ *         description: Доступ запрещён
+ *       404:
+ *         description: Заказ не найден
  *       500:
  *         description: Внутренняя ошибка сервера
  */

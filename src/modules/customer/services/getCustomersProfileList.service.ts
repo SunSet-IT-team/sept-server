@@ -21,7 +21,7 @@ export const getCustomersListService = async (query: any) => {
         prisma.customerProfile,
         {page, limit, sortBy, order, filters},
         {
-            defaultSortBy: 'firstName',
+            defaultSortBy: 'priority',
             defaultOrder: 'asc',
             include: {
                 user: true,

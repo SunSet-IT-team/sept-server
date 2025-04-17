@@ -5,22 +5,18 @@ import {UserDto} from '../../user/dto/user.dto';
 export interface FileDto {
     id: number;
     url: string;
-    /** enum FileType (PROFILE_PHOTO, REPORT_FILE …) */
     type: FileType;
 }
 
 /** Один отчёт, прикреплённый к заказу */
 export interface ReportDto {
     id: number;
-    /** Текст‑описание отчёта (может быть null, если не заполняли) */
     text: string | null;
-    /** Сумма, которая попадает в отчёт (литers / ₽ / иное — по ТЗ) */
     total: number;
     createdAt: Date;
     files: FileDto[];
 }
 
-/** Отзыв заказчика об исполнителе по конкретному заказу */
 export interface ReviewDto {
     id: number;
     rating: number; // 1‑5
@@ -29,11 +25,9 @@ export interface ReviewDto {
     author: UserDto; // кто оставил отзыв
 }
 
-/** Полный DTO заказа, который отдаём во все ручки */
 export interface OrderDto {
     id: number;
 
-    /* Основные поля из Order */
     title: string;
     objectType: string;
     comment: string | null;

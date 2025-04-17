@@ -3,11 +3,10 @@ import {getUserById} from '../../user/services/getUser';
 import {toUserDto} from '../../user/utils/toUser';
 
 export const toOrderDto = async (order: any) => {
-    /* ---------- участники ---------- */
     const executorLoad = order.executor
-        ? Promise.resolve(toUserDto(order.executor)) // уже в памяти
+        ? Promise.resolve(toUserDto(order.executor))
         : order.executorId
-        ? getUserById(order.executorId) // вытаскиваем
+        ? getUserById(order.executorId)
         : Promise.resolve(null);
 
     const customerLoad = order.customer
@@ -16,9 +15,8 @@ export const toOrderDto = async (order: any) => {
         ? getUserById(order.customerId)
         : Promise.resolve(null);
 
-    /* ---------- отзыв (берём первый, если есть) ---------- */
     const review = order.reviews?.[0];
-    const reviewAuthorLoad = review?.author // автор уже загружен?
+    const reviewAuthorLoad = review?.author
         ? Promise.resolve(toUserDto(review.author))
         : review
         ? getUserById(review.authorId)
@@ -31,7 +29,6 @@ export const toOrderDto = async (order: any) => {
         reviewAuthorLoad,
     ]);
 
-    /* ---------- отчёты ---------- */
     const reports =
         order.reports?.map((r: any) => ({
             id: r.id,
@@ -45,7 +42,6 @@ export const toOrderDto = async (order: any) => {
             })),
         })) ?? [];
 
-    /* ---------- финальный DTO ---------- */
     return {
         id: order.id,
         objectType: order.objectType,
