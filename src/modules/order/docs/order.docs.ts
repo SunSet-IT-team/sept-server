@@ -116,6 +116,159 @@
  *       403: { description: Нет доступа }
  */
 
+/**
+ * @swagger
+ * /order/{id}:
+ *   get:
+ *     summary: Получить подробную информацию о заказе
+ *     tags: [Order]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 42
+ *     responses:
+ *       200:
+ *         description: Заказ найден
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 42
+ *                 title:
+ *                   type: string
+ *                   example: Откачка септика
+ *                 objectType:
+ *                   type: string
+ *                   example: Жилой дом
+ *                 comment:
+ *                   type: string
+ *                   nullable: true
+ *                   example: Нужно приехать до обеда
+ *                 distanceToSeptic:
+ *                   type: number
+ *                   example: 15.5
+ *                 septicDepth:
+ *                   type: number
+ *                   example: 3.2
+ *                 septicVolume:
+ *                   type: number
+ *                   example: 5
+ *                 septicConstructionType:
+ *                   type: string
+ *                   example: Бетонные кольца
+ *                 paymentMethod:
+ *                   type: string
+ *                   example: Наличные
+ *                 workDate:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2024-08-01T09:00:00.000Z
+ *                 status:
+ *                   type: string
+ *                   example: IN_PROGRESS
+ *                 price:
+ *                   type: number
+ *                   nullable: true
+ *                   example: 25000
+ *                 priority:
+ *                   type: integer
+ *                   example: 100
+ *                 city:
+ *                   type: string
+ *                   example: Москва
+ *                 address:
+ *                   type: string
+ *                   example: Москва, ул. Пушкина, д. 10
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *                 service:
+ *                   type: object
+ *                   nullable: true
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 3
+ *                     name:
+ *                       type: string
+ *                       example: Откачка септика
+ *                 executor:
+ *                   type: object
+ *                   nullable: true
+ *                   properties:
+ *                     id:        { type: integer, example: 7 }
+ *                     email:     { type: string,  example: exec@mail.ru }
+ *                     role:      { type: string,  example: EXECUTOR }
+ *                     name:      { type: string,  example: Иван Петров }
+ *                 customer:
+ *                   type: object
+ *                   nullable: true
+ *                   properties:
+ *                     id:        { type: integer, example: 12 }
+ *                     email:     { type: string,  example: cust@mail.ru }
+ *                     role:      { type: string,  example: CUSTOMER }
+ *                     name:      { type: string,  example: Сергей Иванов }
+ *                 reports:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:        { type: integer, example: 55 }
+ *                       text:
+ *                         type: string
+ *                         nullable: true
+ *                         example: Работа выполнена
+ *                       total:
+ *                         type: number
+ *                         example: 15000
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       files:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:   { type: integer, example: 77 }
+ *                             url:  { type: string,  example: /uploads/report/77.pdf }
+ *                             type: { type: string,  example: REPORT_FILE }
+ *                 customerReview:
+ *                   oneOf:
+ *                     - type: 'null'
+ *                     - type: object
+ *                       properties:
+ *                         id:        { type: integer, example: 88 }
+ *                         rating:    { type: integer, example: 5 }
+ *                         text:      { type: string,  example: Отличная работа }
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                         author:
+ *                           type: object
+ *                           properties:
+ *                             id:    { type: integer, example: 12 }
+ *                             email: { type: string,  example: cust@mail.ru }
+ *                             role:  { type: string,  example: CUSTOMER }
+ *                             name:  { type: string,  example: Сергей Иванов }
+ *       401:
+ *         description: Неавторизован
+ *       403:
+ *         description: Нет доступа к этому заказу
+ *       404:
+ *         description: Заказ не найден
+ */
+
 /* -------------------------------------------------------------------------- */
 /*                       GET /order/executor/{executorId}                     */
 /* -------------------------------------------------------------------------- */
