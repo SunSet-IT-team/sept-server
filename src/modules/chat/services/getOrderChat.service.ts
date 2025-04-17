@@ -1,51 +1,33 @@
 import {prisma} from '../../../core/database/prisma';
 import {ChatType} from '@prisma/client';
+import {getUserById} from '../../user/services/getUser';
 
-export const getOrCreateOrderChatForUser = async (
-    orderId: number,
-    userId: number
-) => {
+export const getOrCreateOrderChatForUser = async (orderId: number) => {
     const order = await prisma.order.findUnique({
         where: {id: orderId},
-        select: {
-            customerId: true,
-            executorId: true,
-        },
+        select: {customerId: true, executorId: true},
     });
+    if (!order) throw new Error('Заказ не найден');
 
-    if (!order) {
-        throw new Error('Заказ не найден');
-    }
-
-    const isParticipant =
-        userId === order.customerId || userId === order.executorId;
-
-    if (!isParticipant) {
-        throw new Error('Вы не имеете доступа к этому заказу');
-    }
+    const mainParticipants = [order.customerId, order.executorId].filter(
+        Boolean
+    ) as number[];
 
     let chat = await prisma.chat.findFirst({
-        where: {
-            orderId,
-            type: ChatType.ORDER_CUSTOMER,
-        },
+        where: {orderId, type: ChatType.ORDER_CUSTOMER},
         include: {
             participants: true,
-            messages: {
-                orderBy: {createdAt: 'asc'},
-                include: {sender: true},
-            },
+            messages: {orderBy: {createdAt: 'asc'}, include: {sender: true}},
         },
     });
 
-    // Если чата нет — создаём и добавляем только того, кто первый зашёл
     if (!chat) {
         chat = await prisma.chat.create({
             data: {
                 orderId,
                 type: ChatType.ORDER_CUSTOMER,
                 participants: {
-                    create: [{userId}],
+                    create: mainParticipants.map((id) => ({userId: id})),
                 },
             },
             include: {
@@ -57,34 +39,34 @@ export const getOrCreateOrderChatForUser = async (
             },
         });
     } else {
-        const existingParticipantIds = chat.participants.map((p) => p.userId);
+        const existingIds = new Set(chat.participants.map((p) => p.userId));
+        const toAdd = mainParticipants.filter((id) => !existingIds.has(id));
 
-        // Добавим участника, если его ещё нет
-        const usersToAdd: number[] = [];
-
-        if (
-            order.customerId &&
-            !existingParticipantIds.includes(order.customerId)
-        ) {
-            usersToAdd.push(order.customerId);
-        }
-
-        if (
-            order.executorId &&
-            !existingParticipantIds.includes(order.executorId)
-        ) {
-            usersToAdd.push(order.executorId);
-        }
-
-        for (const uid of usersToAdd) {
-            await prisma.chatParticipant.create({
-                data: {
-                    chatId: chat.id,
-                    userId: uid,
-                },
+        if (toAdd.length) {
+            await prisma.chatParticipant.createMany({
+                data: toAdd.map((id) => ({
+                    chatId: chat?.id as number,
+                    userId: id,
+                })),
+                skipDuplicates: true,
             });
+            chat.participants.push(
+                ...toAdd.map(
+                    (id) => ({id: 0, chatId: chat!.id, userId: id} as any)
+                )
+            );
         }
     }
 
-    return chat;
+    const participantsWithUsers = await Promise.all(
+        chat.participants.map(async (p) => ({
+            ...p,
+            user: await getUserById(p.userId),
+        }))
+    );
+
+    return {
+        ...chat,
+        participants: participantsWithUsers,
+    };
 };

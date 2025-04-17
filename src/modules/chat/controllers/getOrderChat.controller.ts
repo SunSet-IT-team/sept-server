@@ -15,7 +15,7 @@ export const getOrderChat = async (req: Request, res: Response) => {
             return sendResponse(res, 400, errorResponse('Некорректные данные'));
         }
 
-        const chat = await getOrCreateOrderChatForUser(orderId, userId);
+        const chat = await getOrCreateOrderChatForUser(orderId);
 
         return sendResponse(res, 200, successResponse(chat));
     } catch (err) {

@@ -5,6 +5,9 @@
  *   description: Управление заказами
  */
 
+/* -------------------------------------------------------------------------- */
+/*                                 POST /order                                */
+/* -------------------------------------------------------------------------- */
 /**
  * @swagger
  * /order:
@@ -20,6 +23,7 @@
  *           schema:
  *             type: object
  *             required:
+ *               - title
  *               - objectType
  *               - distanceToSeptic
  *               - septicDepth
@@ -28,87 +32,98 @@
  *               - paymentMethod
  *               - workDate
  *               - city
+ *               - address
  *               - serviceId
  *               - executorId
- *               - address
  *             properties:
- *               objectType:
- *                 type: string
- *                 example: Жилой дом
- *               comment:
- *                 type: string
- *                 example: Нужно срочно приехать до обеда
- *               distanceToSeptic:
- *                 type: number
- *                 example: 15.5
- *               septicDepth:
- *                 type: number
- *                 example: 3.2
- *               septicVolume:
- *                 type: number
- *                 example: 5.0
- *               septicConstructionType:
- *                 type: string
- *                 example: Бетонные кольца
- *               paymentMethod:
- *                 type: string
- *                 example: Наличные
- *               workDate:
- *                 type: string
- *                 format: date-time
- *                 example: 2024-08-01T09:00:00.000Z
- *               city:
- *                 type: string
- *                 example: Москва
- *               address:
- *                 type: string
- *                 example: Москва, ул. Пушкина, д. 10
- *               serviceId:
- *                 type: integer
- *                 example: 3
- *               executorId:
- *                 type: integer
- *                 example: 7
- *               price:
- *                 type: number
- *                 example: 25000
+ *               title:                    { type: string, example: Откачка септика }
+ *               objectType:               { type: string, example: Жилой дом }
+ *               comment:                  { type: string, example: Нужно приехать до обеда }
+ *               distanceToSeptic:         { type: number, example: 15.5 }
+ *               septicDepth:              { type: number, example: 3.2 }
+ *               septicVolume:             { type: number, example: 5 }
+ *               septicConstructionType:   { type: string, example: Бетонные кольца }
+ *               paymentMethod:            { type: string, example: Наличные }
+ *               workDate:                 { type: string, format: date-time, example: 2024‑08‑01T09:00:00.000Z }
+ *               city:                     { type: string, example: Москва }
+ *               address:                  { type: string, example: Москва, ул. Пушкина, д. 10 }
+ *               serviceId:                { type: integer, example: 3 }
+ *               executorId:               { type: integer, example: 7 }
+ *               price:                    { type: number, example: 25000 }
  *     responses:
- *       201:
- *         description: Заказ успешно создан
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 42
- *                 status:
- *                   type: string
- *                   example: PENDING
- *                 workDate:
- *                   type: string
- *                   format: date-time
- *                 address:
- *                   type: string
- *                   example: Москва, ул. Пушкина, д. 10
- *                 executor:
- *                   type: object
- *                   description: Профиль исполнителя
- *                 customer:
- *                   type: object
- *                   description: Профиль заказчика
- *       400:
- *         description: Ошибка валидации
- *       401:
- *         description: Неавторизован
+ *       201: { description: Заказ успешно создан }
+ *       400: { description: Ошибка валидации входных данных }
+ *       401: { description: Неавторизован }
  */
 
+/* -------------------------------------------------------------------------- */
+/*                            GET /order (админ)                              */
+/* -------------------------------------------------------------------------- */
+/**
+ * @swagger
+ * /order:
+ *   get:
+ *     summary: Получить список заказов (админ)
+ *     description: Пагинация, сортировка по любому полю и гибкая фильтрация
+ *     tags: [Order]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         description: Номер страницы
+ *         schema:  { type: integer, default: 1, minimum: 1 }
+ *       - in: query
+ *         name: limit
+ *         description: Кол‑во элементов на страницу
+ *         schema:  { type: integer, default: 10, minimum: 1 }
+ *       - in: query
+ *         name: sortBy
+ *         description: Любое поле Order (title, price, city, priority, createdAt …)
+ *         schema:  { type: string }
+ *       - in: query
+ *         name: order
+ *         description: Направление сортировки
+ *         schema:  { type: string, enum: [asc, desc], default: desc }
+ *       - in: query
+ *         name: status
+ *         schema:  { type: string, enum: [PENDING, IN_PROGRESS, COMPLETED, REJECTED, CANCELLED] }
+ *       - in: query
+ *         name: executorId
+ *         schema:  { type: integer }
+ *       - in: query
+ *         name: customerId
+ *         schema:  { type: integer }
+ *       - in: query
+ *         name: city
+ *         schema:  { type: string }
+ *       - in: query
+ *         name: priceFrom
+ *         schema:  { type: number }
+ *       - in: query
+ *         name: priceTo
+ *         schema:  { type: number }
+ *       - in: query
+ *         name: createdFrom
+ *         description: Дата «с»
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: createdTo
+ *         description: Дата «по»
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200: { description: Список заказов }
+ *       403: { description: Нет доступа }
+ */
+
+/* -------------------------------------------------------------------------- */
+/*                       GET /order/executor/{executorId}                     */
+/* -------------------------------------------------------------------------- */
 /**
  * @swagger
  * /order/executor/{executorId}:
  *   get:
- *     summary: Получить заказы исполнителя (только админ)
+ *     summary: Получить заказы конкретного исполнителя (админ)
  *     tags: [Order]
  *     security:
  *       - bearerAuth: []
@@ -116,33 +131,29 @@
  *       - name: executorId
  *         in: path
  *         required: true
- *         schema:
- *           type: number
+ *         schema: { type: integer }
  *       - in: query
  *         name: page
- *         schema:
- *           type: integer
+ *         schema: { type: integer, default: 1 }
  *       - in: query
  *         name: limit
- *         schema:
- *           type: integer
+ *         schema: { type: integer, default: 10 }
  *       - in: query
  *         name: status
- *         schema:
- *           type: string
- *           enum: [PENDING, IN_PROGRESS, COMPLETED, REJECTED]
+ *         schema: { type: string, enum: [PENDING, IN_PROGRESS, COMPLETED, REJECTED, CANCELLED] }
  *     responses:
- *       200:
- *         description: Список заказов
- *       403:
- *         description: Нет доступа
+ *       200: { description: Список заказов }
+ *       403: { description: Нет доступа }
  */
 
+/* -------------------------------------------------------------------------- */
+/*                       GET /order/customer/{customerId}                     */
+/* -------------------------------------------------------------------------- */
 /**
  * @swagger
  * /order/customer/{customerId}:
  *   get:
- *     summary: Получить заказы заказчика (только админ)
+ *     summary: Получить заказы конкретного заказчика (админ)
  *     tags: [Order]
  *     security:
  *       - bearerAuth: []
@@ -150,75 +161,49 @@
  *       - name: customerId
  *         in: path
  *         required: true
- *         schema:
- *           type: number
+ *         schema: { type: integer }
  *       - in: query
  *         name: page
- *         schema:
- *           type: integer
+ *         schema: { type: integer, default: 1 }
  *       - in: query
  *         name: limit
- *         schema:
- *           type: integer
+ *         schema: { type: integer, default: 10 }
  *       - in: query
  *         name: status
- *         schema:
- *           type: string
- *           enum: [PENDING, IN_PROGRESS, COMPLETED, REJECTED]
+ *         schema: { type: string, enum: [PENDING, IN_PROGRESS, COMPLETED, REJECTED, CANCELLED] }
  *     responses:
- *       200:
- *         description: Список заказов
- *       403:
- *         description: Нет доступа
+ *       200: { description: Список заказов }
+ *       403: { description: Нет доступа }
  */
 
+/* -------------------------------------------------------------------------- */
+/*                        GET /order/my (исп/заказчик)                        */
+/* -------------------------------------------------------------------------- */
 /**
  * @swagger
  * /order/my:
  *   get:
- *     summary: Получить свои заказы (для заказчика или исполнителя)
+ *     summary: Получить свои заказы (исполнитель или заказчик)
  *     tags: [Order]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
- *         schema:
- *           type: integer
+ *         schema: { type: integer, default: 1 }
  *       - in: query
  *         name: limit
- *         schema:
- *           type: integer
+ *         schema: { type: integer, default: 10 }
  *       - in: query
  *         name: status
- *         schema:
- *           type: string
+ *         schema: { type: string, enum: [PENDING, IN_PROGRESS, COMPLETED, REJECTED, CANCELLED] }
  *     responses:
- *       200:
- *         description: Список заказов
+ *       200: { description: Список заказов }
  */
 
-/**
- * @swagger
- * /order/{id}:
- *   get:
- *     summary: Получить заказ по ID
- *     tags: [Order]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: number
- *     responses:
- *       200:
- *         description: Заказ найден
- *       404:
- *         description: Заказ не найден
- */
-
+/* -------------------------------------------------------------------------- */
+/*                       PATCH /order/{id}  (владелец)                        */
+/* -------------------------------------------------------------------------- */
 /**
  * @swagger
  * /order/{id}:
@@ -231,44 +216,26 @@
  *       - name: id
  *         in: path
  *         required: true
- *         schema:
- *           type: number
+ *         schema: { type: integer }
  *     requestBody:
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               objectType:
- *                 type: string
- *               comment:
- *                 type: string
- *               distanceToSeptic:
- *                 type: number
- *               septicDepth:
- *                 type: number
- *               septicVolume:
- *                 type: number
- *               septicConstructionType:
- *                 type: string
- *               paymentMethod:
- *                 type: string
- *               workDate:
- *                 type: string
- *                 format: date-time
- *               addressId:
- *                 type: number
- *               serviceId:
- *                 type: number
- *               price:
- *                 type: number
+ *               comment:        { type: string }
+ *               paymentMethod:  { type: string }
+ *               workDate:       { type: string, format: date-time }
+ *               price:          { type: number }
+ *               status:         { type: string, enum: [CANCELLED] }
  *     responses:
- *       200:
- *         description: Заказ обновлён
- *       403:
- *         description: Нет прав
+ *       200: { description: Заказ обновлён }
+ *       403: { description: Нет прав }
  */
 
+/* -------------------------------------------------------------------------- */
+/*                        DELETE /order/{id} (владелец)                       */
+/* -------------------------------------------------------------------------- */
 /**
  * @swagger
  * /order/{id}:
@@ -281,15 +248,15 @@
  *       - name: id
  *         in: path
  *         required: true
- *         schema:
- *           type: number
+ *         schema: { type: integer }
  *     responses:
- *       200:
- *         description: Заказ удалён
- *       404:
- *         description: Заказ не найден
+ *       200: { description: Заказ удалён }
+ *       404: { description: Заказ не найден }
  */
 
+/* -------------------------------------------------------------------------- */
+/*                       POST /order/{id}/accept|reject                       */
+/* -------------------------------------------------------------------------- */
 /**
  * @swagger
  * /order/{id}/accept:
@@ -302,17 +269,11 @@
  *       - name: id
  *         in: path
  *         required: true
- *         schema:
- *           type: number
+ *         schema: { type: integer }
  *     responses:
- *       200:
- *         description: Заказ принят
- *       403:
- *         description: Нет доступа
- */
-
-/**
- * @swagger
+ *       200: { description: Заказ принят }
+ *       403: { description: Нет доступа }
+ *
  * /order/{id}/reject:
  *   post:
  *     summary: Отклонить заказ (исполнитель)
@@ -323,14 +284,15 @@
  *       - name: id
  *         in: path
  *         required: true
- *         schema:
- *           type: number
+ *         schema: { type: integer }
  *     responses:
- *       200:
- *         description: Заказ отклонён
- *       403:
- *         description: Нет доступа
+ *       200: { description: Заказ отклонён }
+ *       403: { description: Нет доступа }
  */
+
+/* -------------------------------------------------------------------------- */
+/*                      POST /order/{id}/complete (exec)                      */
+/* -------------------------------------------------------------------------- */
 /**
  * @swagger
  * /order/{id}/complete:
@@ -342,56 +304,29 @@
  *     parameters:
  *       - name: id
  *         in: path
- *         description: ID заказа
  *         required: true
- *         schema:
- *           type: integer
+ *         schema: { type: integer }
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
- *             required:
- *               - total
+ *             required: [total]
  *             properties:
  *               total:
  *                 type: number
- *                 description: Общая сумма работ (например, за что выставлен счёт)
+ *                 description: Итоговая сумма работ
  *                 example: 15000
  *               reportFiles:
  *                 type: array
- *                 description: Файлы, подтверждающие выполнение работ
+ *                 description: Файлы‑подтверждения
  *                 items:
  *                   type: string
  *                   format: binary
  *     responses:
- *       200:
- *         description: Заказ успешно завершён и отчёт создан
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Заказ завершён и отчёт прикреплён
- *                 reportId:
- *                   type: integer
- *                   example: 101
- *                 order:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       example: 42
- *                     status:
- *                       type: string
- *                       example: COMPLETED
- *       400:
- *         description: Ошибка завершения (например, неверный статус заказа)
- *       403:
- *         description: Нет прав завершать заказ
- *       404:
- *         description: Заказ не найден
+ *       200: { description: Заказ завершён, отчёт создан }
+ *       400: { description: Неверный статус заказа }
+ *       403: { description: Нет прав }
+ *       404: { description: Заказ не найден }
  */
