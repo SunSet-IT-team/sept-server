@@ -33,7 +33,7 @@ export const getExecutorsListService = async (query: any) => {
         {
             defaultSortBy: 'priority',
             include: {
-                user: true, // только ID-шники, остальное подтянем через getUserDtoById
+                user: true,
             },
             orderMap,
             transformFilters: (filters) => {

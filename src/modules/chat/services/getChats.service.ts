@@ -36,7 +36,6 @@ export const getChatsService = async (query: GetChatsQueryDTO) => {
         },
     });
 
-    // Обновим участников чатов через toUserDto
     const transformedItems = await Promise.all(
         result.items.map(async (chat: any) => {
             const participants = await Promise.all(

@@ -250,6 +250,7 @@ model Chat {
   orderId      Int?
   order        Order?   @relation(fields: [orderId], references: [id])
   type         ChatType @default(GENERAL)
+  theme        String?
   createdAt    DateTime @default(now())
 
   participants ChatParticipant[]
