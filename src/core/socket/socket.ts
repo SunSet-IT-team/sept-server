@@ -88,13 +88,47 @@ export const configureSocket = (io: Server) => {
             }
         );
 
-        // Mark messages as read
-        socket.on('markAsRead', async ({chatId}) => {
-            if (!chatId || !userId) return;
-            // Логика отметки прочтения. Например, уведомляем других:
-            socket
-                .to(chatId)
-                .emit('readReceipt', {userId, chatId, timestamp: new Date()});
+        socket.on('markAsRead', async ({messageId}) => {
+            if (!messageId || !userId) return;
+
+            try {
+                // 1. Находим сообщение и проверяем, что оно не от текущего пользователя
+                const message = await prisma.message.findUnique({
+                    where: {id: messageId},
+                    select: {
+                        id: true,
+                        senderId: true,
+                        chatId: true,
+                        isReaded: true,
+                    },
+                });
+
+                if (!message) {
+                    return socket.emit('error', 'Сообщение не найдено');
+                }
+
+                if (message.senderId === userId) {
+                    return; // Не обновляем статус для своих сообщений
+                }
+
+                // 2. Обновляем только если оно еще не прочитано
+                if (!message.isReaded) {
+                    await prisma.message.update({
+                        where: {id: messageId},
+                        data: {isReaded: true},
+                    });
+
+                    // 3. Уведомляем всех в чате о прочтении
+                    socket.to(`${message.chatId}`).emit('messageRead', {
+                        messageId,
+                        readBy: userId,
+                        timestamp: new Date(),
+                    });
+                }
+            } catch (err) {
+                console.error('[markAsRead error]', err);
+                socket.emit('error', 'Ошибка при обновлении статуса');
+            }
         });
 
         socket.on('disconnect', () => {

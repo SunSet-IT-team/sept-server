@@ -7,7 +7,7 @@ export const getMessagesByChatIdService = async (
 ) => {
     return paginate(prisma.message, query, {
         defaultSortBy: 'createdAt',
-        defaultOrder: 'asc',
+        defaultOrder: 'desc',
         include: {
             sender: {
                 select: {
