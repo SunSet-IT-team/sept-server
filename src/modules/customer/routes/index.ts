@@ -9,6 +9,8 @@ import {deleteCustomerProfile} from '../controllers/deleteCustomerProfile.contro
 import {validateDto} from '../../../core/utils/validateDto';
 import {CreateAddressDTO} from '../dtos/createAddress.dto';
 import {createAddress} from '../controllers/createAddress.controller';
+import {getCustomerStats} from '../controllers/getCustomerStats.controller';
+import {getMyStats} from '../controllers/getMyStats.controller';
 
 const customerRouter = Router();
 
@@ -27,5 +29,8 @@ customerRouter.post(
     validateDto(CreateAddressDTO),
     createAddress
 );
+
+customerRouter.get('/me/stats', authMiddleware, getMyStats);
+customerRouter.get('/:id/stats', authMiddleware, getCustomerStats);
 
 export default customerRouter;

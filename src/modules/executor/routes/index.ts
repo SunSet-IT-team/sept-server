@@ -46,7 +46,7 @@ executorRouter.get('/', authMiddleware, getExecutorsList); // Получить �
 
 // executorRouter.get('/:executorId/rating', checkRole(Role.EXECUTOR), () => {});
 
-executorRouter.get('/me/stats', checkRole(Role.EXECUTOR), getMyStats);
-executorRouter.get('/:id/stats', checkRole(Role.ADMIN), getExecutorStats);
+executorRouter.get('/me/stats', authMiddleware, getMyStats);
+executorRouter.get('/:id/stats', authMiddleware, getExecutorStats);
 
 export default executorRouter;

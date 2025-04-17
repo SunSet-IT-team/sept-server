@@ -442,3 +442,136 @@
  *                   type: string
  *                   example: Пользователь не найден или не является заказчиком
  */
+
+/**
+ * @swagger
+ * /customer/{id}/stats:
+ *   get:
+ *     summary: Получить статистику по заказам конкретного заказчика (только админ)
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID заказчика
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Статистика по заказам заказчика
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 orders:
+ *                   type: object
+ *                   description: Общие показатели заявок
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       example: 42
+ *                     open:
+ *                       type: integer
+ *                       example: 10
+ *                     closed:
+ *                       type: integer
+ *                       example: 30
+ *                     cancelled:
+ *                       type: integer
+ *                       example: 2
+ *                 ordersMonth:
+ *                   type: object
+ *                   description: Показатели заявок за текущий месяц
+ *                   properties:
+ *                     calls:
+ *                       type: integer
+ *                       example: 5
+ *                     closed:
+ *                       type: integer
+ *                       example: 3
+ *                     cancelled:
+ *                       type: integer
+ *                       example: 1
+ *                 ordersTotal:
+ *                   type: object
+ *                   description: Показатели заявок за всё время (дублирует orders.total и т.п.)
+ *                   properties:
+ *                     calls:
+ *                       type: integer
+ *                       example: 42
+ *                     closed:
+ *                       type: integer
+ *                       example: 30
+ *                     cancelled:
+ *                       type: integer
+ *                       example: 2
+ *       403:
+ *         description: Нет доступа
+ *       404:
+ *         description: Заказчик не найден
+ */
+
+/**
+ * @swagger
+ * /customer/me/stats:
+ *   get:
+ *     summary: Получить статистику по заказам текущего заказчика
+ *     tags: [Customer]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Статистика по заказам текущего заказчика
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 orders:
+ *                   type: object
+ *                   description: Общие показатели заявок
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       example: 10
+ *                     open:
+ *                       type: integer
+ *                       example: 4
+ *                     closed:
+ *                       type: integer
+ *                       example: 5
+ *                     cancelled:
+ *                       type: integer
+ *                       example: 1
+ *                 ordersMonth:
+ *                   type: object
+ *                   description: Показатели заявок за текущий месяц
+ *                   properties:
+ *                     calls:
+ *                       type: integer
+ *                       example: 2
+ *                     closed:
+ *                       type: integer
+ *                       example: 1
+ *                     cancelled:
+ *                       type: integer
+ *                       example: 0
+ *                 ordersTotal:
+ *                   type: object
+ *                   description: Показатели заявок за всё время
+ *                   properties:
+ *                     calls:
+ *                       type: integer
+ *                       example: 10
+ *                     closed:
+ *                       type: integer
+ *                       example: 5
+ *                     cancelled:
+ *                       type: integer
+ *                       example: 1
+ *       403:
+ *         description: Нет доступа
+ */

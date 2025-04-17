@@ -12,10 +12,6 @@ export const getExecutorStats: (
     res: Response
 ) => Promise<void> = async (req, res) => {
     try {
-        const {role, id} = req.user!;
-        if (role !== Role.ADMIN) {
-            return sendResponse(res, 403, errorResponse('Доступ запрещён'));
-        }
         const executorId = Number(req.params.id);
         if (isNaN(executorId)) {
             return sendResponse(
