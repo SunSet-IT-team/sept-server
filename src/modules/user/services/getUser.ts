@@ -13,20 +13,21 @@ export const getUserById = async (userId: number) => {
                     type: true,
                 },
             },
+
             executorProfile: true,
+            customerProfile: {
+                include: {addresses: true},
+            },
             customerOrders: true,
             executorOrders: true,
-            customerProfile: {
-                include: {
-                    addresses: true,
-                },
-            },
+
+            reviewsReceived: true,
         },
     });
 
-    // console.log(user, 1);
-
-    if (!user) throw new Error('Пользователь не найден');
+    if (!user) {
+        throw new Error('Пользователь не найден');
+    }
 
     return toUserDto(user);
 };

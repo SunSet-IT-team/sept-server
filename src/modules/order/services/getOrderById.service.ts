@@ -10,8 +10,8 @@ export const getOrderByIdService = async (
     const order = await prisma.order.findUnique({
         where: {id: orderId},
         include: {
-            customer: true, // теперь это User
-            executor: true, // теперь это User
+            customer: true,
+            executor: true,
             service: true,
             reports: {
                 include: {

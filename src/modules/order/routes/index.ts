@@ -18,6 +18,9 @@ import {completeOrder} from '../controllers/completeOrder.controller';
 
 const orderRouter = Router();
 
+
+orderRouter.get('/', authMiddleware, getMyOrders);
+
 orderRouter.get('/my', checkRole([Role.CUSTOMER, Role.EXECUTOR]), getMyOrders);
 
 orderRouter.get('/executor/:executorId', checkRole(Role.ADMIN), getMyOrders);
