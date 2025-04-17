@@ -94,7 +94,7 @@
  *         name: theme
  *         schema:
  *           type: string
- *         required: false
+ *         required: true
  *         description: Тема обращения в поддержку
  *         example: "Не могу прикрепить отчёт"
  *

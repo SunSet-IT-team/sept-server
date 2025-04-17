@@ -70,7 +70,7 @@ export const getMyOrdersService = async ({
             filters,
         },
         {
-            defaultSortBy: 'createdAt',
+            defaultSortBy: 'priority',
             defaultOrder: 'desc',
             include: {
                 service: true,
