@@ -1,3 +1,4 @@
+// services/getOrderById.service.ts
 import {Role} from '@prisma/client';
 import {prisma} from '../../../core/database/prisma';
 import {toOrderDto} from '../utils/toOrder';
@@ -10,22 +11,46 @@ export const getOrderByIdService = async (
     const order = await prisma.order.findUnique({
         where: {id: orderId},
         include: {
-            customer: true,
-            executor: true,
             service: true,
-            reports: {
+            executor: {
                 include: {
                     files: true,
+                    executorProfile: true,
+                    customerOrders: true,
+                    executorOrders: true,
+                    reviewsReceived: {select: {id: true}},
                 },
             },
-            reviews: true,
-            chats: true,
+            customer: {
+                include: {
+                    files: true,
+                    customerProfile: {include: {addresses: true}},
+                    customerOrders: true,
+                    executorOrders: true,
+                    reviewsReceived: {select: {id: true}},
+                },
+            },
+
+            reports: {include: {files: true}},
+
+            reviews: {
+                include: {
+                    author: {
+                        include: {
+                            files: true,
+                            customerProfile: true,
+                            executorProfile: true,
+                            customerOrders: true,
+                            executorOrders: true,
+                            reviewsReceived: {select: {id: true}},
+                        },
+                    },
+                },
+            },
         },
     });
 
-    if (!order) {
-        throw new Error('Заказ не найден');
-    }
+    if (!order) throw new Error('Заказ не найден');
 
     const isAdmin = role === Role.ADMIN;
     const isCustomer = role === Role.CUSTOMER && userId === order.customerId;
@@ -34,6 +59,5 @@ export const getOrderByIdService = async (
     if (!isAdmin && !isCustomer && !isExecutor) {
         throw new Error('Нет доступа к заказу');
     }
-
-    return await toOrderDto(order);
+    return toOrderDto(order);
 };
