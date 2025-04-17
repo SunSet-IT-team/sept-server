@@ -1,3 +1,4 @@
+// services/getMyOrders.service.ts
 import {prisma} from '../../../core/database/prisma';
 import {paginate, PaginationParams} from '../../../core/utils/pagination';
 import {OrderStatus} from '@prisma/client';
@@ -19,12 +20,10 @@ export const getMyOrdersService = async ({
     filters = {},
     ...pagination
 }: GetOrdersParams) => {
-    console.log(role, userId, executorId, customerId, filters, pagination);
     const where: any = {};
 
-    if (filters.status) {
-        where.status = filters.status as OrderStatus;
-    }
+    /* -------- фильтры -------- */
+    if (filters.status) where.status = filters.status as OrderStatus;
 
     if (filters.fromDate && filters.toDate) {
         where.createdAt = {
@@ -33,21 +32,18 @@ export const getMyOrdersService = async ({
         };
     }
 
-    if (filters.serviceId) {
-        where.serviceId = filters.serviceId;
-    }
+    if (filters.serviceId) where.serviceId = filters.serviceId;
 
-    if (role === 'CUSTOMER' && userId) {
-        where.customerId = userId;
-    } else if (role === 'EXECUTOR' && userId) {
-        where.executorId = userId;
-    } else if (role === 'ADMIN') {
+    if (role === 'CUSTOMER' && userId) where.customerId = userId;
+    else if (role === 'EXECUTOR' && userId) where.executorId = userId;
+    else if (role === 'ADMIN') {
         if (filters.executorId || executorId)
             where.executorId = filters.executorId || executorId;
         if (filters.customerId || customerId)
             where.customerId = filters.customerId || customerId;
     }
 
+    /* ---------- пагинация ---------- */
     const result = await paginate(
         prisma.order,
         {...pagination},
@@ -55,9 +51,34 @@ export const getMyOrdersService = async ({
             defaultSortBy: 'createdAt',
             defaultOrder: 'desc',
             transformFilters: () => where,
+
+            /* что загружаем вместе с заказом */
             include: {
                 service: true,
+
+                reviews: {
+                    include: {
+                        author: {
+                            include: {
+                                customerProfile: true,
+                                executorProfile: true,
+                                files: true,
+                                customerOrders: true,
+                                executorOrders: true,
+                                reviewsReceived: {select: {id: true}},
+                            },
+                        },
+                    },
+                },
+
+                /* добавили отчёты + файлы отчётов */
+                reports: {
+                    include: {
+                        files: true,
+                    },
+                },
             },
+
             orderMap: {
                 createdAt: {
                     createdAt:
@@ -70,12 +91,8 @@ export const getMyOrdersService = async ({
         }
     );
 
-    const transformedItems = await Promise.all(
-        result.items.map((item) => toOrderDto(item))
-    );
+    /* превращаем в DTO */
+    const items = await Promise.all(result.items.map(toOrderDto));
 
-    return {
-        ...result,
-        items: transformedItems,
-    };
+    return {...result, items};
 };

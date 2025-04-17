@@ -24,6 +24,7 @@ orderRouter.post(
     checkRole(Role.CUSTOMER),
     createOrder
 );
+// orderRouter.get('/', authMiddleware, getMyOrders);
 orderRouter.get('/my', checkRole([Role.CUSTOMER, Role.EXECUTOR]), getMyOrders);
 
 orderRouter.get('/executor/:executorId', checkRole(Role.ADMIN), getMyOrders);

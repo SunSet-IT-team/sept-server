@@ -8,12 +8,10 @@ export const toUserDto = (user: any): UserDto => {
 
     let profile = null;
 
-    console.log(user);
-
     if (user.role === Role.EXECUTOR && user.executorProfile) {
         profile = toExecutorProfile(
             user.executorProfile,
-            user.files || [],
+            user.files ?? [],
             user.phone
         );
     }
@@ -21,10 +19,13 @@ export const toUserDto = (user: any): UserDto => {
     if (user.role === Role.CUSTOMER && user.customerProfile) {
         profile = toCustomerProfile(
             user.customerProfile,
-            user.files || [],
+            user.files ?? [],
             user.phone
         );
     }
+
+    const ordersCount =
+        (user.customerOrders?.length || 0) + (user.executorOrders?.length || 0);
 
     return {
         id: user.id,
@@ -32,7 +33,7 @@ export const toUserDto = (user: any): UserDto => {
         role: user.role,
         name: fullName,
         profile,
-        customerOrdersCount: user.customerOrders?.length || 0,
-        executorOrdersCount: user.executorOrders?.length || 0,
+        ordersCount,
+        reviewsCount: user.reviewsReceived?.length || 0,
     };
 };

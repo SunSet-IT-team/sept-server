@@ -1,15 +1,51 @@
-import {toUserDto} from '../../user/utils/toUser';
+// utils/toOrder.ts
 import {getUserById} from '../../user/services/getUser';
+import {toUserDto} from '../../user/utils/toUser';
 
 export const toOrderDto = async (order: any) => {
-    const executorUser = order.executorId
-        ? await getUserById(order.executorId)
-        : null;
+    /* ---------- участники ---------- */
+    const executorLoad = order.executor
+        ? Promise.resolve(toUserDto(order.executor)) // уже в памяти
+        : order.executorId
+        ? getUserById(order.executorId) // вытаскиваем
+        : Promise.resolve(null);
 
-    const customerUser = order.customerId
-        ? await getUserById(order.customerId)
-        : null;
+    const customerLoad = order.customer
+        ? Promise.resolve(toUserDto(order.customer))
+        : order.customerId
+        ? getUserById(order.customerId)
+        : Promise.resolve(null);
 
+    /* ---------- отзыв (берём первый, если есть) ---------- */
+    const review = order.reviews?.[0];
+    const reviewAuthorLoad = review?.author // автор уже загружен?
+        ? Promise.resolve(toUserDto(review.author))
+        : review
+        ? getUserById(review.authorId)
+        : Promise.resolve(null);
+
+    /* ждём параллельно */
+    const [executor, customer, reviewAuthor] = await Promise.all([
+        executorLoad,
+        customerLoad,
+        reviewAuthorLoad,
+    ]);
+
+    /* ---------- отчёты ---------- */
+    const reports =
+        order.reports?.map((r: any) => ({
+            id: r.id,
+            text: r.text,
+            total: r.total,
+            createdAt: r.createdAt,
+            files: (r.files ?? []).map((f: any) => ({
+                id: f.id,
+                url: f.url,
+                type: f.type,
+            })),
+        })) ?? [];
+
+    /* ---------- финальный DTO ---------- */
     return {
         id: order.id,
         objectType: order.objectType,
@@ -24,17 +60,26 @@ export const toOrderDto = async (order: any) => {
         price: order.price,
         priority: order.priority,
         city: order.city,
+        address: order.address,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
 
         service: order.service
-            ? {
-                  id: order.service.id,
-                  name: order.service.name,
-              }
+            ? {id: order.service.id, name: order.service.name}
             : null,
 
-        executor: executorUser,
-        customer: customerUser,
+        executor,
+        customer,
+        reports,
+
+        customerReview: review
+            ? {
+                  id: review.id,
+                  rating: review.rating,
+                  text: review.text,
+                  createdAt: review.createdAt,
+                  author: reviewAuthor,
+              }
+            : null,
     };
 };

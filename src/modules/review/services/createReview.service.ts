@@ -43,7 +43,6 @@ export const createReviewService = async ({
         throw new Error('Вы уже оставляли отзыв на этот заказ');
     }
 
-    // Создание отзыва
     const review = await prisma.review.create({
         data: {
             text,
@@ -59,7 +58,6 @@ export const createReviewService = async ({
         },
     });
 
-    // Пересчёт рейтинга
     await recalcExecutorRating(order.executorId);
 
     return review;
