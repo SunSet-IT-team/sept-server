@@ -8,6 +8,9 @@ export interface CustomerProfileDto {
         filename: string;
         type: string;
     } | null;
+    favoriteIds: {
+        id: number;
+    }[];
     addresses: {
         id: number;
         value: string;
