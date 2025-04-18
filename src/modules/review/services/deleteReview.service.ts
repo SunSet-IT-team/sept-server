@@ -15,7 +15,7 @@ export const deleteReviewService = async ({
     const review = await prisma.review.findUnique({
         where: {id: reviewId},
         include: {
-            order: true, // теперь достаточно, чтобы получить executorId
+            order: true,
         },
     });
 

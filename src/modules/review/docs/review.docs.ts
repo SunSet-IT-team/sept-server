@@ -73,37 +73,67 @@
 
 /**
  * @swagger
- * /review/{targetId}:
+ * /review:
  *   get:
- *     summary: Получить все отзывы о пользователе
+ *     summary: Получить список отзывов
  *     tags: [Review]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: targetId
- *         required: true
+ *       - in: query
+ *         name: page
  *         schema:
- *           type: number
- *         description: ID пользователя (обычно исполнителя), на которого оставлены отзывы
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           description: Поле для сортировки (например, createdAt, rating)
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *       - in: query
+ *         name: senderId
+ *         schema:
+ *           type: integer
+ *         description: Фильтр по ID автора отзыва
+ *       - in: query
+ *         name: targetId
+ *         schema:
+ *           type: integer
+ *         description: Фильтр по ID получателя отзыва
  *     responses:
  *       200:
- *         description: Список отзывов о пользователе
+ *         description: Пагинированный список отзывов
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 pages:
+ *                   type: integer
+ *                 items:
  *                   type: array
  *                   items:
  *                     type: object
  *                     properties:
  *                       id:
- *                         type: number
+ *                         type: integer
  *                       text:
  *                         type: string
  *                       rating:
@@ -115,7 +145,7 @@
  *                         type: object
  *                         properties:
  *                           id:
- *                             type: number
+ *                             type: integer
  *                           firstName:
  *                             type: string
  *                           lastName:
@@ -126,13 +156,11 @@
  *                         type: object
  *                         properties:
  *                           id:
- *                             type: number
+ *                             type: integer
  *                           title:
  *                             type: string
  *                           status:
  *                             type: string
- *       400:
- *         description: Ошибка
  *       401:
  *         description: Неавторизован
  */
