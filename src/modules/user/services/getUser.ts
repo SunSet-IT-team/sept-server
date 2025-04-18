@@ -6,22 +6,23 @@ export const getUserById = async (userId: number) => {
         where: {id: userId},
         include: {
             files: {
-                select: {
-                    id: true,
-                    url: true,
-                    filename: true,
-                    type: true,
-                },
+                select: {id: true, url: true, filename: true, type: true},
             },
-
             executorProfile: true,
             customerProfile: {
-                include: {addresses: true, favorites: true},
+                include: {
+                    addresses: true,
+                    favorites: true,
+                },
             },
-            customerOrders: true,
-            executorOrders: true,
-
-            reviewsReceived: true,
+            _count: {
+                select: {
+                    customerOrders: true,
+                    executorOrders: true,
+                    reviewsReceived: true,
+                    reviewsGiven: true,
+                },
+            },
         },
     });
 

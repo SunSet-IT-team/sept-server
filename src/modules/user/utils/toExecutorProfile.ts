@@ -6,17 +6,8 @@ export const toExecutorProfile = (
     files: any[],
     phone: string | null = null
 ): ExecutorProfileDto => {
-    const getFile = (type: FileType) =>
-        files.find((f) => f.type === type) || null;
-
-    const formatFile = (file: any) =>
-        file
-            ? {
-                  id: file.id,
-                  url: file.url,
-                  type: file.type,
-              }
-            : null;
+    const pick = (type: FileType) => files.find((f) => f.type === type) ?? null;
+    const fmt = (f: any) => (f ? {id: f.id, url: f.url, type: f.type} : null);
 
     return {
         workFormat: executor.workFormat,
@@ -27,10 +18,10 @@ export const toExecutorProfile = (
         city: executor.city,
         completedOrders: executor.completedOrders,
         rating: executor.rating,
-        phone: phone ?? null,
+        phone,
         priority: executor.priority,
-        profilePhoto: formatFile(getFile(FileType.PROFILE_PHOTO)),
-        licenseDoc: formatFile(getFile(FileType.LICENSE)),
-        registrationDoc: formatFile(getFile(FileType.REGISTRATION_CERTIFICATE)),
+        profilePhoto: fmt(pick(FileType.PROFILE_PHOTO)),
+        licenseDoc: fmt(pick(FileType.LICENSE)),
+        registrationDoc: fmt(pick(FileType.REGISTRATION_CERTIFICATE)),
     };
 };

@@ -1,13 +1,12 @@
 import {Role} from '@prisma/client';
 import {UserDto} from '../dto/user.dto';
-import {toCustomerProfile} from './toCustomerProfile';
 import {toExecutorProfile} from './toExecutorProfile';
+import {toCustomerProfile} from './toCustomerProfile';
 
 export const toUserDto = (user: any): UserDto => {
     const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
 
     let profile = null;
-
     if (user.role === Role.EXECUTOR && user.executorProfile) {
         profile = toExecutorProfile(
             user.executorProfile,
@@ -15,7 +14,6 @@ export const toUserDto = (user: any): UserDto => {
             user.phone
         );
     }
-
     if (user.role === Role.CUSTOMER && user.customerProfile) {
         profile = toCustomerProfile(
             user.customerProfile,
@@ -24,8 +22,19 @@ export const toUserDto = (user: any): UserDto => {
         );
     }
 
+    // общее число заказов
     const ordersCount =
-        (user.customerOrders?.length || 0) + (user.executorOrders?.length || 0);
+        (user._count?.customerOrders ?? 0) + (user._count?.executorOrders ?? 0);
+
+    // сколько отзывов заказчик оставил, а исполнитель получил
+    const reviewsGivenCount = user._count?.reviewsGiven ?? 0;
+    const reviewsReceivedCount = user._count?.reviewsReceived ?? 0;
+    const reviewCount =
+        user.role === Role.CUSTOMER
+            ? reviewsGivenCount
+            : user.role === Role.EXECUTOR
+            ? reviewsReceivedCount
+            : 0;
 
     return {
         id: user.id,
@@ -34,6 +43,6 @@ export const toUserDto = (user: any): UserDto => {
         name: fullName,
         profile,
         ordersCount,
-        reviewsCount: user.reviewsReceived?.length || 0,
+        reviewCount,
     };
 };

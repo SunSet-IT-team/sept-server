@@ -9,5 +9,9 @@ export interface UserDto {
     name: string;
     profile: ExecutorProfileDto | CustomerProfileDto | null;
     ordersCount: number;
-    reviewsCount: number;
+    /**
+     * Для заказчика — сколько он оставил отзывов,
+     * для исполнителя — сколько получил
+     */
+    reviewCount: number;
 }
