@@ -9,7 +9,7 @@ import {upload} from '../../../core/middleware/upload';
 
 const fileRouter = Router();
 
-fileRouter.get('/:filename', authMiddleware, getProtectedFileController);
+fileRouter.get('/:filename', getProtectedFileController);
 fileRouter.post(
     '/upload',
     authMiddleware,
