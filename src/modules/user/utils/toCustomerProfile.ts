@@ -7,9 +7,8 @@ export const toCustomerProfile = (
     phone: string | null = null
 ): CustomerProfileDto => {
     const photo = files.find((f) => f.type === FileType.PROFILE_PHOTO);
-
     return {
-        phone: phone,
+        phone,
         profilePhoto: photo
             ? {
                   id: photo.id,
@@ -18,17 +17,13 @@ export const toCustomerProfile = (
                   type: photo.type,
               }
             : null,
-        ordersCount: customer.orders?.length || 0,
-        reviewCount: customer.reviewCount ?? 0,
         priority: customer.priority,
         favoriteIds:
-            customer.favorites?.map((a: any) => ({
-                id: a.id,
-            })) || [],
+            customer.favorites?.map((f: any) => ({id: f.executorId})) ?? [],
         addresses:
             customer.addresses?.map((a: any) => ({
                 id: a.id,
                 value: a.value,
-            })) || [],
+            })) ?? [],
     };
 };

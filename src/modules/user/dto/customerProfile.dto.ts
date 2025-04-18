@@ -1,5 +1,4 @@
 export interface CustomerProfileDto {
-    ordersCount: number;
     phone: string | null;
     priority: number;
     profilePhoto: {
@@ -15,5 +14,4 @@ export interface CustomerProfileDto {
         id: number;
         value: string;
     }[];
-    reviewCount: number;
 }
