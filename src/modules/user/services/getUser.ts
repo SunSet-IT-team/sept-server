@@ -16,7 +16,7 @@ export const getUserById = async (userId: number) => {
 
             executorProfile: true,
             customerProfile: {
-                include: {addresses: true},
+                include: {addresses: true, favorites: true},
             },
             customerOrders: true,
             executorOrders: true,

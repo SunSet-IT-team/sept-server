@@ -250,3 +250,158 @@
  *       404:
  *         description: Исполнитель не найден
  */
+
+/**
+ * @swagger
+ * /executor/{id}/stats:
+ *   get:
+ *     summary: Получить статистику указанного исполнителя (только админ)
+ *     tags: [Executor]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID исполнителя
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 42
+ *     responses:
+ *       200:
+ *         description: Статистика исполнителя
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     income:
+ *                       type: object
+ *                       properties:
+ *                         month:
+ *                           type: number
+ *                           description: Доход за текущий месяц
+ *                           example: 12500
+ *                         total:
+ *                           type: number
+ *                           description: Доход за весь период
+ *                           example: 65500
+ *                     statsMonth:
+ *                       type: object
+ *                       description: Статистика по заказам за последний месяц
+ *                       properties:
+ *                         calls:
+ *                           type: integer
+ *                           description: Всего вызовов
+ *                           example: 38
+ *                         closed:
+ *                           type: integer
+ *                           description: Закрыто
+ *                           example: 28
+ *                         rejected:
+ *                           type: integer
+ *                           description: Отказано
+ *                           example: 10
+ *                     statsTotal:
+ *                       type: object
+ *                       description: Общая статистика по заказам
+ *                       properties:
+ *                         calls:
+ *                           type: integer
+ *                           example: 380
+ *                         closed:
+ *                           type: integer
+ *                           example: 250
+ *                         rejected:
+ *                           type: integer
+ *                           example: 130
+ *       400:
+ *         description: Некорректный запрос (например, неверный ID)
+ *       403:
+ *         description: Нет доступа
+ *       500:
+ *         description: Внутренняя ошибка сервера
+ */
+
+/**
+ * @swagger
+ * /executor/me/stats:
+ *   get:
+ *     summary: Получить свою статистику (только исполнитель)
+ *     tags: [Executor]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Ваша статистика
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/ExecutorStats'
+ *       403:
+ *         description: Нет доступа
+ *       500:
+ *         description: Внутренняя ошибка сервера
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ExecutorStats:
+ *       type: object
+ *       properties:
+ *         income:
+ *           type: object
+ *           properties:
+ *             month:
+ *               type: number
+ *               description: Доход за текущий месяц
+ *               example: 12500
+ *             total:
+ *               type: number
+ *               description: Доход за весь период
+ *               example: 65500
+ *         statsMonth:
+ *           type: object
+ *           properties:
+ *             calls:
+ *               type: integer
+ *               description: Всего вызовов за месяц
+ *               example: 38
+ *             closed:
+ *               type: integer
+ *               description: Закрыто за месяц
+ *               example: 28
+ *             rejected:
+ *               type: integer
+ *               description: Отказано за месяц
+ *               example: 10
+ *         statsTotal:
+ *           type: object
+ *           properties:
+ *             calls:
+ *               type: integer
+ *               description: Всего вызовов за весь период
+ *               example: 380
+ *             closed:
+ *               type: integer
+ *               description: Закрыто за весь период
+ *               example: 250
+ *             rejected:
+ *               type: integer
+ *               description: Отказано за весь период
+ *               example: 130
+ */

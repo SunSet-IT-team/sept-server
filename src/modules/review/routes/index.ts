@@ -9,9 +9,11 @@ import {deleteReview} from '../controllers/deleteReview.controller';
 
 const reviewRouter = Router();
 
+reviewRouter.get('/', authMiddleware, getReviews);
+
 reviewRouter.post('/:orderId', checkRole(Role.CUSTOMER), createReview);
 
-reviewRouter.get('/:targetId', authMiddleware, getReviews);
+// reviewRouter.get('/:targetId', authMiddleware, getReviews);
 
 reviewRouter.patch(
     '/:reviewId',

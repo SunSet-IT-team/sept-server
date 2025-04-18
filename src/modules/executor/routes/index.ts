@@ -9,6 +9,8 @@ import {validateDto} from '../../../core/utils/validateDto';
 import {updateExecutorProfile} from '../controllers/updateExecutorProfile.controller';
 import {deleteExecutorProfile} from '../controllers/deleteExecutor.controller';
 import {getExecutorsList} from '../controllers/getExecutorsList.controller';
+import {getExecutorStats} from '../controllers/getExecutorStats.controller';
+import {getMyStats} from '../controllers/getMyStats.controller';
 
 const executorRouter = Router();
 
@@ -44,7 +46,7 @@ executorRouter.get('/', authMiddleware, getExecutorsList); // Получить �
 
 // executorRouter.get('/:executorId/rating', checkRole(Role.EXECUTOR), () => {});
 
-// executorRouter.get('/:id/stats', checkRole(Role.ADMIN), () => {});
-// executorRouter.get('/stats', checkRole(Role.EXECUTOR), () => {});
+executorRouter.get('/me/stats', authMiddleware, getMyStats);
+executorRouter.get('/:id/stats', authMiddleware, getExecutorStats);
 
 export default executorRouter;

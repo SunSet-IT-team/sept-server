@@ -1,87 +1,100 @@
 import {prisma} from '../../../core/database/prisma';
+import {getUserById} from '../../user/services/getUser';
+import {toOrderDto} from '../../order/utils/toOrder';
+import {OrderDto, ReviewDto} from '../../order/dtos/order.dto';
 
-interface CreateReviewData {
+export interface CreateReviewParams {
     orderId: number;
+    authorId: number;
     text: string;
     rating: number;
-    authorId: number;
+}
+
+export interface CreateReviewResult {
+    review: ReviewDto;
+    order: OrderDto;
 }
 
 export const createReviewService = async ({
     orderId,
+    authorId,
     text,
     rating,
-    authorId,
-}: CreateReviewData) => {
-    const order = await prisma.order.findUnique({
+}: CreateReviewParams): Promise<CreateReviewResult> => {
+    const orderMeta = await prisma.order.findUnique({
         where: {id: orderId},
+        select: {customerId: true, executorId: true, title: true},
     });
-
-    if (!order) {
-        throw new Error('Заказ не найден');
-    }
-
-    // Проверка, что автор — владелец заказа
-    if (order.customerId !== authorId) {
+    if (!orderMeta) throw new Error('Заказ не найден');
+    if (orderMeta.customerId !== authorId) {
         throw new Error('Вы не являетесь владельцем этого заказа');
     }
+    const executorUserId = orderMeta.executorId;
+    if (!executorUserId) throw new Error('У заказа нет исполнителя');
 
-    if (!order.executorId) {
-        throw new Error('У заказа нет исполнителя');
-    }
-
-    // Проверка, что отзыв ещё не был создан
-    const existingReview = await prisma.review.findFirst({
-        where: {
-            authorId,
-            targetId: order.executorId,
-            orderId,
-        },
+    const exists = await prisma.review.findFirst({
+        where: {authorId, targetId: executorUserId, orderId},
     });
+    if (exists) throw new Error('Вы уже оставляли отзыв на этот заказ');
 
-    if (existingReview) {
-        throw new Error('Вы уже оставляли отзыв на этот заказ');
-    }
-
-    const review = await prisma.review.create({
+    const created = await prisma.review.create({
         data: {
             text,
             rating,
             authorId,
-            targetId: order.executorId,
+            targetId: executorUserId,
             orderId,
         },
-        include: {
-            author: true,
-            target: true,
-            order: true,
-        },
     });
 
-    await recalcExecutorRating(order.executorId);
-
-    return review;
-};
-
-async function recalcExecutorRating(executorUserId: number) {
-    const reviews = await prisma.review.findMany({
+    const agg = await prisma.review.aggregate({
         where: {targetId: executorUserId},
-        select: {rating: true},
+        _avg: {rating: true},
     });
-
-    if (!reviews.length) {
-        await prisma.executorProfile.update({
-            where: {userId: executorUserId},
-            data: {rating: 0},
-        });
-        return;
-    }
-
-    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-    const average = sum / reviews.length;
-
     await prisma.executorProfile.update({
         where: {userId: executorUserId},
-        data: {rating: average},
+        data: {rating: agg._avg.rating ?? 0},
     });
-}
+
+    const authorDto = await getUserById(authorId);
+    const reviewDto: ReviewDto = {
+        id: created.id,
+        text: created.text!,
+        rating: created.rating,
+        createdAt: created.createdAt,
+        author: authorDto,
+    };
+
+    const fullOrder = await prisma.order.findUnique({
+        where: {id: orderId},
+        include: {
+            service: true,
+            reports: {include: {files: true}},
+            reviews: {
+                include: {
+                    author: {
+                        include: {
+                            files: true,
+                            customerProfile: true,
+                            executorProfile: true,
+                            customerOrders: true,
+                            executorOrders: true,
+                            reviewsReceived: {select: {id: true}},
+                        },
+                    },
+                },
+            },
+            chats: true,
+        },
+    });
+    if (!fullOrder) throw new Error('Не удалось загрузить заказ');
+
+    const baseOrderDto = await toOrderDto(fullOrder);
+    const orderDto: OrderDto = {
+        title: fullOrder.title || '',
+        ...baseOrderDto,
+        customerReview: reviewDto,
+    };
+
+    return {review: reviewDto, order: orderDto};
+};

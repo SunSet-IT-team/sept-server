@@ -454,3 +454,80 @@
  *       401:
  *         description: Неавторизован
  */
+/**
+ * @swagger
+ * /auth/password/forgot:
+ *   post:
+ *     summary: Отправить код восстановления пароля на email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: Код успешно отправлен
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Код выслан на почту
+ *       400:
+ *         description: Неверный запрос или пользователь не найден
+ */
+
+/**
+ * @swagger
+ * /auth/password/reset:
+ *   post:
+ *     summary: Сбросить пароль по коду
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               code:
+ *                 type: string
+ *                 example: "123456"
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 minLength: 8
+ *                 example: "newStrongPass1"
+ *     responses:
+ *       200:
+ *         description: Пароль успешно обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Пароль успешно обновлён
+ *       400:
+ *         description: Неверный код, email или срок действия истёк
+ */

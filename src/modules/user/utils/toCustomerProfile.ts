@@ -21,6 +21,10 @@ export const toCustomerProfile = (
         ordersCount: customer.orders?.length || 0,
         reviewCount: customer.reviewCount ?? 0,
         priority: customer.priority,
+        favoriteIds:
+            customer.favorites?.map((a: any) => ({
+                id: a.id,
+            })) || [],
         addresses:
             customer.addresses?.map((a: any) => ({
                 id: a.id,
