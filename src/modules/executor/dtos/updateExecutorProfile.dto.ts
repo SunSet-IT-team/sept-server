@@ -8,19 +8,15 @@ import {
     Matches,
     IsArray,
     IsUUID,
+    IsNumber,
+    IsEmail,
 } from 'class-validator';
 import {WorkFormat} from '@prisma/client';
 
 export class UpdateExecutorDTO {
     @IsOptional()
-    @IsString()
-    @MaxLength(50)
-    firstName?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(50)
-    lastName?: string;
+    @IsEmail()
+    email?: string;
 
     @IsOptional()
     @IsString()
@@ -33,8 +29,6 @@ export class UpdateExecutorDTO {
     about?: string;
 
     @IsOptional()
-    @IsInt()
-    @Min(0)
     experience?: number;
 
     @IsOptional()
@@ -46,6 +40,11 @@ export class UpdateExecutorDTO {
     @IsString()
     @MaxLength(1000)
     description?: string;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(255)
+    city?: string;
 
     @IsOptional()
     @IsEnum(WorkFormat, {

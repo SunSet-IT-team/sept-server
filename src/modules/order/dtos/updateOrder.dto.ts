@@ -2,9 +2,12 @@ import {
     IsOptional,
     IsString,
     IsNumber,
+    IsEnum,
     IsDateString,
-    IsUUID,
+    Min,
+    Max,
 } from 'class-validator';
+import {OrderStatus} from '@prisma/client';
 
 export class UpdateOrderDTO {
     @IsOptional()
@@ -40,10 +43,27 @@ export class UpdateOrderDTO {
     workDate?: string;
 
     @IsOptional()
-    @IsUUID()
-    addressId?: number;
+    @IsString()
+    city?: string;
+
+    @IsOptional()
+    @IsString()
+    address?: string;
 
     @IsOptional()
     @IsNumber()
-    price?: number;
+    serviceId?: number;
+
+    @IsOptional()
+    @IsNumber()
+    executorId?: number;
+
+    @IsOptional()
+    @IsEnum(OrderStatus)
+    status?: OrderStatus;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    priority?: number;
 }

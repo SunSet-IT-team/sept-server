@@ -362,28 +362,126 @@
  * /order/{id}:
  *   patch:
  *     summary: Обновить заказ
+ *     description: Позволяет владельцу заказа (до начала выполнения) или админу изменить поля заказа. Только админ может редактировать поле `priority`.
  *     tags: [Order]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
+ *         description: ID заказа
  *         required: true
- *         schema: { type: integer }
+ *         schema:
+ *           type: integer
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               comment:        { type: string }
- *               paymentMethod:  { type: string }
- *               workDate:       { type: string, format: date-time }
- *               price:          { type: number }
- *               status:         { type: string, enum: [CANCELLED] }
+ *               objectType:
+ *                 type: string
+ *                 description: Тип объекта
+ *               comment:
+ *                 type: string
+ *                 description: Комментарий к заказу
+ *               distanceToSeptic:
+ *                 type: number
+ *                 description: Расстояние до септика
+ *               septicDepth:
+ *                 type: number
+ *                 description: Глубина септика
+ *               septicVolume:
+ *                 type: number
+ *                 description: Объём септика
+ *               septicConstructionType:
+ *                 type: string
+ *                 description: Тип конструкции септика
+ *               paymentMethod:
+ *                 type: string
+ *                 description: Способ оплаты
+ *               workDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Дата и время выполнения работ
+ *               city:
+ *                 type: string
+ *                 description: Город
+ *               address:
+ *                 type: string
+ *                 description: Адрес
+ *               serviceId:
+ *                 type: integer
+ *                 description: ID сервиса
+ *               executorId:
+ *                 type: integer
+ *                 description: ID исполнителя
+ *               status:
+ *                 type: string
+ *                 enum: [PENDING, IN_PROGRESS, REJECTED, COMPLETED, CANCELLED]
+ *                 description: Новый статус заказа
+ *               priority:
+ *                 type: integer
+ *                 description: Приоритет заказа (меняет только админ)
  *     responses:
- *       200: { description: Заказ обновлён }
- *       403: { description: Нет прав }
+ *       200:
+ *         description: Заказ успешно обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 42
+ *                 objectType:
+ *                   type: string
+ *                 comment:
+ *                   type: string
+ *                 distanceToSeptic:
+ *                   type: number
+ *                 septicDepth:
+ *                   type: number
+ *                 septicVolume:
+ *                   type: number
+ *                 septicConstructionType:
+ *                   type: string
+ *                 paymentMethod:
+ *                   type: string
+ *                 workDate:
+ *                   type: string
+ *                   format: date-time
+ *                 city:
+ *                   type: string
+ *                 address:
+ *                   type: string
+ *                 service:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     name:
+ *                       type: string
+ *                 executor:
+ *                   type: object
+ *                   description: Профиль исполнителя (UserDto)
+ *                 customer:
+ *                   type: object
+ *                   description: Профиль заказчика (UserDto)
+ *                 reports:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 customerReview:
+ *                   type: object
+ *                   nullable: true
+ *       400:
+ *         description: Ошибка валидации или неверные данные
+ *       403:
+ *         description: Нет прав для изменения заказа
+ *       404:
+ *         description: Заказ не найден
  */
 
 /* -------------------------------------------------------------------------- */

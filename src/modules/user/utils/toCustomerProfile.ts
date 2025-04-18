@@ -6,17 +6,18 @@ export const toCustomerProfile = (
     files: any[],
     phone: string | null = null
 ): CustomerProfileDto => {
-    const photo = files.find((f) => f.type === FileType.PROFILE_PHOTO);
+    const photos = files
+        .filter((f) => f.type === FileType.PROFILE_PHOTO)
+        .map((f) => ({
+            id: f.id,
+            url: f.url,
+            filename: f.filename,
+            type: f.type as FileType,
+        }));
+
     return {
         phone,
-        profilePhoto: photo
-            ? {
-                  id: photo.id,
-                  url: photo.url,
-                  filename: photo.filename,
-                  type: photo.type,
-              }
-            : null,
+        profilePhotos: photos,
         priority: customer.priority,
         favoriteIds:
             customer.favorites?.map((f: any) => ({id: f.executorId})) ?? [],

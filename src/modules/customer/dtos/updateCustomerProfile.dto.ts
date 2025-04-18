@@ -5,6 +5,7 @@ import {
     IsInt,
     IsArray,
     ValidateNested,
+    IsEmail,
 } from 'class-validator';
 import {Type} from 'class-transformer';
 
@@ -29,6 +30,10 @@ export class NewAddressDTO {
 }
 
 export class UpdateCustomerDTO {
+    @IsOptional()
+    @IsEmail()
+    email?: string;
+
     @IsOptional()
     @IsString()
     firstName?: string;

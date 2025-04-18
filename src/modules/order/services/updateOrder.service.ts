@@ -1,17 +1,14 @@
-import {Role} from '@prisma/client';
 import {prisma} from '../../../core/database/prisma';
+import {Role} from '@prisma/client';
 import {toOrderDto} from '../utils/toOrder';
 
 export const updateOrderService = async (
     orderId: number,
     userId: number,
     role: Role,
-    data: Record<string, any>
+    dto: Record<string, any>
 ) => {
-    const order = await prisma.order.findUnique({
-        where: {id: orderId},
-    });
-
+    const order = await prisma.order.findUnique({where: {id: orderId}});
     if (!order) throw new Error('Заказ не найден');
 
     const isOwner = order.customerId === userId;
@@ -21,13 +18,20 @@ export const updateOrderService = async (
         throw new Error('Нет доступа к редактированию заказа');
     }
 
+    // Нельзя редактировать заказ после старта, если не админ
     if (order.status !== 'PENDING' && !isAdmin) {
         throw new Error('Нельзя изменить заказ после начала выполнения');
     }
 
+    // Скрываем priority для не‑админов
+    if (!isAdmin && dto.priority !== undefined) {
+        delete dto.priority;
+        delete dto.status;
+    }
+
     const updated = await prisma.order.update({
         where: {id: orderId},
-        data,
+        data: dto,
         include: {
             service: true,
             customer: {
@@ -37,6 +41,8 @@ export const updateOrderService = async (
                 },
             },
             executor: {include: {files: true, executorProfile: true}},
+            reports: {include: {files: true}},
+            reviews: {include: {author: {include: {files: true}}}},
         },
     });
 

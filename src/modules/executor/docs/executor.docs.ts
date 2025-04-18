@@ -98,45 +98,64 @@
  *           schema:
  *             type: object
  *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
+ *               email:
  *                 type: string
  *               phone:
  *                 type: string
+ *                 description: Телефон в формате +7XXXXXXXXXX
+ *               city:
+ *                 type: string
+ *                 description: Город
  *               workFormat:
  *                 type: string
  *                 enum: [INDIVIDUAL, LEGAL_ENTITY, SOLE_PROPRIETOR]
+ *                 description: Формат работы
  *               experience:
  *                 type: integer
+ *                 description: Опыт работы в годах
  *               about:
  *                 type: string
+ *                 description: Описание себя
  *               companyName:
  *                 type: string
+ *                 description: Название компании
  *               description:
  *                 type: string
+ *                 description: Дополнительное описание компании
  *               fileIdsToDelete:
  *                 type: array
  *                 items:
- *                   type: number
+ *                   type: integer
+ *                 description: Список ID уже загруженных файлов для удаления
  *               profilePhoto:
  *                 type: string
  *                 format: binary
+ *                 description: Новый файл фото профиля
  *               registrationDoc:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *                 description: Новый(е) файл(ы) регистрационного документа
  *               licenseDoc:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *                 description: Новый(е) файл(ы) лицензии
  *     responses:
  *       200:
- *         description: Профиль обновлен
+ *         description: Профиль исполнителя успешно обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
  *       400:
- *         description: Ошибка валидации
+ *         description: Ошибка валидации данных или обновлении профиля
  */
 
 /**
@@ -165,17 +184,10 @@
  * @swagger
  * /executor/{id}:
  *   patch:
- *     summary: Обновить профиль исполнителя по ID (только для администраторов)
+ *     summary: Обновить свой профиль исполнителя
  *     tags: [Executor]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: number
- *         description: ID исполнителя
  *     requestBody:
  *       required: true
  *       content:
@@ -183,48 +195,64 @@
  *           schema:
  *             type: object
  *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
+ *               email:
  *                 type: string
  *               phone:
  *                 type: string
+ *                 description: Телефон в формате +7XXXXXXXXXX
+ *               city:
+ *                 type: string
+ *                 description: Город
  *               workFormat:
  *                 type: string
  *                 enum: [INDIVIDUAL, LEGAL_ENTITY, SOLE_PROPRIETOR]
+ *                 description: Формат работы
  *               experience:
  *                 type: integer
+ *                 description: Опыт работы в годах
  *               about:
  *                 type: string
+ *                 description: Описание себя
  *               companyName:
  *                 type: string
+ *                 description: Название компании
  *               description:
  *                 type: string
+ *                 description: Дополнительное описание компании
  *               fileIdsToDelete:
  *                 type: array
  *                 items:
- *                   type: number
- *                   format: uuid
+ *                   type: integer
+ *                 description: Список ID уже загруженных файлов для удаления
  *               profilePhoto:
  *                 type: string
  *                 format: binary
+ *                 description: Новый файл фото профиля
  *               registrationDoc:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *                 description: Новый(е) файл(ы) регистрационного документа
  *               licenseDoc:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *                 description: Новый(е) файл(ы) лицензии
  *     responses:
  *       200:
- *         description: Профиль обновлён
- *       403:
- *         description: Нет прав
+ *         description: Профиль исполнителя успешно обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
  *       400:
- *         description: Ошибка валидации
+ *         description: Ошибка валидации данных или обновлении профиля
  */
 
 /**
