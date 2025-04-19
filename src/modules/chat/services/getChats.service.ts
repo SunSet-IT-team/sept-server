@@ -25,7 +25,13 @@ export const getChatsService = async (query: GetChatsQueryDTO) => {
         transformFilters: (filters) => {
             const where: any = {};
 
-            where.type = ChatType.ORDER_ADMIN;
+            where.type = {
+                in: [
+                    ChatType.ORDER_ADMIN,
+                    ChatType.SUPPORT_CUSTOMER,
+                    ChatType.SUPPORT_EXECUTOR,
+                ],
+            };
 
             if (filters.type) {
                 where.type = filters.type;

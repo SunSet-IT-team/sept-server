@@ -88,7 +88,8 @@ export const configureSocket = (io: Server) => {
             }
         );
 
-        socket.on('markAsRead', async ({messageId}) => {
+        socket.on('markAsRead', async ({messageId, chatId}) => {
+            console.error('messageId', messageId, userId);
             if (!messageId || !userId) return;
 
             try {
@@ -108,6 +109,7 @@ export const configureSocket = (io: Server) => {
                 }
 
                 if (message.senderId === userId) {
+                    console.error(' Не обновляем статус для своих сообщений');
                     return; // Не обновляем статус для своих сообщений
                 }
 
@@ -119,11 +121,14 @@ export const configureSocket = (io: Server) => {
                     });
 
                     // 3. Уведомляем всех в чате о прочтении
-                    socket.to(`${message.chatId}`).emit('messageRead', {
+                    socket.to(chatId).emit('messageRead', {
                         messageId,
                         readBy: userId,
-                        timestamp: new Date(),
+                        chatId: chatId,
                     });
+
+                    console.error('message.chatId', chatId);
+                    console.error('emit messageRead');
                 }
             } catch (err) {
                 console.error('[markAsRead error]', err);
