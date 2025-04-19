@@ -2,10 +2,12 @@ import {prisma} from '../../../core/database/prisma';
 import {OrderStatus} from '@prisma/client';
 import {handleFileUpload} from '../utils/files/handleFileUpload';
 import {toOrderDto} from '../utils/toOrder';
+import {CompleteOrderDTO} from '../dtos/completeOrder.dto';
 
 export const completeOrderService = async (
     orderId: number,
     executorId: number,
+    dto: CompleteOrderDTO,
     files: Record<string, Express.Multer.File[]>
 ) => {
     const order = await prisma.order.findUnique({
@@ -23,7 +25,7 @@ export const completeOrderService = async (
     const report = await prisma.report.create({
         data: {
             orderId,
-            total: 100,
+            total: Number(dto.total),
             text: '',
         },
     });
