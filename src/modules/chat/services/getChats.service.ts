@@ -3,6 +3,7 @@ import {prisma} from '../../../core/database/prisma';
 import {paginate} from '../../../core/utils/pagination';
 import {GetChatsQueryDTO} from '../dtos/getChatsQuery.dto';
 import {getUserById} from '../../user/services/getUser';
+import {ChatType} from '@prisma/client';
 
 export const getChatsService = async (query: GetChatsQueryDTO) => {
     const result = await paginate(prisma.chat, query, {
@@ -23,6 +24,8 @@ export const getChatsService = async (query: GetChatsQueryDTO) => {
         },
         transformFilters: (filters) => {
             const where: any = {};
+
+            where.type = ChatType.ORDER_ADMIN;
 
             if (filters.type) {
                 where.type = filters.type;
