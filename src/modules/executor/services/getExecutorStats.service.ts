@@ -25,6 +25,7 @@ export const getExecutorStatsService = async (
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+    // Получаем рейтинг
     const user = await prisma.user.findUnique({
         where: {id: executorId},
         include: {
@@ -38,12 +39,20 @@ export const getExecutorStatsService = async (
 
     const [{_sum: totalAgg}, {_sum: monthAgg}] = await Promise.all([
         prisma.report.aggregate({
-            where: {order: {executorId}},
+            where: {
+                order: {
+                    executorId,
+                    status: OrderStatus.COMPLETED,
+                },
+            },
             _sum: {total: true},
         }),
         prisma.report.aggregate({
             where: {
-                order: {executorId},
+                order: {
+                    executorId,
+                    status: OrderStatus.COMPLETED,
+                },
                 createdAt: {gte: startOfMonth},
             },
             _sum: {total: true},

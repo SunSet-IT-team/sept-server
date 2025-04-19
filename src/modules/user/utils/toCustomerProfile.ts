@@ -4,7 +4,8 @@ import {FileType} from '@prisma/client';
 export const toCustomerProfile = (
     customer: any,
     files: any[],
-    phone: string | null = null
+    phone: string | null = null,
+    favoriteIds: {id: number}[] = []
 ): CustomerProfileDto => {
     const photos = files
         .filter((f) => f.type === FileType.PROFILE_PHOTO)
@@ -19,8 +20,7 @@ export const toCustomerProfile = (
         phone,
         profilePhotos: photos,
         priority: customer.priority,
-        favoriteIds:
-            customer.favorites?.map((f: any) => ({id: f.executorId})) ?? [],
+        favoriteIds,
         addresses:
             customer.addresses?.map((a: any) => ({
                 id: a.id,

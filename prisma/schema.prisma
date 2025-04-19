@@ -79,6 +79,11 @@ model User {
 
   customerOrders   Order[]         @relation("CustomerOrders")
   executorOrders   Order[]         @relation("ExecutorOrders")
+
+  /// Кто я сам добавил в избранное
+  favoritesGiven     Favorite[] @relation("UserFavorites")
+  /// Кто меня добавил в избранное
+  favoritesReceived  Favorite[] @relation("ExecutorFavorites")
 }
 
 model AdminProfile {
@@ -96,7 +101,6 @@ model CustomerProfile {
   reviewCount  Int    @default(0)
 
   addresses    Address[]
-  favorites    Favorite[] @relation("CustomerFavorites")
 }
 
 model ExecutorProfile {
@@ -115,7 +119,6 @@ model ExecutorProfile {
   completedOrders  Int     @default(0)
 
   files            File[]
-  favorites        Favorite[] @relation("ExecutorFavorites")
 }
 
 model Favorite {
@@ -124,8 +127,9 @@ model Favorite {
   executorId Int
   createdAt  DateTime @default(now())
 
-  customer   CustomerProfile @relation("CustomerFavorites", fields: [customerId], references: [id])
-  executor   ExecutorProfile @relation("ExecutorFavorites", fields: [executorId], references: [id])
+   user     User @relation("UserFavorites", fields: [customerId],         references: [id])
+  executor User @relation("ExecutorFavorites", fields: [executorId], references: [id])
+
 
   @@unique([customerId, executorId])
 }

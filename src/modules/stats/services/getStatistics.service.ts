@@ -1,5 +1,5 @@
 import {prisma} from '../../../core/database/prisma';
-import {OrderStatus} from '@prisma/client';
+import {OrderStatus, Role} from '@prisma/client';
 
 export const getStatisticsService = async () => {
     // Общая статистика заказов
@@ -11,12 +11,12 @@ export const getStatisticsService = async () => {
 
     // Общая статистика исполнителей
     const totalExecutors = await prisma.user.count({
-        where: {role: 'EXECUTOR'},
+        where: {role: Role.EXECUTOR},
     });
 
     const newExecutors = await prisma.user.count({
         where: {
-            role: 'EXECUTOR',
+            role: Role.EXECUTOR,
             createdAt: {
                 gte: new Date(
                     new Date().getFullYear(),
@@ -53,6 +53,7 @@ export const getStatisticsService = async () => {
         }
     }
 
+    // Топ-3 исполнителей по числу завершённых заказов
     const topExecutorsRaw = await prisma.order.groupBy({
         by: ['executorId'],
         where: {
@@ -74,16 +75,17 @@ export const getStatisticsService = async () => {
             const executor = await prisma.user.findUnique({
                 where: {id: entry.executorId!},
                 select: {
-                    firstName: true,
-                    lastName: true,
+                    executorProfile: {
+                        select: {
+                            companyName: true,
+                        },
+                    },
                 },
             });
 
-            const name = executor
-                ? `${executor.firstName || ''} ${
-                      executor.lastName || ''
-                  }`.trim() || 'Без имени'
-                : 'Неизвестно';
+            const name =
+                executor?.executorProfile?.companyName?.trim() ||
+                'Название не указано';
 
             return {
                 name,
@@ -92,9 +94,16 @@ export const getStatisticsService = async () => {
         })
     );
 
-    const closedOrdersSumAgg = await prisma.order.aggregate({
-        where: {status: OrderStatus.COMPLETED},
-        _sum: {price: true},
+    // Сумма по всем завершённым заказам
+    const closedReportsSumAgg = await prisma.report.aggregate({
+        where: {
+            order: {
+                status: OrderStatus.COMPLETED,
+            },
+        },
+        _sum: {
+            total: true,
+        },
     });
 
     return {
@@ -115,6 +124,6 @@ export const getStatisticsService = async () => {
             byCity: cityOrders,
             top: topExecutors,
         },
-        closedOrdersTotalSum: closedOrdersSumAgg._sum.price ?? 0,
+        closedOrdersTotalSum: closedReportsSumAgg._sum.total ?? 0,
     };
 };
