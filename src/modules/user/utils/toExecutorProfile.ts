@@ -1,4 +1,9 @@
-import {ExecutorProfileDto} from '../dto/executorProfile.dto';
+// src/modules/user/utils/toExecutorProfile.ts
+
+import {
+    ExecutorProfileDto,
+    ExecutorProfileFileDto,
+} from '../dto/executorProfile.dto';
 import {FileType} from '@prisma/client';
 
 export const toExecutorProfile = (
@@ -6,8 +11,15 @@ export const toExecutorProfile = (
     files: any[],
     phone: string | null = null
 ): ExecutorProfileDto => {
-    const pick = (type: FileType) => files.find((f) => f.type === type) ?? null;
-    const fmt = (f: any) => (f ? {id: f.id, url: f.url, type: f.type} : null);
+    // Подбираем все файлы заданного типа и форматируем
+    const pickAll = (type: FileType): ExecutorProfileFileDto[] =>
+        files
+            .filter((f) => f.type === type)
+            .map((f) => ({
+                id: f.id,
+                url: f.url,
+                type: f.type as FileType,
+            }));
 
     return {
         workFormat: executor.workFormat,
@@ -20,8 +32,9 @@ export const toExecutorProfile = (
         rating: executor.rating,
         phone,
         priority: executor.priority,
-        profilePhoto: fmt(pick(FileType.PROFILE_PHOTO)),
-        licenseDoc: fmt(pick(FileType.LICENSE)),
-        registrationDoc: fmt(pick(FileType.REGISTRATION_CERTIFICATE)),
+
+        profilePhotos: pickAll(FileType.PROFILE_PHOTO),
+        licenseDocs: pickAll(FileType.LICENSE),
+        registrationDocs: pickAll(FileType.REGISTRATION_CERTIFICATE),
     };
 };

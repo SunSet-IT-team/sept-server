@@ -28,8 +28,6 @@
  *     tags: [Customer]
  *     security:
  *       - bearerAuth: []
- *     consumes:
- *       - multipart/form-data
  *     requestBody:
  *       required: true
  *       content:
@@ -37,99 +35,81 @@
  *           schema:
  *             type: object
  *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Новый email пользователя
  *               firstName:
  *                 type: string
- *                 example: Алексей
+ *                 description: Новое имя пользователя
  *               lastName:
  *                 type: string
- *                 example: Смирнов
+ *                 description: Новая фамилия пользователя
  *               phone:
  *                 type: string
- *                 example: +79876543210
+ *                 description: Новый номер телефона
  *               updateAddresses:
- *                 type: string
- *                 format: json
- *                 description: JSON-массив адресов, которые нужно обновить
- *                 example: '[{"id":1,"value":"Москва, Ленина 1","isDefault":true}]'
- *               deleteAddressIds:
- *                 type: string
- *                 format: json
- *                 description: JSON-массив ID адресов для удаления
- *                 example: '[2, 3]'
- *               newAddresses:
- *                 type: string
- *                 format: json
- *                 description: JSON-массив новых адресов
- *                 example: '[{"value":"СПб, Невский 100","isDefault":false}]'
- *               profilePhoto:
- *                 type: string
- *                 format: binary
- *                 description: Новое фото профиля
- *     responses:
- *       200:
- *         description: Профиль успешно обновлён
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Профиль успешно обновлён
- *                 user:
+ *                 type: array
+ *                 description: Список существующих адресов для обновления
+ *                 items:
  *                   type: object
  *                   properties:
  *                     id:
  *                       type: integer
- *                       example: 12
- *                     email:
+ *                     value:
  *                       type: string
- *                       example: user@example.com
- *                     firstName:
+ *                     isDefault:
+ *                       type: boolean
+ *               deleteAddressIds:
+ *                 type: array
+ *                 description: Список ID адресов для удаления
+ *                 items:
+ *                   type: integer
+ *               newAddresses:
+ *                 type: array
+ *                 description: Список новых адресов для добавления
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
  *                       type: string
- *                     lastName:
- *                       type: string
- *                     phone:
- *                       type: string
- *                     role:
- *                       type: string
- *                       example: CUSTOMER
- *                     customerProfile:
- *                       type: object
- *                       properties:
- *                         addresses:
- *                           type: array
- *                           items:
- *                             type: object
- *                             properties:
- *                               id:
- *                                 type: integer
- *                               value:
- *                                 type: string
- *                               isDefault:
- *                                 type: boolean
- *                         priority:
- *                           type: integer
- *                     profilePhoto:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: integer
- *                         url:
- *                           type: string
- *                         type:
- *                           type: string
- *                           example: PROFILE_PHOTO
- *       400:
- *         description: Ошибка валидации или данных
+ *                     isDefault:
+ *                       type: boolean
+ *               profilePhoto:
+ *                 type: string
+ *                 format: binary
+ *                 description: Новый файл профиля (фото)
+ *     responses:
+ *       200:
+ *         description: Профиль заказчика успешно обновлён
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
+ *                 id:
+ *                   type: integer
+ *                 email:
  *                   type: string
- *                   example: Пользователь не найден или не является заказчиком
+ *                 firstName:
+ *                   type: string
+ *                 lastName:
+ *                   type: string
+ *                 phone:
+ *                   type: string
+ *                 profile:
+ *                   type: object
+ *                   description: DTO профиля (addresses, favorites и пр.)
+ *                 ordersCount:
+ *                   type: integer
+ *                   description: Общее число заказов
+ *                 reviewsReceivedCount:
+ *                   type: integer
+ *                   description: Количество полученных отзывов
+ *                 reviewsGivenCount:
+ *                   type: integer
+ *                   description: Количество оставленных отзывов
+ *       400:
+ *         description: Ошибка валидации или обновлении профиля
  */
 
 /**
@@ -328,19 +308,10 @@
  * @swagger
  * /customer/{id}:
  *   patch:
- *     summary: Обновление профиля заказчика по ID
+ *     summary: Обновить свой профиль заказчика
  *     tags: [Customer]
  *     security:
  *       - bearerAuth: []
- *     consumes:
- *       - multipart/form-data
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID пользователя
- *         schema:
- *           type: integer
  *     requestBody:
  *       required: true
  *       content:
@@ -348,99 +319,81 @@
  *           schema:
  *             type: object
  *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Новый email пользователя
  *               firstName:
  *                 type: string
- *                 example: Алексей
+ *                 description: Новое имя пользователя
  *               lastName:
  *                 type: string
- *                 example: Смирнов
+ *                 description: Новая фамилия пользователя
  *               phone:
  *                 type: string
- *                 example: +79876543210
+ *                 description: Новый номер телефона
  *               updateAddresses:
- *                 type: string
- *                 format: json
- *                 description: JSON-массив адресов, которые нужно обновить
- *                 example: '[{"id":1,"value":"Москва, Ленина 1","isDefault":true}]'
- *               deleteAddressIds:
- *                 type: string
- *                 format: json
- *                 description: JSON-массив ID адресов для удаления
- *                 example: '[2, 3]'
- *               newAddresses:
- *                 type: string
- *                 format: json
- *                 description: JSON-массив новых адресов
- *                 example: '[{"value":"СПб, Невский 100","isDefault":false}]'
- *               profilePhoto:
- *                 type: string
- *                 format: binary
- *                 description: Новое фото профиля
- *     responses:
- *       200:
- *         description: Профиль успешно обновлён
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Профиль успешно обновлён
- *                 user:
+ *                 type: array
+ *                 description: Список существующих адресов для обновления
+ *                 items:
  *                   type: object
  *                   properties:
  *                     id:
  *                       type: integer
- *                       example: 12
- *                     email:
+ *                     value:
  *                       type: string
- *                       example: user@example.com
- *                     firstName:
+ *                     isDefault:
+ *                       type: boolean
+ *               deleteAddressIds:
+ *                 type: array
+ *                 description: Список ID адресов для удаления
+ *                 items:
+ *                   type: integer
+ *               newAddresses:
+ *                 type: array
+ *                 description: Список новых адресов для добавления
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
  *                       type: string
- *                     lastName:
- *                       type: string
- *                     phone:
- *                       type: string
- *                     role:
- *                       type: string
- *                       example: CUSTOMER
- *                     customerProfile:
- *                       type: object
- *                       properties:
- *                         addresses:
- *                           type: array
- *                           items:
- *                             type: object
- *                             properties:
- *                               id:
- *                                 type: integer
- *                               value:
- *                                 type: string
- *                               isDefault:
- *                                 type: boolean
- *                         priority:
- *                           type: integer
- *                     profilePhoto:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: integer
- *                         url:
- *                           type: string
- *                         type:
- *                           type: string
- *                           example: PROFILE_PHOTO
- *       400:
- *         description: Ошибка валидации или данных
+ *                     isDefault:
+ *                       type: boolean
+ *               profilePhoto:
+ *                 type: string
+ *                 format: binary
+ *                 description: Новый файл профиля (фото)
+ *     responses:
+ *       200:
+ *         description: Профиль заказчика успешно обновлён
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
+ *                 id:
+ *                   type: integer
+ *                 email:
  *                   type: string
- *                   example: Пользователь не найден или не является заказчиком
+ *                 firstName:
+ *                   type: string
+ *                 lastName:
+ *                   type: string
+ *                 phone:
+ *                   type: string
+ *                 profile:
+ *                   type: object
+ *                   description: DTO профиля (addresses, favorites и пр.)
+ *                 ordersCount:
+ *                   type: integer
+ *                   description: Общее число заказов
+ *                 reviewsReceivedCount:
+ *                   type: integer
+ *                   description: Количество полученных отзывов
+ *                 reviewsGivenCount:
+ *                   type: integer
+ *                   description: Количество оставленных отзывов
+ *       400:
+ *         description: Ошибка валидации или обновлении профиля
  */
 
 /**

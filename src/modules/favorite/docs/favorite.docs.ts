@@ -9,7 +9,7 @@
  * @swagger
  * /favorite/{executorId}:
  *   post:
- *     summary: Добавить или удалить исполнителя из избранного (toggle)
+ *     summary: Добавить или удалить исполнителя из избранного
  *     tags: [Favorite]
  *     security:
  *       - bearerAuth: []
@@ -18,11 +18,11 @@
  *         name: executorId
  *         required: true
  *         schema:
- *           type: string
- *         description: ID профиля исполнителя
+ *           type: integer
+ *         description: ID пользователя‑исполнителя
  *     responses:
  *       200:
- *         description: Статус действия (добавлен/удалён)
+ *         description: Статус операции (toggle)
  *         content:
  *           application/json:
  *             schema:
@@ -36,16 +36,18 @@
  *                   properties:
  *                     message:
  *                       type: string
- *                       example: Добавлено в избранное
- *       400:
- *         description: Ошибка (например, профиль заказчика не найден)
+ *                       example: "Добавлено в избранное"
+ *       403:
+ *         description: Профиль заказчика не найден или нет прав
+ *       404:
+ *         description: Исполнитель не найден
  */
 
 /**
  * @swagger
  * /favorite:
  *   get:
- *     summary: Получить список избранных исполнителей заказчика
+ *     summary: Список избранных исполнителей заказчика
  *     tags: [Favorite]
  *     security:
  *       - bearerAuth: []
@@ -54,29 +56,44 @@
  *         name: page
  *         schema:
  *           type: integer
- *           example: 1
+ *           default: 1
  *         description: Номер страницы
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *           example: 10
- *         description: Кол-во элементов на странице
+ *           default: 10
+ *         description: Кол‑во элементов на странице
  *       - in: query
- *         name: companyName
+ *         name: sortBy
  *         schema:
  *           type: string
- *           example: АкваСервис
- *         description: Поиск по названию компании
+ *         description: Поле для сортировки (createdAt, city, rating, priority, firstName, lastName)
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *         description: Направление сортировки
  *       - in: query
  *         name: city
  *         schema:
  *           type: string
- *           example: Москва
- *         description: Поиск по городу
+ *         description: Фильтр по городу исполнителя
+ *       - in: query
+ *         name: minRating
+ *         schema:
+ *           type: number
+ *         description: Минимальный рейтинг исполнителя
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Поиск по имени или фамилии исполнителя
  *     responses:
  *       200:
- *         description: Список избранных исполнителей
+ *         description: Пагинированный список UserDto
  *         content:
  *           application/json:
  *             schema:
@@ -84,6 +101,7 @@
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 data:
  *                   type: object
  *                   properties:
@@ -95,35 +113,4 @@
  *                       type: integer
  *                     pages:
  *                       type: integer
- *                     items:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                           executor:
- *                             type: object
- *                             properties:
- *                               id:
- *                                 type: string
- *                               companyName:
- *                                 type: string
- *                               city:
- *                                 type: string
- *                               rating:
- *                                 type: number
- *                               completedOrders:
- *                                 type: integer
- *                               user:
- *                                 type: object
- *                                 properties:
- *                                   id:
- *                                     type: string
- *                                   email:
- *                                     type: string
- *                                   firstName:
- *                                     type: string
- *                                   lastName:
- *                                     type: string
  */

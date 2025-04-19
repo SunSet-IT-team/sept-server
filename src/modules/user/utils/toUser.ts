@@ -18,15 +18,14 @@ export const toUserDto = (user: any): UserDto => {
         profile = toCustomerProfile(
             user.customerProfile,
             user.files ?? [],
-            user.phone
+            user.phone,
+            user.customerProfile.favoriteIds ?? []
         );
     }
 
-    // общее число заказов
     const ordersCount =
         (user._count?.customerOrders ?? 0) + (user._count?.executorOrders ?? 0);
 
-    // сколько отзывов заказчик оставил, а исполнитель получил
     const reviewsGivenCount = user._count?.reviewsGiven ?? 0;
     const reviewsReceivedCount = user._count?.reviewsReceived ?? 0;
     const reviewCount =

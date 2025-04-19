@@ -1,12 +1,11 @@
 export interface CustomerProfileDto {
     phone: string | null;
     priority: number;
-    profilePhoto: {
+    profilePhotos: {
         id: number;
         url: string;
         filename: string;
-        type: string;
-    } | null;
+    }[];
     favoriteIds: {
         id: number;
     }[];

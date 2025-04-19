@@ -4,6 +4,8 @@ import {handleFileUpload} from '../../auth/utils/files/handleFileUpload';
 import fs from 'fs';
 import path from 'path';
 import {toUserDto} from '../../user/utils/toUser';
+import {getUserById} from '../../user/services/getUser';
+import {FileType} from '@prisma/client';
 
 export const updateExecutorProfileService = async (
     userId: number,
@@ -13,93 +15,76 @@ export const updateExecutorProfileService = async (
     const executor = await prisma.executorProfile.findUnique({
         where: {userId},
     });
-
     if (!executor) {
         throw new Error('Профиль исполнителя не найден');
     }
 
-    const {firstName, lastName, phone, fileIdsToDelete, ...executorData} = dto;
+    const {phone, experience, fileIdsToDelete, email, ...executorData} = dto;
+    const userUpdates: any = {};
+    if (phone) userUpdates.phone = phone;
+    if (email) userUpdates.email = email;
 
-    const filteredUserData: any = {};
-    if (firstName) filteredUserData.firstName = firstName;
-    if (lastName) filteredUserData.lastName = lastName;
-    if (phone) filteredUserData.phone = phone;
-
-    const filteredExecutorData: Record<string, any> = {};
-    for (const key in executorData) {
-        const value = executorData[key as keyof typeof executorData];
-        if (value !== undefined && value !== null && value !== '') {
-            filteredExecutorData[key] = value;
+    const execUpdates: Record<string, any> = {};
+    if (experience !== undefined) execUpdates.experience = Number(experience);
+    for (const key of Object.keys(
+        executorData
+    ) as (keyof typeof executorData)[]) {
+        const val = executorData[key];
+        if (val !== undefined && val !== null && val !== '') {
+            execUpdates[key] = val;
         }
     }
 
-    // Обновляем пользователя
-    await prisma.user.update({
-        where: {id: userId},
-        data: filteredUserData,
-    });
+    await prisma.user.update({where: {id: userId}, data: userUpdates});
+    await prisma.executorProfile.update({where: {userId}, data: execUpdates});
 
-    // Обновляем профиль исполнителя
-    await prisma.executorProfile.update({
-        where: {userId},
-        data: filteredExecutorData,
-    });
-
-    // Удаление файлов
+    // 2. Удаление файлов по явным ID
     if (fileIdsToDelete?.length) {
-        const numericIdsToDelete = fileIdsToDelete.map((id) => Number(id));
-
-        const filesToDelete = await prisma.file.findMany({
-            where: {
-                id: {in: numericIdsToDelete},
-                userId,
-            },
+        const ids = fileIdsToDelete.map((i) => Number(i));
+        const owned = await prisma.file.findMany({
+            where: {id: {in: ids}, userId},
         });
-
-        await prisma.file.deleteMany({
-            where: {
-                id: {in: numericIdsToDelete},
-                userId,
-            },
-        });
-
-        for (const file of filesToDelete) {
-            const filePath = path.resolve(
+        if (owned.length !== ids.length) {
+            throw new Error(
+                'Некоторые файлы не найдены или не принадлежат вам'
+            );
+        }
+        await prisma.file.deleteMany({where: {id: {in: ids}, userId}});
+        for (const f of owned) {
+            const p = path.resolve(
                 __dirname,
                 '../../../../uploads',
-                file.filename
+                f.filename
             );
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
+            if (fs.existsSync(p)) fs.unlinkSync(p);
+        }
+    }
+
+    // 3. Если загружено новое фото профиля — удаляем старые PROFILE_PHOTO
+    if (files.profilePhoto && files.profilePhoto.length > 0) {
+        const oldPhotos = await prisma.file.findMany({
+            where: {userId, type: FileType.PROFILE_PHOTO},
+        });
+        if (oldPhotos.length) {
+            await prisma.file.deleteMany({
+                where: {id: {in: oldPhotos.map((f) => f.id)}},
+            });
+            for (const old of oldPhotos) {
+                const p = path.resolve(
+                    __dirname,
+                    '../../../../uploads',
+                    old.filename
+                );
+                if (fs.existsSync(p)) fs.unlinkSync(p);
             }
         }
     }
 
-    // Загрузка новых файлов
-    if (files) {
+    // 4. Загрузка всех новых файлов (включая profilePhoto, registrationDoc, licenseDoc)
+    if (files && Object.keys(files).length > 0) {
         await handleFileUpload(files, userId);
     }
 
-    // Получение актуального пользователя
-    const fullUser = await prisma.user.findUnique({
-        where: {id: userId},
-        include: {
-            files: {
-                select: {
-                    id: true,
-                    url: true,
-                    filename: true,
-                    type: true,
-                },
-            },
-            executorOrders: true,
-            executorProfile: true,
-        },
-    });
-
-    if (!fullUser?.executorProfile) {
-        throw new Error('Ошибка при получении обновлённого профиля');
-    }
-
-    return toUserDto(fullUser);
+    // 5. Возвращаем обновлённый DTO
+    return getUserById(userId);
 };

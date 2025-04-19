@@ -1,7 +1,9 @@
+import {FileType} from '@prisma/client';
+
 export interface ExecutorProfileFileDto {
     id: number;
     url: string;
-    type: string;
+    type: FileType;
 }
 
 export interface ExecutorProfileDto {
@@ -10,13 +12,13 @@ export interface ExecutorProfileDto {
     about: string | null;
     companyName: string | null;
     description: string | null;
-    city: string | null;
+    city: string;
     completedOrders: number;
-    rating: number | null;
+    rating: number;
     phone: string | null;
     priority: number;
 
-    profilePhoto: ExecutorProfileFileDto | null;
-    licenseDoc: ExecutorProfileFileDto | null;
-    registrationDoc: ExecutorProfileFileDto | null;
+    profilePhotos: ExecutorProfileFileDto[];
+    licenseDocs: ExecutorProfileFileDto[];
+    registrationDocs: ExecutorProfileFileDto[];
 }

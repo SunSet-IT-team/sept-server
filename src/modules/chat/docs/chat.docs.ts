@@ -9,24 +9,26 @@
  * @swagger
  * /chat/order/{id}:
  *   get:
- *     summary: Получить чат по заказу (или создать если не существует)
+ *     summary: Получить чат по заказу (или создать, если не существует)
  *     tags: [Chat]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
- *         description: ID заказа
  *         required: true
  *         schema:
- *           type: number
+ *           type: integer
+ *         description: ID заказа
  *     responses:
  *       200:
- *         description: Чат получен
+ *         description: Чат получен или создан
  *       400:
  *         description: Ошибка запроса
  *       401:
  *         description: Неавторизован
+ *       404:
+ *         description: Заказ не найден
  *       500:
  *         description: Внутренняя ошибка сервера
  */
@@ -42,10 +44,10 @@
  *     parameters:
  *       - name: id
  *         in: path
- *         description: ID чата
  *         required: true
+ *         description: ID чата
  *         schema:
- *           type: number
+ *           type: integer
  *       - name: page
  *         in: query
  *         required: false
@@ -73,34 +75,26 @@
  * @swagger
  * /chat/support:
  *   post:
- *     summary: Получить / создать чат с поддержкой
- *     description: |
- *       Возвращает существующий чат *ORDER_ADMIN* с участием пользователя или создаёт новый.<br/>
- *       Если передан **orderId**, чат будет (или останется) привязан к заказу.<br/>
- *       Опционально можно задать/изменить **theme** – произвольную тему обращения.
+ *     summary: Создать чат с поддержкой
  *     tags: [Chat]
  *     security:
  *       - bearerAuth: []
- *
- *     parameters:
- *       - in: query
- *         name: orderId
- *         schema:
- *           type: integer
- *         required: false
- *         description: ID заказа, к которому следует привязать чат
- *         example: 123
- *       - in: query
- *         name: theme
- *         schema:
- *           type: string
- *         required: true
- *         description: Тема обращения в поддержку
- *         example: "Не могу прикрепить отчёт"
- *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - theme
+ *             properties:
+ *               theme:
+ *                 type: string
+ *                 description: Тема обращения в поддержку
+ *                 example: "Не могу прикрепить отчёт"
  *     responses:
- *       200:
- *         description: Чат получен или создан
+ *       201:
+ *         description: Чат с поддержкой создан
  *         content:
  *           application/json:
  *             schema:
@@ -108,18 +102,11 @@
  *               properties:
  *                 id:
  *                   type: integer
- *                   example: 17
- *                 orderId:
- *                   type: integer
- *                   nullable: true
- *                   example: 123
  *                 type:
  *                   type: string
- *                   example: ORDER_ADMIN
+ *                   example: SUPPORT_CUSTOMER
  *                 theme:
  *                   type: string
- *                   nullable: true
- *                   example: "Не могу прикрепить отчёт"
  *                 createdAt:
  *                   type: string
  *                   format: date-time
@@ -130,34 +117,45 @@
  *                     properties:
  *                       id:
  *                         type: integer
- *                         example: 5
  *                       user:
  *                         type: object
  *                         properties:
  *                           id:
  *                             type: integer
- *                             example: 42
  *                           email:
  *                             type: string
- *                             example: user@example.com
  *                           role:
  *                             type: string
- *                             example: CUSTOMER
+ *                 messages:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       text:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       sender:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           role:
+ *                             type: string
+ *       400:
+ *         description: Ошибка валидации
  *       401:
  *         description: Неавторизован
- *       403:
- *         description: Доступ запрещён
- *       404:
- *         description: Заказ не найден
- *       500:
- *         description: Внутренняя ошибка сервера
  */
 
 /**
  * @swagger
- * /chat/support:
+ * /chat/support/admin:
  *   get:
- *     summary: Получить список всех чатов с поддержкой (только для администратора)
+ *     summary: Получить все чаты с поддержкой (только для администратора)
  *     tags: [Chat]
  *     security:
  *       - bearerAuth: []
@@ -173,10 +171,162 @@
  *         schema:
  *           type: integer
  *           default: 10
- *         description: Количество на странице
+ *         description: Количество чатов на странице
  *     responses:
  *       200:
  *         description: Список чатов с поддержкой
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       example: 42
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 10
+ *                     pages:
+ *                       type: integer
+ *                       example: 5
+ *                     items:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 12
+ *                           type:
+ *                             type: string
+ *                             example: SUPPORT_CUSTOMER
+ *                           theme:
+ *                             type: string
+ *                             example: "Не могу прикрепить файл"
+ *                           orderId:
+ *                             type: integer
+ *                             nullable: true
+ *                             example: 345
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2025-04-19T12:34:56.000Z"
+ *                           participants:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 id:
+ *                                   type: integer
+ *                                   example: 23
+ *                                 user:
+ *                                   type: object
+ *                                   properties:
+ *                                     id:
+ *                                       type: integer
+ *                                       example: 44
+ *                                     email:
+ *                                       type: string
+ *                                       example: "client@mail.ru"
+ *                                     role:
+ *                                       type: string
+ *                                       example: "CUSTOMER"
+ *       401:
+ *         description: Неавторизован
  *       403:
- *         description: Нет прав
+ *         description: Доступ запрещён
+ */
+
+/**
+ * @swagger
+ * /chat/support:
+ *   get:
+ *     summary: Получить чат с поддержкой (если существует)
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Чат с поддержкой найден
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 type:
+ *                   type: string
+ *                   example: SUPPORT_CUSTOMER
+ *                 theme:
+ *                   type: string
+ *                   nullable: true
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 participants:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           email:
+ *                             type: string
+ *                           role:
+ *                             type: string
+ *                 messages:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       text:
+ *                         type: string
+ *                         nullable: true
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       isReaded:
+ *                         type: boolean
+ *                         nullable: true
+ *                       sender:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           email:
+ *                             type: string
+ *                           role:
+ *                             type: string
+ *                       files:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: integer
+ *                             filename:
+ *                               type: string
+ *                             url:
+ *                               type: string
+ *       401:
+ *         description: Неавторизован
+ *       404:
+ *         description: Чат с поддержкой не найден
  */
