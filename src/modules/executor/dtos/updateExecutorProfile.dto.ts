@@ -10,6 +10,7 @@ import {
     IsUUID,
     IsNumber,
     IsEmail,
+    MinLength,
 } from 'class-validator';
 import {WorkFormat} from '@prisma/client';
 
@@ -65,4 +66,9 @@ export class UpdateExecutorDTO {
 
     @IsOptional()
     licenseDoc?: any;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(6, {message: 'Пароль должен быть минимум 6 символов'})
+    password?: string;
 }
