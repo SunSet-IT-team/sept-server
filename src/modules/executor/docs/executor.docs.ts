@@ -100,6 +100,9 @@
  *             properties:
  *               email:
  *                 type: string
+ *                 description: Новый email пользователя
+ *               password:
+ *                 type: string
  *               phone:
  *                 type: string
  *                 description: Телефон в формате +7XXXXXXXXXX

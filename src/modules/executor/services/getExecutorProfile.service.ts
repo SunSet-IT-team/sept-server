@@ -1,4 +1,5 @@
 import {prisma} from '../../../core/database/prisma';
+import {getUserById} from '../../user/services/getUser';
 import {toUserDto} from '../../user/utils/toUser';
 
 export const getExecutorProfileService = async (userId: number) => {
@@ -22,5 +23,5 @@ export const getExecutorProfileService = async (userId: number) => {
         throw new Error('Профиль исполнителя не найден');
     }
 
-    return toUserDto(user);
+    return getUserById(user.id);
 };

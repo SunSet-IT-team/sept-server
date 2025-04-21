@@ -11,11 +11,19 @@ import {CreateAddressDTO} from '../dtos/createAddress.dto';
 import {createAddress} from '../controllers/createAddress.controller';
 import {getCustomerStats} from '../controllers/getCustomerStats.controller';
 import {getMyStats} from '../controllers/getMyStats.controller';
+import {upload} from '../../../core/middleware/upload';
+import {UpdateCustomerDTO} from '../dtos/updateCustomerProfile.dto';
 
 const customerRouter = Router();
 
 customerRouter.get('/me', checkRole(Role.CUSTOMER), getCustomerProfile);
-customerRouter.patch('/me', checkRole(Role.CUSTOMER), updateCustomerProfile);
+customerRouter.patch(
+    '/me',
+    checkRole(Role.CUSTOMER),
+    upload.fields([{name: 'profilePhoto', maxCount: 1}]),
+    // validateDto(UpdateCustomerDTO),
+    updateCustomerProfile
+);
 
 customerRouter.get('/list', authMiddleware, getCustomersList);
 

@@ -6,6 +6,8 @@ import {
     IsArray,
     ValidateNested,
     IsEmail,
+    Min,
+    MinLength,
 } from 'class-validator';
 import {Type} from 'class-transformer';
 
@@ -65,4 +67,9 @@ export class UpdateCustomerDTO {
     @IsOptional()
     @Type(() => Object)
     profilePhoto?: Express.Multer.File;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(6, {message: 'Пароль должен быть минимум 6 символов'})
+    password?: string;
 }

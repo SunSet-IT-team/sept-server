@@ -38,6 +38,8 @@
  *               email:
  *                 type: string
  *                 description: Новый email пользователя
+ *               password:
+ *                 type: string
  *               firstName:
  *                 type: string
  *                 description: Новое имя пользователя

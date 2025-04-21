@@ -28,6 +28,7 @@ export const toUserDto = (user: any): UserDto => {
 
     const reviewsGivenCount = user._count?.reviewsGiven ?? 0;
     const reviewsReceivedCount = user._count?.reviewsReceived ?? 0;
+
     const reviewCount =
         user.role === Role.CUSTOMER
             ? reviewsGivenCount

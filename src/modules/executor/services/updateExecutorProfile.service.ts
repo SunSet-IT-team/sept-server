@@ -6,6 +6,7 @@ import path from 'path';
 import {toUserDto} from '../../user/utils/toUser';
 import {getUserById} from '../../user/services/getUser';
 import {FileType} from '@prisma/client';
+import {hashPassword} from '../../auth/utils/hashPassword';
 
 export const updateExecutorProfileService = async (
     userId: number,
@@ -19,10 +20,20 @@ export const updateExecutorProfileService = async (
         throw new Error('Профиль исполнителя не найден');
     }
 
-    const {phone, experience, fileIdsToDelete, email, ...executorData} = dto;
+    const {
+        phone,
+        experience,
+        fileIdsToDelete,
+        email,
+        password,
+        ...executorData
+    } = dto;
+
+    const hashedPassword = password ? await hashPassword(password) : null;
     const userUpdates: any = {};
     if (phone) userUpdates.phone = phone;
     if (email) userUpdates.email = email;
+    if (hashedPassword) userUpdates.password = hashedPassword;
 
     const execUpdates: Record<string, any> = {};
     if (experience !== undefined) execUpdates.experience = Number(experience);
