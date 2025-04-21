@@ -103,7 +103,7 @@ export const updateCustomerProfileService = async (
         await Promise.all(
             updateAddresses.map((addr: any) =>
                 prisma.address.update({
-                    where: {id: addr.id},
+                    where: {id: Number(addr.id)},
                     data: {
                         value: addr.value,
                         isDefault: addr.isDefault,
