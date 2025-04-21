@@ -83,6 +83,11 @@ export const updateCustomerProfileService = async (
 
     const customerId = user.customerProfile.id;
 
+    let passwordHash: string | undefined;
+    if (password) {
+        passwordHash = await hashPassword(password);
+    }
+
     await prisma.user.update({
         where: {id: userId},
         data: {
@@ -90,7 +95,7 @@ export const updateCustomerProfileService = async (
             ...(firstName && {firstName}),
             ...(lastName && {lastName}),
             ...(phone && {phone}),
-            ...(password && (await hashPassword(password))),
+            ...(passwordHash ? {password: passwordHash} : {}),
         },
     });
 
