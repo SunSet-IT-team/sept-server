@@ -24,7 +24,26 @@ if (!fs.existsSync(uploadDir)) {
 const app = express();
 app.use(
     cors({
-        origin: '*',
+        origin: (origin, callback) => {
+            if (!origin) return callback(null, true);
+
+            try {
+                const {hostname} = new URL(origin);
+                const allowedRoot = 'eko-kontrol.ru';
+
+                if (
+                    hostname === allowedRoot ||
+                    hostname.endsWith(`.${allowedRoot}`)
+                ) {
+                    return callback(null, true);
+                } else {
+                    return callback(new Error('Что-то не так с CORS'));
+                }
+            } catch (err) {
+                return callback(new Error('Ошибка CORS'));
+            }
+        },
+        credentials: false,
     })
 );
 app.use(express.json());
