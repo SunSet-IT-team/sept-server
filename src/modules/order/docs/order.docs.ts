@@ -19,11 +19,10 @@
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
- *               - title
  *               - objectType
  *               - distanceToSeptic
  *               - septicDepth
@@ -44,12 +43,16 @@
  *               septicVolume:             { type: number, example: 5 }
  *               septicConstructionType:   { type: string, example: Бетонные кольца }
  *               paymentMethod:            { type: string, example: Наличные }
- *               workDate:                 { type: string, format: date-time, example: 2024‑08‑01T09:00:00.000Z }
+ *               workDate:                 { type: string, format: date-time, example: 2024-08-01T09:00:00.000Z }
  *               city:                     { type: string, example: Москва }
- *               address:                  { type: string, example: Москва, ул. Пушкина, д. 10 }
+ *               address:                  { type: string, example: Москва, ул. Пушкина, д. 10 }
  *               serviceId:                { type: integer, example: 3 }
  *               executorId:               { type: integer, example: 7 }
  *               price:                    { type: number, example: 25000 }
+ *               orderPreview:
+ *                 type: string
+ *                 format: binary
+ *                 description: Превью‑картинка заказа
  *     responses:
  *       201: { description: Заказ успешно создан }
  *       400: { description: Ошибка валидации входных данных }

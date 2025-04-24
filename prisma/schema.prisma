@@ -36,6 +36,7 @@ enum FileType {
   PROFILE_PHOTO
   REGISTRATION_CERTIFICATE
   LICENSE
+  ORDER_PREVIEW
 }
 
 enum WorkFormat {
@@ -148,6 +149,8 @@ model File {
   messageId  Int?
   message    Message? @relation(fields: [messageId], references: [id])
 
+  orderPreview  Order? @relation("OrderPreviewFile")
+
   url        String
   filename   String
   mimetype   String
@@ -183,6 +186,11 @@ model Order {
   customer                   User          @relation("CustomerOrders", fields: [customerId], references: [id])
   executor                   User          @relation("ExecutorOrders", fields: [executorId], references: [id])
   service                    Service       @relation(fields: [serviceId], references: [id])
+
+  previewFileId Int? @unique
+  previewFile   File? @relation("OrderPreviewFile", fields: [previewFileId], references: [id])
+
+
 
   reports                    Report[]
   reviews                    Review[]

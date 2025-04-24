@@ -74,6 +74,7 @@ export const getMyOrdersService = async ({
             defaultOrder: 'desc',
             include: {
                 service: true,
+                previewFile: true,
                 reports: {include: {files: true}},
                 reviews: {
                     include: {

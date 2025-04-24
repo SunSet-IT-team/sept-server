@@ -9,6 +9,7 @@ import {apiRouter} from './routes';
 import path from 'path';
 import fs from 'fs';
 import {createAdmin} from './core/utils/createAdmin';
+import {getCorsChecker} from './core/config/cors';
 
 const email = process.env.ADMIN_EMAIL || 'admin@admin.com';
 const password = process.env.ADMIN_PASSWORD || '123456';
@@ -24,7 +25,8 @@ if (!fs.existsSync(uploadDir)) {
 const app = express();
 app.use(
     cors({
-        origin: '*',
+        origin: getCorsChecker(),
+        credentials: false,
     })
 );
 app.use(express.json());

@@ -48,6 +48,7 @@ orderRouter.post(
 
 orderRouter.post(
     '/',
+    upload.fields([{name: 'orderPreview', maxCount: 1}]),
     validateDto(CreateOrderDTO),
     checkRole(Role.CUSTOMER),
     createOrder

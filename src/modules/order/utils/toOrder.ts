@@ -1,5 +1,3 @@
-// utils/toOrder.ts
-import {title} from 'process';
 import {getUserById} from '../../user/services/getUser';
 import {toUserDto} from '../../user/utils/toUser';
 
@@ -23,7 +21,6 @@ export const toOrderDto = async (order: any) => {
         ? getUserById(review.authorId)
         : Promise.resolve(null);
 
-    /* ждём параллельно */
     const [executor, customer, reviewAuthor] = await Promise.all([
         executorLoad,
         customerLoad,
@@ -76,6 +73,15 @@ export const toOrderDto = async (order: any) => {
                   text: review.text,
                   createdAt: review.createdAt,
                   author: reviewAuthor,
+              }
+            : null,
+
+        previewFile: order.previewFile
+            ? {
+                  id: order.previewFile.id,
+                  url: order.previewFile.url,
+                  type: order.previewFile.type,
+                  mimetype: order.previewFile.mimetype,
               }
             : null,
     };
