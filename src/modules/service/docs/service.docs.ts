@@ -16,18 +16,22 @@
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
  *             properties:
  *               name:
  *                 type: string
  *                 example: "Откачка септика"
  *               priority:
- *                 type: integer
- *                 example: 100
- *             required:
- *               - name
+ *                 type: string
+ *                 example: "100"
+ *               servicePreview:
+ *                 type: string
+ *                 format: binary
+ *                 description: Превью-файл (картинка)
  *     responses:
  *       201:
  *         description: Услуга успешно создана
@@ -35,26 +39,6 @@
  *         description: Ошибка валидации
  *       401:
  *         description: Неавторизован
- */
-
-/**
- * @swagger
- * /service/{id}:
- *   get:
- *     summary: Получить услугу по ID
- *     tags: [Service]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: number
- *         description: ID услуги
- *     responses:
- *       200:
- *         description: Услуга успешно получена
- *       404:
- *         description: Услуга не найдена
  */
 
 /**
@@ -94,14 +78,34 @@
  *       200:
  *         description: Список услуг успешно получен
  *       400:
- *         description: Ошибка валидации или некорректный запрос
+ *         description: Ошибка валидации
+ */
+
+/**
+ * @swagger
+ * /service/{id}:
+ *   get:
+ *     summary: Получить услугу по ID
+ *     tags: [Service]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID услуги
+ *     responses:
+ *       200:
+ *         description: Услуга успешно получена
+ *       404:
+ *         description: Услуга не найдена
  */
 
 /**
  * @swagger
  * /service/{id}:
  *   patch:
- *     summary: Обновить услугу по ID
+ *     summary: Обновить услугу
  *     tags: [Service]
  *     security:
  *       - bearerAuth: []
@@ -110,12 +114,12 @@
  *         name: id
  *         required: true
  *         schema:
- *           type: number
+ *           type: integer
  *         description: ID услуги
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -123,8 +127,12 @@
  *                 type: string
  *                 example: "Откачка септика (экстренная)"
  *               priority:
- *                 type: integer
- *                 example: 50
+ *                 type: string
+ *                 example: "50"
+ *               servicePreview:
+ *                 type: string
+ *                 format: binary
+ *                 description: Новый превью-файл
  *     responses:
  *       200:
  *         description: Услуга успешно обновлена
@@ -140,7 +148,7 @@
  * @swagger
  * /service/{id}:
  *   delete:
- *     summary: Удалить услугу по ID
+ *     summary: Удалить услугу
  *     tags: [Service]
  *     security:
  *       - bearerAuth: []
@@ -149,7 +157,7 @@
  *         name: id
  *         required: true
  *         schema:
- *           type: number
+ *           type: integer
  *         description: ID услуги
  *     responses:
  *       200:

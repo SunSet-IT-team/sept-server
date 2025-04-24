@@ -5,7 +5,5 @@ export class CreateServiceDTO {
     name!: string;
 
     @IsOptional()
-    @IsInt()
-    @Min(1)
-    priority?: number;
+    priority?: string;
 }
