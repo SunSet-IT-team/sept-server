@@ -8,6 +8,7 @@ export function getFileTypeByKey(key: string): FileType | null {
         licenseDoc: FileType.LICENSE,
         otherFiles: FileType.OTHER,
         reportFiles: FileType.REPORT_FILE,
+        orderPreview: FileType.ORDER_PREVIEW,
     };
 
     return map[key] || null;

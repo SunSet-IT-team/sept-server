@@ -12,6 +12,7 @@ export const getOrderByIdService = async (
         where: {id: orderId},
         include: {
             service: true,
+            previewFile: true,
             executor: {
                 include: {
                     files: true,

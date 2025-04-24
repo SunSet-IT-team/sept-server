@@ -34,6 +34,7 @@ export const updateOrderService = async (
         data: dto,
         include: {
             service: true,
+            previewFile: true,
             customer: {
                 include: {
                     files: true,

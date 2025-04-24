@@ -1,4 +1,4 @@
-import {IsString, IsNumber, IsOptional, IsDateString} from 'class-validator';
+import {IsString, IsOptional} from 'class-validator';
 
 export class CreateOrderDTO {
     @IsString()
@@ -8,14 +8,14 @@ export class CreateOrderDTO {
     @IsString()
     comment?: string;
 
-    @IsNumber()
-    distanceToSeptic!: number;
+    @IsString()
+    distanceToSeptic!: string;
 
-    @IsNumber()
-    septicDepth!: number;
+    @IsString()
+    septicDepth!: string;
 
-    @IsNumber()
-    septicVolume!: number;
+    @IsString()
+    septicVolume!: string;
 
     @IsString()
     septicConstructionType!: string;
@@ -23,7 +23,7 @@ export class CreateOrderDTO {
     @IsString()
     paymentMethod!: string;
 
-    @IsDateString()
+    @IsString()
     workDate!: string;
 
     @IsString()
@@ -32,13 +32,13 @@ export class CreateOrderDTO {
     @IsString()
     address!: string;
 
-    @IsNumber()
-    serviceId!: number;
+    @IsString()
+    serviceId!: string;
 
-    @IsNumber()
-    executorId!: number;
+    @IsString()
+    executorId!: string;
 
     @IsOptional()
-    @IsNumber()
-    price?: number;
+    @IsString()
+    price?: string;
 }

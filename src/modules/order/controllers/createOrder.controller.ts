@@ -11,6 +11,7 @@ export const createOrder = async (req: Request, res: Response) => {
     try {
         const customerId = Number(req.user?.id);
         const dto = req.body;
+        const files = req.files;
 
         if (!customerId) {
             return sendResponse(
@@ -20,7 +21,11 @@ export const createOrder = async (req: Request, res: Response) => {
             );
         }
 
-        const created = await createOrderService(dto, customerId);
+        const created = await createOrderService(
+            dto,
+            customerId,
+            files as Record<string, Express.Multer.File[]>
+        );
 
         return sendResponse(res, 201, successResponse(created));
     } catch (error: any) {
