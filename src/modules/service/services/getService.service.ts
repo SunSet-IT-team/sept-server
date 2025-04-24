@@ -23,6 +23,7 @@ export const getServicesListService = async (query: PaginationParams) => {
             defaultSortBy: 'priority',
             defaultOrder: 'asc',
             orderMap,
+            include: {previewFile: true},
         }
     );
 };

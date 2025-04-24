@@ -37,6 +37,7 @@ enum FileType {
   REGISTRATION_CERTIFICATE
   LICENSE
   ORDER_PREVIEW
+  SERVICE_PREVIEW
 }
 
 enum WorkFormat {
@@ -150,6 +151,7 @@ model File {
   message    Message? @relation(fields: [messageId], references: [id])
 
   orderPreview  Order? @relation("OrderPreviewFile")
+  servicePreview Service? @relation("ServicePreviewFile")
 
   url        String
   filename   String
@@ -202,6 +204,9 @@ model Service {
   name      String
   priority  Int     @default(100)
   createdAt DateTime @default(now())
+
+  previewFileId Int? @unique
+  previewFile   File? @relation("ServicePreviewFile", fields: [previewFileId], references: [id])
 
   orders    Order[]
 }

@@ -8,5 +8,6 @@ export const updateServiceService = async (
     return await prisma.service.update({
         where: {id},
         data: serviceData,
+        include: {previewFile: true},
     });
 };
