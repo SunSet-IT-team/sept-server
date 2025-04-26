@@ -27,10 +27,8 @@ export const getChatsService = async (
                 select: {
                     messages: {
                         where: {
-                            isReaded: false,
-                            NOT: {
-                                senderId: currentUserId,
-                            },
+                            OR: [{isReaded: false}, {isReaded: null}],
+                            senderId: {not: currentUserId},
                         },
                     },
                 },
