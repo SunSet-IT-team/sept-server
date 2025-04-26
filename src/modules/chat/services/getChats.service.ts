@@ -1,11 +1,13 @@
-// modules/chat/services/getAllChats.service.ts
 import {prisma} from '../../../core/database/prisma';
 import {paginate} from '../../../core/utils/pagination';
 import {GetChatsQueryDTO} from '../dtos/getChatsQuery.dto';
 import {getUserById} from '../../user/services/getUser';
 import {ChatType} from '@prisma/client';
 
-export const getChatsService = async (query: GetChatsQueryDTO) => {
+export const getChatsService = async (
+    query: GetChatsQueryDTO,
+    currentUserId: number
+) => {
     const result = await paginate(prisma.chat, query, {
         defaultSortBy: 'createdAt',
         defaultOrder: 'desc',
@@ -19,6 +21,18 @@ export const getChatsService = async (query: GetChatsQueryDTO) => {
                 select: {
                     id: true,
                     title: true,
+                },
+            },
+            _count: {
+                select: {
+                    messages: {
+                        where: {
+                            isReaded: false,
+                            NOT: {
+                                senderId: currentUserId,
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -60,6 +74,7 @@ export const getChatsService = async (query: GetChatsQueryDTO) => {
             return {
                 ...chat,
                 participants,
+                newMessages: chat._count.messages,
             };
         })
     );
