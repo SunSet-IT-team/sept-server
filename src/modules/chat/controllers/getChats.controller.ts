@@ -9,7 +9,15 @@ import {
 
 export const getAllChats = async (req: Request, res: Response) => {
     try {
-        const result = await getChatsService(req.query);
+        const userId = req.user?.id;
+        if (!userId) {
+            return sendResponse(
+                res,
+                400,
+                errorResponse('Необходима авторизация')
+            );
+        }
+        const result = await getChatsService(req.query, userId);
         return sendResponse(res, 200, successResponse(result));
     } catch (err: any) {
         // console.error('[getAllChats]', err);
